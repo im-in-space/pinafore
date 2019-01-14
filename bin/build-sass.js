@@ -13,7 +13,7 @@ const render = pify(sass.render.bind(sass))
 const now = require('performance-now')
 
 const globalScss = path.join(__dirname, '../scss/global.scss')
-const defaultThemeScss = path.join(__dirname, '../scss/themes/_default.scss')
+const defaultThemeScss = path.join(__dirname, '../scss/themes/space.scss')
 const offlineThemeScss = path.join(__dirname, '../scss/themes/_offline.scss')
 const customScrollbarScss = path.join(__dirname, '../scss/custom-scrollbars.scss')
 const html2xxFile = path.join(__dirname, '../templates/2xx.html')
