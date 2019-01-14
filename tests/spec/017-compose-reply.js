@@ -3,11 +3,11 @@ import {
   getNthComposeReplyInput, getNthPostPrivacyButton, getNthPostPrivacyOptionInDialog, getNthReplyButton,
   getNthReplyContentWarningButton,
   getNthReplyContentWarningInput, getNthReplyPostPrivacyButton,
-  getNthStatus, getUrl, homeNavButton, notificationsNavButton, scrollToStatus
+  getNthStatus, getNthStatusRelativeDate, getUrl, homeNavButton, notificationsNavButton, scrollToStatus
 } from '../utils'
 import { loginAsFoobar } from '../roles'
 import { homeTimeline } from '../fixtures'
-import { indexWhere } from '../../routes/_utils/arrays'
+import { indexWhere } from '../../src/routes/_utils/arrays'
 
 fixture`017-compose-reply.js`
   .page`http://localhost:4002`
@@ -67,7 +67,8 @@ test('replies have same CW as replied-to status', async t => {
   await scrollToStatus(t, kittenIdx)
   await t.click(getNthReplyButton(kittenIdx))
     .expect(getNthReplyContentWarningInput(kittenIdx).value).eql('kitten CW')
-    .click(getNthStatus(kittenIdx))
+    .click(getNthStatusRelativeDate(kittenIdx))
+    .expect(getUrl()).contains('/statuses')
     .click(getNthReplyButton(0))
     .expect(getNthReplyContentWarningInput(0).value).eql('kitten CW')
 })
@@ -80,7 +81,8 @@ test('replies save deletions of CW', async t => {
     .expect(getNthReplyContentWarningInput(kittenIdx).value).eql('kitten CW')
     .click(getNthReplyContentWarningButton(kittenIdx))
     .expect(getNthReplyContentWarningInput(kittenIdx).exists).notOk()
-    .click(getNthStatus(kittenIdx))
+    .click(getNthStatusRelativeDate(kittenIdx))
+    .expect(getUrl()).contains('/statuses')
     .click(getNthReplyButton(0))
     .expect(getNthReplyContentWarningInput(0).exists).notOk()
 })
@@ -93,7 +95,8 @@ test('replies save changes to CW', async t => {
     .expect(getNthReplyContentWarningInput(kittenIdx).value).eql('kitten CW')
     .typeText(getNthReplyContentWarningInput(kittenIdx), ' yolo', { paste: true })
     .expect(getNthReplyContentWarningInput(kittenIdx).value).eql('kitten CW yolo')
-    .click(getNthStatus(kittenIdx))
+    .click(getNthStatusRelativeDate(kittenIdx))
+    .expect(getUrl()).contains('/statuses')
     .click(getNthReplyButton(0))
     .expect(getNthReplyContentWarningInput(0).value).eql('kitten CW yolo')
 })
@@ -108,7 +111,22 @@ test('replies save changes to post privacy', async t => {
     .click(getNthReplyPostPrivacyButton(1))
     .click(getNthPostPrivacyOptionInDialog(1))
     .expect(getNthPostPrivacyButton(1).getAttribute('aria-label')).eql('Adjust privacy (currently Public)')
-    .click(getNthStatus(1))
+    .click(getNthStatusRelativeDate(1))
+    .expect(getUrl()).contains('/statuses')
     .click(getNthReplyButton(0))
-    .expect(getNthPostPrivacyButton(0).getAttribute('aria-label')).eql('Adjust privacy (currently Unlisted)')
+    .expect(getNthPostPrivacyButton(0).getAttribute('aria-label')).eql('Adjust privacy (currently Public)')
+})
+
+test('replies are the same whatever thread they are in', async t => {
+  await loginAsFoobar(t)
+  await t
+    .hover(getNthStatus(0))
+    .hover(getNthStatus(1))
+    .click(getNthReplyButton(1))
+    .typeText(getNthComposeReplyInput(1), 'this is a reply', { paste: true })
+    .expect(getNthComposeReplyInput(1).value).eql('@admin this is a reply')
+    .click(getNthStatusRelativeDate(1))
+    .expect(getUrl()).contains('/statuses')
+    .click(getNthReplyButton(0))
+    .expect(getNthComposeReplyInput(0).value).eql('@admin this is a reply')
 })

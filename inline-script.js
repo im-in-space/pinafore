@@ -1,31 +1,45 @@
+
 // For perf reasons, this script is run inline to quickly set certain styles.
 // To allow CSP to work correctly, we also calculate a sha256 hash during
 // the build process and write it to inline-script-checksum.json.
+
+import { testHasLocalStorageOnce } from './src/routes/_utils/testStorage'
+import { switchToTheme } from './src/routes/_utils/themeEngine'
+import { basename } from './src/routes/_api/utils'
+import { onUserIsLoggedOut } from './src/routes/_actions/onUserIsLoggedOut'
+
 window.__themeColors = process.env.THEME_COLORS
 
-if (localStorage.store_currentInstance && localStorage.store_instanceThemes) {
-  let safeParse = (str) => str === 'undefined' ? undefined : JSON.parse(str)
+const safeParse = str => (typeof str === 'undefined' || str === 'undefined') ? undefined : JSON.parse(str)
+const hasLocalStorage = testHasLocalStorageOnce()
+const currentInstance = hasLocalStorage && safeParse(localStorage.store_currentInstance)
+
+if (currentInstance) {
+  // Do prefetch if we're logged in, so we can connect faster to the other origin.
+  // Note that /api/v1/instance is basically the only URL that doesn't require credentials,
+  // which is why we can do this. Also we do end up calling this on loading the home page,
+  // so it's not a wasted request.
+  let link = document.createElement('link')
+  link.setAttribute('rel', 'prefetch')
+  link.setAttribute('href', `${basename(currentInstance)}/api/v1/instance`)
+  link.setAttribute('crossorigin', 'anonymous')
+  document.head.appendChild(link)
+}
+
+if (currentInstance && localStorage.store_instanceThemes) {
+  // switch theme ASAP to minimize flash of default theme
   let theme = safeParse(localStorage.store_instanceThemes)[safeParse(localStorage.store_currentInstance)]
   if (theme && theme !== 'default') {
-    let link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = `/theme-${theme}.css`
-    // inserting before the offline <style> ensures that the offline style wins when offline
-    document.head.insertBefore(link, document.getElementById('theOfflineStyle'))
-    if (window.__themeColors[theme]) {
-      document.getElementById('theThemeColor').content = window.__themeColors[theme]
-    }
+    switchToTheme(theme)
   }
 }
 
-if (!localStorage.store_currentInstance) {
+if (!hasLocalStorage || !currentInstance) {
   // if not logged in, show all these 'hidden-from-ssr' elements
-  let style = document.createElement('style')
-  style.textContent = '.hidden-from-ssr { opacity: 1 !important; }'
-  document.head.appendChild(style)
+  onUserIsLoggedOut()
 }
 
-if (localStorage.store_disableCustomScrollbars === 'true') {
+if (hasLocalStorage && localStorage.store_disableCustomScrollbars === 'true') {
   // if user has disabled custom scrollbars, remove this style
   let theScrollbarStyle = document.getElementById('theScrollbarStyle')
   theScrollbarStyle.setAttribute('media', 'only x') // disables the style

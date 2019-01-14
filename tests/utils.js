@@ -46,6 +46,7 @@ export const markMediaSensitiveInput = $('#choice-mark-media-sensitive')
 export const neverMarkMediaSensitiveInput = $('#choice-never-mark-media-sensitive')
 export const removeEmojiFromDisplayNamesInput = $('#choice-omit-emoji-in-display-names')
 export const dialogOptionsOption = $(`.modal-dialog button`)
+export const emojiSearchInput = $('.emoji-mart-search input')
 
 export const composeModalInput = $('.modal-dialog .compose-box-input')
 export const composeModalComposeButton = $('.modal-dialog .compose-box-button')
@@ -96,9 +97,13 @@ export const getActiveElementInsideNthStatus = exec(() => {
   return ''
 })
 
-export const getTitleText = exec(() => document.head.querySelector('title').innerHTML)
+export const getTitleText = exec(() => document.head.querySelector('title') && document.head.querySelector('title').innerHTML)
 
 export const goBack = exec(() => window.history.back())
+
+export const goForward = exec(() => window.history.forward())
+
+export const reload = exec(() => window.location.reload())
 
 export const forceOffline = exec(() => window.__forceOnline(false))
 
@@ -106,6 +111,10 @@ export const forceOnline = exec(() => window.__forceOnline(true))
 
 export const getComposeSelectionStart = exec(() => composeInput().selectionStart, {
   dependencies: { composeInput }
+})
+
+export const getOpacity = selector => exec(() => window.getComputedStyle(document.querySelector(selector)).opacity, {
+  dependencies: { selector }
 })
 
 export const getCurrentTheme = exec(() => {
@@ -181,6 +190,10 @@ export function getNthDeleteMediaButton (n) {
   return $(`.compose-media:nth-child(${n}) .compose-media-delete-button`)
 }
 
+export function getAriaSetSize () {
+  return getNthStatus(0).getAttribute('aria-setsize')
+}
+
 export function getNthStatus (n) {
   return $(getNthStatusSelector(n))
 }
@@ -203,6 +216,10 @@ export function getNthStatusSensitiveMediaButton (n) {
 
 export function getNthStatusMedia (n) {
   return $(`${getNthStatusSelector(n)} .status-media`)
+}
+
+export function getNthStatusRelativeDate (n) {
+  return $(`${getNthStatusSelector(n)} .status-relative-date`)
 }
 
 export function getNthStatusMediaImg (n) {

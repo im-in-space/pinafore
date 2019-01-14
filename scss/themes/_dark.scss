@@ -8,7 +8,7 @@
   --action-button-deemphasized-fill-color-pressed-hover: #{darken($deemphasized-color, 2%)};
   --action-button-deemphasized-fill-color-pressed-active: #{darken($deemphasized-color, 15%)};
 
-  --loading-bg: #{#ededed};
+  --loading-bg: #{#222};
 
   --deemphasized-text-color: #{$deemphasized-color};
 
@@ -16,6 +16,7 @@
   --very-deemphasized-text-color: #{lighten($main-bg-color, 32%)};
 
   --status-direct-background: #{darken($body-bg-color, 5%)};
+  --status-active-background: #{lighten($body-bg-color, 10%)};
   --main-theme-color: #{$main-theme-color};
   --warning-color: #{#c7423d};
   --alt-input-bg: #{rgba($main-bg-color, 0.7)};
@@ -29,4 +30,6 @@
   --compose-autosuggest-item-hover: #{lighten($main-bg-color, 10%)};
   --compose-autosuggest-item-active: #{lighten($main-bg-color, 15%)};
   --compose-autosuggest-outline: #{lighten($border-color, 20%)};
+
+  --file-drop-mask: #{rgba(30, 30, 30, 0.8)};
 }

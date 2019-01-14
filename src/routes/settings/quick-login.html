@@ -1,0 +1,33 @@
+<!-- this is only used in the tests, to log in quickly -->
+<script>
+  import { store } from '../_store/store'
+  import { goto } from '../../../__sapper__/client'
+
+  export default {
+    store: () => store,
+    oncreate () {
+      let accessToken = location.search.match(/accessToken=([^&]+)/)[1]
+      let instanceName = location.search.match(/instanceName=([^&]+)/)[1]
+      let {
+        loggedInInstances,
+        loggedInInstancesInOrder
+      } = this.store.get()
+
+      loggedInInstances[instanceName] = {
+        access_token: accessToken
+      }
+
+      if (!loggedInInstancesInOrder.includes(instanceName)) {
+        loggedInInstancesInOrder.push(instanceName)
+      }
+
+      this.store.set({
+        currentInstance: instanceName,
+        loggedInInstances,
+        loggedInInstancesInOrder
+      })
+      this.store.save()
+      goto('/')
+    }
+  }
+</script>

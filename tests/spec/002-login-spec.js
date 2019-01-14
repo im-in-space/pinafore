@@ -1,12 +1,20 @@
 import { Selector as $ } from 'testcafe'
 import {
   addInstanceButton,
-  authorizeInput, emailInput, formError, getFirstVisibleStatus, getUrl, instanceInput, logInToInstanceLink,
+  authorizeInput,
+  emailInput,
+  formError,
+  getFirstVisibleStatus, getNthStatus, getOpacity,
+  getUrl,
+  homeNavButton,
+  instanceInput,
+  logInToInstanceLink,
   mastodonLogInButton,
-  passwordInput,
+  passwordInput, reload,
   settingsButton,
   sleep
 } from '../utils'
+import { loginAsFoobar } from '../roles'
 
 fixture`002-login-spec.js`
   .page`http://localhost:4002`
@@ -55,6 +63,34 @@ test('Logs in and logs out of localhost:3000', async t => {
     .expect($('.acct-display-name').innerText).eql('foobar')
     .click($('button').withText('Log out'))
     .click($('.modal-dialog button').withText('OK'))
-    .expect($('.main-content').innerText)
-    .contains("You're not logged in to any instances")
+    .expect($('.main-content').innerText).contains("You're not logged in to any instances")
+    .click(homeNavButton)
+    // check that the "hidden from SSR" content is visible
+    .expect(getOpacity('.hidden-from-ssr')()).eql('1')
+    .navigateTo('/')
+    .expect(getOpacity('.hidden-from-ssr')()).eql('1')
+  await reload()
+  await t
+    .expect(getOpacity('.hidden-from-ssr')()).eql('1')
+})
+
+test('Logs in, refreshes, then logs out', async t => {
+  await loginAsFoobar(t)
+  await t
+    .hover(getNthStatus(0))
+  await reload()
+  await t
+    .hover(getNthStatus(0))
+    .click(settingsButton)
+    .click($('a').withText('Instances'))
+    .click($('a').withText('localhost:3000'))
+    .expect(getUrl()).contains('/settings/instances/localhost:3000')
+    .expect($('.instance-name-h1').innerText).eql('localhost:3000')
+    .expect($('.acct-handle').innerText).eql('@foobar')
+    .expect($('.acct-display-name').innerText).eql('foobar')
+    .click($('button').withText('Log out'))
+    .click($('.modal-dialog button').withText('OK'))
+    .expect($('.main-content').innerText).contains("You're not logged in to any instances")
+    .click(homeNavButton)
+    .expect(getOpacity('.hidden-from-ssr')()).eql('1')
 })

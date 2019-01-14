@@ -1,0 +1,18 @@
+<Status status={virtualProps.status}
+        timelineType={virtualProps.timelineType}
+        timelineValue={virtualProps.timelineValue}
+        focusSelector={virtualProps.focusSelector}
+        shortcutScope={virtualKey}
+        index={virtualIndex}
+        length={virtualLength}
+        active={active}
+        on:recalculateHeight />
+<script>
+  import Status from '../status/Status.html'
+
+  export default {
+    components: {
+      Status
+    }
+  }
+</script>

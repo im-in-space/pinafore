@@ -1,37 +1,47 @@
-#!/usr/bin/env node
-
 import crypto from 'crypto'
 import fs from 'fs'
 import pify from 'pify'
 import path from 'path'
-import { themes } from '../routes/_static/themes.js'
-import { fromPairs } from 'lodash-es'
+import { rollup } from 'rollup'
+import { terser } from 'rollup-plugin-terser'
+import replace from 'rollup-plugin-replace'
+import fromPairs from 'lodash-es/fromPairs'
+import { themes } from '../src/routes/_static/themes'
 
-const readFile = pify(fs.readFile.bind(fs))
 const writeFile = pify(fs.writeFile.bind(fs))
 
-async function main () {
+const themeColors = fromPairs(themes.map(_ => ([_.name, _.color])))
+
+export async function buildInlineScript () {
   let inlineScriptPath = path.join(__dirname, '../inline-script.js')
-  let code = await readFile(inlineScriptPath, 'utf8')
 
-  code = code.replace('process.env.THEME_COLORS', JSON.stringify(fromPairs(themes.map(_ => ([_.name, _.color])))))
-  code = `(function () {'use strict'\n${code}})()`
+  let bundle = await rollup({
+    input: inlineScriptPath,
+    plugins: [
+      replace({
+        'process.browser': true,
+        'process.env.THEME_COLORS': JSON.stringify(themeColors)
+      }),
+      terser({
+        mangle: true,
+        compress: true
+      })
+    ]
+  })
+  let { output } = await bundle.generate({
+    format: 'iife',
+    sourcemap: true
+  })
 
-  let checksum = crypto.createHash('sha256').update(code).digest('base64')
+  let { code, map } = output[0]
 
-  let checksumFilepath = path.join(__dirname, '../inline-script-checksum.json')
-  await writeFile(checksumFilepath, JSON.stringify({ checksum }), 'utf8')
+  let fullCode = `${code}//# sourceMappingURL=/inline-script.js.map`
+  let checksum = crypto.createHash('sha256').update(fullCode).digest('base64')
 
-  let html2xxFilepath = path.join(__dirname, '../templates/2xx.html')
-  let html2xxFile = await readFile(html2xxFilepath, 'utf8')
-  html2xxFile = html2xxFile.replace(
-    /<!-- insert inline script here -->[\s\S]+<!-- end insert inline script here -->/,
-    '<!-- insert inline script here --><script>' + code + '</script><!-- end insert inline script here -->'
-  )
-  await writeFile(html2xxFilepath, html2xxFile, 'utf8')
+  await writeFile(path.resolve(__dirname, '../inline-script-checksum.json'),
+    JSON.stringify({ checksum }), 'utf8')
+  await writeFile(path.resolve(__dirname, '../static/inline-script.js.map'),
+    map.toString(), 'utf8')
+
+  return '<script>' + fullCode + '</script>'
 }
-
-main().catch(err => {
-  console.error(err)
-  process.exit(1)
-})
