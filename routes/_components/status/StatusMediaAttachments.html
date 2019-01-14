@@ -34,7 +34,7 @@
   <MediaAttachments {mediaAttachments} {sensitive} {uuid} />
 {/if}
 <style>
-  .status-sensitive-media-container {
+  :global(.status-sensitive-media-container ){
     grid-area: media;
     margin: 10px 0;
     position: relative;
@@ -43,42 +43,42 @@
     background: none;
   }
 
-  .status-sensitive-media-button {
+  :global(.status-sensitive-media-button ){
     margin: 0;
     padding: 0;
     border: none;
     background: none;
   }
 
-  .status-sensitive-media-button:hover {
+  :global(.status-sensitive-media-button:hover ){
     background: none;
   }
 
-  .status-sensitive-media-button:active {
+  :global(.status-sensitive-media-button:active ){
     background: none;
   }
 
-  .status-sensitive-media-shown .status-sensitive-media-button {
+  :global(.status-sensitive-media-shown .status-sensitive-media-button ){
     position: absolute;
     left: 0;
     top: 0;
     z-index: 90;
   }
 
-  .status-sensitive-media-hidden .status-sensitive-media-button {
+  :global(.status-sensitive-media-hidden .status-sensitive-media-button ){
     right: 0;
     bottom: 0;
     width: 100%;
     height: 100%;
   }
 
-  .status-sensitive-media-container.status-sensitive-media-hidden {
+  :global(.status-sensitive-media-container.status-sensitive-media-hidden ){
     width: 100%;
     margin: 10px auto;
     height: 200px;
   }
 
-  .status-sensitive-media-container .status-sensitive-media-warning {
+  :global(.status-sensitive-media-container .status-sensitive-media-warning ){
     position: absolute;
     top: 0;
     left: 0;
@@ -91,7 +91,7 @@
     z-index: 60;
   }
 
-  .status-sensitive-media-container .svg-wrapper {
+  :global(.status-sensitive-media-container .svg-wrapper ){
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -99,17 +99,17 @@
     pointer-events: none;
     background: var(--mask-bg);
   }
-  .status-sensitive-media-hidden .svg-wrapper {
+  :global(.status-sensitive-media-hidden .svg-wrapper ){
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
   }
-  .status-sensitive-media-container.status-sensitive-media-shown .svg-wrapper {
+  :global(.status-sensitive-media-container.status-sensitive-media-shown .svg-wrapper ){
     background: none;
   }
-  .status-sensitive-media-svg {
+  :global(.status-sensitive-media-svg ){
     width: 24px;
     height: 24px;
     fill: var(--mask-svg-fill);
@@ -118,7 +118,7 @@
     margin: 1px;
     padding: 6px 10px;
   }
-  .status-sensitive-media-container.status-sensitive-media-hidden .status-sensitive-media-svg {
+  :global(.status-sensitive-media-container.status-sensitive-media-hidden .status-sensitive-media-svg ){
     fill: var(--deemphasized-text-color);
     background: var(--mask-opaque-bg);
   }

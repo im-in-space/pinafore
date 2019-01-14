@@ -22,7 +22,7 @@
   </div>
 </div>
 <style>
-  .compose-media {
+  :global(.compose-media ){
     height: 200px;
     overflow: hidden;
     flex-direction: column;
@@ -30,14 +30,14 @@
     display: flex;
     background: var(--main-bg);
   }
-  .compose-media img {
+  :global(.compose-media img ){
     object-fit: contain;
     object-position: center center;
     flex: 1;
     height: 100%;
     width: 100%;
   }
-  .compose-media-alt {
+  :global(.compose-media-alt ){
     z-index: 10;
     position: absolute;
     bottom: 0;
@@ -46,16 +46,16 @@
     display: flex;
     justify-content: center;
   }
-  .compose-media-alt-input {
+  :global(.compose-media-alt-input ){
     width: 100%;
     font-size: 1.2em;
     background: var(--alt-input-bg);
     color: var(--body-text-color);
   }
-  .compose-media-alt-input:focus {
+  :global(.compose-media-alt-input:focus ){
     background: var(--main-bg);
   }
-  .compose-media-delete {
+  :global(.compose-media-delete ){
     position: absolute;
     z-index: 10;
     top: 0;
@@ -65,15 +65,15 @@
     justify-content: flex-end;
     margin: 2px;
   }
-  .compose-media-delete-button {
+  :global(.compose-media-delete-button ){
     padding: 10px;
     background: none;
     border: none;
   }
-  .compose-media-delete-button:hover {
+  :global(.compose-media-delete-button:hover ){
     background: var(--toast-border);
   }
-  .compose-media-delete-button-svg {
+  :global(.compose-media-delete-button-svg ){
     fill: var(--button-text);
     width: 18px;
     height: 18px;

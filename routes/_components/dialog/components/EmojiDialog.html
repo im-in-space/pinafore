@@ -24,24 +24,24 @@
   </div>
 </ModalDialog>
 <style>
-  .custom-emoji-container {
+  :global(.custom-emoji-container ){
     max-width: 100%;
     width: 400px;
     height: 300px;
     overflow: auto;
   }
-  .custom-emoji-no-emoji {
+  :global(.custom-emoji-no-emoji ){
     font-size: 1.3em;
     padding: 20px;
   }
-  .custom-emoji-list {
+  :global(.custom-emoji-list ){
     list-style: none;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
     grid-gap: 5px;
     padding: 20px 10px;
   }
-  .custom-emoji button {
+  :global(.custom-emoji button ){
     padding: 0;
     margin: 0;
     border: none;
@@ -49,7 +49,7 @@
     box-shadow: none;
     background: none;
   }
-  .custom-emoji img {
+  :global(.custom-emoji img ){
     width: 48px;
     height: 48px;
     object-fit: contain;

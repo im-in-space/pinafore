@@ -22,15 +22,15 @@
   </button>
 </div>
 <style>
-  .compose-box-button-halo {
+  :global(.compose-box-button-halo ){
     border-radius: 2px;
     margin: 5px 15px 15px 5px;
     pointer-events: auto;
   }
-  .compose-box-button-halo-sticky {
+  :global(.compose-box-button-halo-sticky ){
     background-color: var(--compose-button-halo);
   }
-  .compose-box-button {
+  :global(.compose-box-button ){
     grid-area: button;
     justify-self: right;
     text-transform: uppercase;
@@ -38,7 +38,7 @@
     margin: 5px;
     pointer-events: auto;
   }
-  .compose-box-button-spinner, .compose-box-button-compose {
+  :global(.compose-box-button-spinner, .compose-box-button-compose ){
     position: absolute;
     display: flex;
     justify-content: center;
@@ -49,17 +49,17 @@
     left: 0;
     right: 0;
   }
-  .compose-box-button-svg {
+  :global(.compose-box-button-svg ){
     width: 24px;
     height: 24px;
     fill: var(--button-primary-text);
   }
 
   @media (max-width: 767px) {
-    .compose-box-button-halo {
+    :global(.compose-box-button-halo ){
       margin: 5px;
     }
-    .compose-box-button {
+    :global(.compose-box-button ){
       margin: 5px;
     }
   }

@@ -3,17 +3,17 @@
      aria-hidden="true"
 ></div>
 <style>
-  .compose-box-length-gauge {
+  :global(.compose-box-length-gauge ){
     grid-area: gauge;
     margin: 0 0 5px 5px;
     height: 2px;
     background: var(--main-theme-color);
     transform-origin: left;
   }
-  .compose-box-length-gauge.should-animate {
+  :global(.compose-box-length-gauge.should-animate ){
     transition: transform 0.2s linear;
   }
-  .compose-box-length-gauge.over-char-limit {
+  :global(.compose-box-length-gauge.over-char-limit ){
     background: var(--warning-color);
   }
 </style>

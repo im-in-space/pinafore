@@ -2,7 +2,7 @@
     {@html massagedContent}
 </div>
 <style>
-  .status-content {
+  :global(.status-content ){
     margin: 10px 10px 10px 5px;
     grid-area: content;
     word-wrap: break-word;
@@ -12,12 +12,12 @@
     display: none;
   }
 
-  .status-content.status-in-own-thread {
+  :global(.status-content.status-in-own-thread ){
     font-size: 1.3em;
     margin: 20px 10px 20px 5px;
   }
 
-  .status-content.shown {
+  :global(.status-content.shown ){
     display: block;
   }
 
@@ -33,7 +33,7 @@
     margin: 0;
   }
 
-  .status-content.status-in-notification {
+  :global(.status-content.status-in-notification ){
     color: var(--very-deemphasized-text-color);
   }
   :global(.status-content.status-in-notification a, .status-content.status-in-notification a:hover) {

@@ -26,7 +26,7 @@
   </button>
 {/if}
 <style>
-  .icon-button {
+  :global(.icon-button ){
     padding: 6px 10px;
     background: none;
     border: none;
@@ -35,14 +35,14 @@
     justify-content: center;
   }
 
-  .icon-button-svg {
+  :global(.icon-button-svg ){
     width: 24px;
     height: 24px;
     fill: var(--action-button-fill-color);
     pointer-events: none; /* hack for Edge */
   }
 
-  .icon-button.big-icon .icon-button-svg {
+  :global(.icon-button.big-icon .icon-button-svg ){
     width: 32px;
     height: 32px;
   }
@@ -51,23 +51,23 @@
    * regular styles
    */
 
-  .icon-button:hover .icon-button-svg {
+  :global(.icon-button:hover .icon-button-svg ){
     fill: var(--action-button-fill-color-hover);
   }
 
-  .icon-button.not-pressable:active .icon-button-svg {
+  :global(.icon-button.not-pressable:active .icon-button-svg ){
     fill: var(--action-button-fill-color-active);
   }
 
-  .icon-button.pressed .icon-button-svg {
+  :global(.icon-button.pressed .icon-button-svg ){
     fill: var(--action-button-fill-color-pressed);
   }
 
-  .icon-button.pressed:hover .icon-button-svg {
+  :global(.icon-button.pressed:hover .icon-button-svg ){
     fill: var(--action-button-fill-color-pressed-hover);
   }
 
-  .icon-button.pressed:active .icon-button-svg {
+  :global(.icon-button.pressed:active .icon-button-svg ){
     fill: var(--action-button-fill-color-pressed-active);
   }
 
@@ -75,27 +75,27 @@
    * muted
    */
 
-  .icon-button.muted-style .icon-button-svg {
+  :global(.icon-button.muted-style .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color);
   }
 
-  .icon-button.muted-style:hover .icon-button-svg {
+  :global(.icon-button.muted-style:hover .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color-hover);
   }
 
-  .icon-button.muted-style.not-pressable:active .icon-button-svg {
+  :global(.icon-button.muted-style.not-pressable:active .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color-active);
   }
 
-  .icon-button.muted-style.pressed .icon-button-svg {
+  :global(.icon-button.muted-style.pressed .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color-pressed);
   }
 
-  .icon-button.muted-style.pressed:hover .icon-button-svg {
+  :global(.icon-button.muted-style.pressed:hover .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color-pressed-hover);
   }
 
-  .icon-button.muted-style.pressed:active .icon-button-svg {
+  :global(.icon-button.muted-style.pressed:active .icon-button-svg ){
     fill: var(--action-button-deemphasized-fill-color-pressed-active);
   }
 

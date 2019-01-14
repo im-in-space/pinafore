@@ -8,7 +8,7 @@
   />
 </div>
 <style>
-  .compose-autosuggest {
+  :global(.compose-autosuggest ){
     position: absolute;
     left: 5px;
     top: 0;
@@ -19,16 +19,16 @@
     max-width: calc(100vw - 20px);
     z-index: 7000;
   }
-  .compose-autosuggest.is-dialog {
+  :global(.compose-autosuggest.is-dialog ){
     z-index: 11000;
   }
-  .compose-autosuggest.shown {
+  :global(.compose-autosuggest.shown ){
     pointer-events: auto;
     opacity: 1;
   }
 
   @media (max-width: 479px) {
-    .compose-autosuggest {
+    :global(.compose-autosuggest ){
       /* hack: move this over to the left on mobile so it's easier to see */
       transform: translateX(-58px); /* avatar size 48px + 10px padding */
       min-width: 0;

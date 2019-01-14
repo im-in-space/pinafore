@@ -8,7 +8,7 @@ import { updateCustomEmojiForInstance } from './emoji'
 import { database } from '../_database/database'
 
 const REDIRECT_URI = (typeof location !== 'undefined'
-  ? location.origin : 'https://pinafore.social') + '/settings/instances/add'
+  ? location.origin : 'https://pf.im-in.space') + '/settings/instances/add'
 
 async function redirectToOauth () {
   let { instanceNameInSearch, loggedInInstances } = store.get()
@@ -68,7 +68,7 @@ async function registerNewInstance (code) {
     REDIRECT_URI
   )
   let { loggedInInstances, loggedInInstancesInOrder, instanceThemes } = store.get()
-  instanceThemes[currentRegisteredInstanceName] = 'default'
+  instanceThemes[currentRegisteredInstanceName] = 'space'
   loggedInInstances[currentRegisteredInstanceName] = instanceData
   if (!loggedInInstancesInOrder.includes(currentRegisteredInstanceName)) {
     loggedInInstancesInOrder.push(currentRegisteredInstanceName)
@@ -83,7 +83,7 @@ async function registerNewInstance (code) {
     instanceThemes: instanceThemes
   })
   store.save()
-  switchToTheme('default')
+  switchToTheme('space')
   // fire off these requests so they're cached
   /* no await */ updateVerifyCredentialsForInstance(currentRegisteredInstanceName)
   /* no await */ updateCustomEmojiForInstance(currentRegisteredInstanceName)

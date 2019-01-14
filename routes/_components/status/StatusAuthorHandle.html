@@ -2,7 +2,7 @@
   {'@' + originalAccount.acct}
 </span>
 <style>
-  .status-author-handle {
+  :global(.status-author-handle ){
     grid-area: author-handle;
     align-self: center;
     margin-left: 5px;
@@ -14,7 +14,7 @@
     text-overflow: ellipsis;
   }
 
-  .status-author-handle.status-in-notification {
+  :global(.status-author-handle.status-in-notification ){
     color: var(--very-deemphasized-text-color);
   }
 </style>

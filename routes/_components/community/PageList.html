@@ -10,10 +10,10 @@
   {/if}
 </div>
 <style>
-  .page-list-wrapper {
+  :global(.page-list-wrapper ){
     margin: 20px 20px;
   }
-  ul.page-list {
+  :global(ul.page-list ){
     list-style: none;
     width: 100%;
     border: 1px solid var(--settings-list-item-border);
@@ -21,7 +21,7 @@
     box-sizing: border-box;
   }
   @media (max-width: 767px) {
-    .page-list-wrapper {
+    :global(.page-list-wrapper ){
       margin: 20px 0;
     }
   }

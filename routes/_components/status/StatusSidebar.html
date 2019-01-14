@@ -8,23 +8,23 @@
           {size} />
 </a>
 <style>
-  .status-sidebar {
+  :global(.status-sidebar ){
     grid-area: sidebar;
     margin-right: 15px;
   }
 
-  .status-sidebar.size-small {
+  :global(.status-sidebar.size-small ){
     width: 48px;
     height: 48px;
   }
 
-  .status-sidebar.size-medium {
+  :global(.status-sidebar.size-medium ){
     width: 64px;
     height: 64px;
   }
 
   @media (max-width: 767px) {
-    .status-sidebar {
+    :global(.status-sidebar ){
       margin-right: 5px;
     }
   }

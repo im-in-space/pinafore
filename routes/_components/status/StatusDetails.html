@@ -40,7 +40,7 @@
   </a>
 </div>
 <style>
-  .status-details {
+  :global(.status-details ){
     grid-area: details;
     display: grid;
     grid-template-columns: minmax(0, max-content) repeat(3, max-content);
@@ -77,31 +77,31 @@
     align-items: center;
   }
 
-  .status-application-span {
+  :global(.status-application-span ){
     word-wrap: break-word;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  .status-favs-reblogs {
+  :global(.status-favs-reblogs ){
     font-size: 1.1em;
     display: flex;
     flex-direction: row;
     align-items: center;
   }
 
-  .status-favs-reblogs span {
+  :global(.status-favs-reblogs span ){
     margin-left: 5px;
   }
 
-  .status-favs-reblogs,
+  :global(.status-favs-reblogs,
   .status-favs-reblogs:hover,
-  .status-favs-reblogs:visited {
+  .status-favs-reblogs:visited ){
     color: var(--deemphasized-text-color);
   }
 
-  .status-favs-reblogs-svg {
+  :global(.status-favs-reblogs-svg ){
     fill: var(--deemphasized-text-color);
     width: 18px;
     height: 18px;
@@ -115,13 +115,13 @@
     :global(.status-absolute-date) {
       font-size: 1em;
     }
-    .status-favs-reblogs {
+    :global(.status-favs-reblogs ){
       font-size: 1em;
     }
     :global(.status-application) {
       font-size: 1em;
     }
-    .status-details {
+    :global(.status-details ){
       grid-gap: 5px;
       justify-content: space-between;
     }

@@ -4,7 +4,7 @@
   <ComposeButton {overLimit} {sticky} on:click="onClickButton()" />
 </div>
 <style>
-  .compose-box-button-wrapper {
+  :global(.compose-box-button-wrapper ){
     /*
      * We want pointer-events only for the sticky button, so use fit-content so that
      * the element doesn't take up the full width, and then set its left margin to
@@ -18,7 +18,7 @@
     justify-content: flex-end;
   }
 
-  .compose-box-button-sticky {
+  :global(.compose-box-button-sticky ){
     position: -webkit-sticky;
     position: sticky;
   }
@@ -39,7 +39,7 @@
     }
   }
   @supports (-webkit-overflow-scrolling: touch) {
-    .compose-box-button-sticky {
+    :global(.compose-box-button-sticky ){
       /* disable sticky positioning on iOS due to
          https://github.com/nolanlawson/pinafore/issues/667 */
       position: relative;

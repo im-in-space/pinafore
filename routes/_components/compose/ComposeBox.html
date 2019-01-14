@@ -20,7 +20,7 @@
   <div class="compose-box-border-bottom {hideAndFadeIn}"></div>
 {/if}
 <style>
-  .compose-box {
+  :global(.compose-box ){
     border-radius: 4px;
     padding: 20px 20px 0 20px;
     display: grid;
@@ -37,37 +37,37 @@
     max-width: calc(100vw - 40px);
   }
 
-  .compose-box.direct-reply {
+  :global(.compose-box.direct-reply ){
     background-color: var(--status-direct-background);
   }
 
-  .compose-box.slim-size {
+  :global(.compose-box.slim-size ){
     width: 540px;
     max-width: calc(100vw - 60px);
   }
 
-  .compose-box-fade-in {
+  :global(.compose-box-fade-in ){
     transition: opacity 0.2s linear; /* main page reveal */
   }
 
-  .compose-box-border-bottom {
+  :global(.compose-box-border-bottom ){
     height: 1px;
     background: var(--main-border);
     width: 100%;
   }
 
-  .compose-content-warning-wrapper {
+  :global(.compose-content-warning-wrapper ){
     grid-area: cw;
   }
 
   @media (max-width: 767px) {
-    .compose-box {
+    :global(.compose-box ){
       padding: 10px 10px 0 10px;
       max-width: calc(100vw - 20px);
       width: 580px;
     }
 
-    .compose-box.slim-size {
+    :global(.compose-box.slim-size ){
       width: 560px;
       max-width: calc(100vw - 40px);
     }

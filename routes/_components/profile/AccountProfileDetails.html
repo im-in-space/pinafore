@@ -43,14 +43,14 @@
   {/if}
 </div>
 <style>
-  .account-profile-details {
+  :global(.account-profile-details ){
     grid-area: details;
     display: flex;
     margin: 0 5px;
     align-items: center;
   }
 
-  .account-profile-details-item {
+  :global(.account-profile-details-item ){
     flex: 1;
     display: flex;
     flex-direction: row;
@@ -59,55 +59,55 @@
     font-size: 1.1em;
   }
 
-  .account-profile-details-item:hover {
+  :global(.account-profile-details-item:hover ){
     text-decoration: none;
     background: var(--button-bg-hover);
     cursor: pointer;
   }
 
-  .account-profile-details-item:active {
+  :global(.account-profile-details-item:active ){
     background: var(--button-bg-active);
   }
 
-  .account-profile-details-item-title {
+  :global(.account-profile-details-item-title ){
     text-transform: uppercase;
     color: var(--deemphasized-text-color);
     margin-right: 5px;
   }
 
-  .account-profile-details-item-datum {
+  :global(.account-profile-details-item-datum ){
     color: var(--body-text-color);
     margin-left: 5px;
     font-weight: 600;
   }
 
   @media (max-width: 767px) {
-    .account-profile-details-item {
+    :global(.account-profile-details-item ){
       flex-direction: column;
       margin-left: 5px;
       margin-right: 5px;
     }
 
-    .account-profile-details-item:last-child {
+    :global(.account-profile-details-item:last-child ){
       margin-right: 0;
     }
 
-    .account-profile-details-item:first-child {
+    :global(.account-profile-details-item:first-child ){
       margin-left: 0;
     }
 
-    .account-profile-details-item-title {
+    :global(.account-profile-details-item-title ){
       margin-right: 0;
       text-align: center;
     }
-    .account-profile-details-item-datum {
+    :global(.account-profile-details-item-datum ){
       margin-left: 0;
       text-align: center;
     }
   }
 
   @media (max-width: 767px) {
-    .account-profile-details-item {
+    :global(.account-profile-details-item ){
       font-size: 1em;
     }
   }

@@ -3,7 +3,7 @@
       {lengthToDisplayDeferred}
     </span>
 <style>
-  .compose-box-length {
+  :global(.compose-box-length ){
     grid-area: length;
     justify-self: right;
     color: var(--main-theme-color);
@@ -11,7 +11,7 @@
     align-self: center;
   }
 
-  .compose-box-length.over-char-limit {
+  :global(.compose-box-length.over-char-limit ){
     color: var(--warning-color);
   }
 </style>

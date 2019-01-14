@@ -28,7 +28,7 @@
   ></div>
 </a>
 <style>
-  .main-nav-link {
+  :global(.main-nav-link ){
     text-decoration: none;
     display: flex;
     justify-content: center;
@@ -37,7 +37,7 @@
     flex-direction: column;
   }
 
-  .nav-icon-and-label {
+  :global(.nav-icon-and-label ){
     padding: 15px 20px;
     display: flex;
     justify-content: center;
@@ -45,17 +45,17 @@
     flex: 1;
   }
 
-  .nav-link-svg-wrapper {
+  :global(.nav-link-svg-wrapper ){
     position: relative;
     display: inline-block;
   }
 
-  .nav-link-svg-wrapper, .nav-link-svg {
+  :global(.nav-link-svg-wrapper, .nav-link-svg ){
     width: 20px;
     height: 20px;
   }
 
-  .nav-link-notifications {
+  :global(.nav-link-notifications ){
     position: absolute;
     display: flex;
     align-items: center;
@@ -75,59 +75,59 @@
     font-weight: 600;
   }
 
-  .nav-link-notifications-digits-2, .nav-link-notifications-digits-3 {
+  :global(.nav-link-notifications-digits-2, .nav-link-notifications-digits-3 ){
     font-size: 0.7em;
   }
 
-  .main-nav-link.selected {
+  :global(.main-nav-link.selected ){
     background: var(--nav-a-selected-bg);
   }
 
-  .main-nav-link.selected:hover {
+  :global(.main-nav-link.selected:hover ){
     background: var(--nav-a-selected-bg-hover);
   }
 
-  .nav-indicator {
+  :global(.nav-indicator ){
     width: 100%;
     height: 1px;
     background: var(--nav-a-border);
     transform-origin: left;
   }
 
-  .nav-indicator.animate {
+  :global(.nav-indicator.animate ){
     transition: transform 333ms ease-in-out;
   }
 
-  .main-nav-link:hover .nav-indicator {
+  :global(.main-nav-link:hover .nav-indicator ){
     background: var(--nav-a-border-hover);
   }
 
-  .main-nav-link.selected .nav-indicator {
+  :global(.main-nav-link.selected .nav-indicator ){
     background: var(--nav-a-selected-border);
   }
 
-  .main-nav-link.selected:hover .nav-indicator {
+  :global(.main-nav-link.selected:hover .nav-indicator ){
     background: var(--nav-a-selected-border-hover);
   }
 
-  .main-nav-link:hover {
+  :global(.main-nav-link:hover ){
     background-color: var(--nav-a-bg-hover);
     text-decoration: none;
   }
 
-  .main-nav-link:hover .nav-link-label {
+  :global(.main-nav-link:hover .nav-link-label ){
     color: var(--nav-text-color-hover);
   }
-  .main-nav-link:hover .nav-link-svg {
+  :global(.main-nav-link:hover .nav-link-svg ){
     fill: var(--nav-svg-fill-hover);
   }
 
-  .nav-link-svg {
+  :global(.nav-link-svg ){
     display: inline-block;
     fill: var(--nav-svg-fill);
   }
 
-  .nav-link-label {
+  :global(.nav-link-label ){
     font-size: 16px;
     color: var(--nav-text-color);
     padding-left: 10px;
@@ -137,17 +137,17 @@
   }
 
   @media (max-width: 991px) {
-    .main-nav-link .nav-link-label {
+    :global(.main-nav-link .nav-link-label ){
       display: none;
     }
-    .nav-link-svg-wrapper, .nav-link-svg {
+    :global(.nav-link-svg-wrapper, .nav-link-svg ){
       width: 25px;
       height: 25px;
     }
-    .nav-icon-and-label {
+    :global(.nav-icon-and-label ){
       padding: 20px 0;
     }
-    .nav-link-notifications {
+    :global(.nav-link-notifications ){
       transform: translate(15px, 7px);
       margin: 2px 1px 4px;
     }

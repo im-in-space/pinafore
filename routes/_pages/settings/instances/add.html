@@ -30,7 +30,7 @@
   {/if}
 </SettingsLayout>
 <style>
-  .form-error {
+  :global(.form-error ){
     border: 2px solid red;
     border-radius: 2px;
     padding: 10px;
@@ -38,13 +38,13 @@
     margin: 5px;
     background-color: var(--main-bg);
   }
-  .add-new-instance-input {
+  :global(.add-new-instance-input ){
     min-width: 70%;
     max-width: 100%;
     background-color: var(--input-bg);
   }
 
-  .add-new-instance {
+  :global(.add-new-instance ){
     background: var(--form-bg);
     padding: 5px 10px 15px;
     margin: 20px auto;
@@ -52,13 +52,13 @@
     border-radius: 4px;
   }
 
-  .add-new-instance-label, .add-new-instance-input, .add-new-instance-button {
+  :global(.add-new-instance-label, .add-new-instance-input, .add-new-instance-button ){
     display: block;
     margin: 20px 5px;
   }
 
   @media (max-width: 767px) {
-    .add-new-instance-input {
+    :global(.add-new-instance-input ){
       min-width: 95%;
     }
   }

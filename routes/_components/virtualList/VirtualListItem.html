@@ -10,7 +10,7 @@
               on:recalculateHeight="doRecalculateHeight()"/>
 </div>
 <style>
-  .virtual-list-item {
+  :global(.virtual-list-item ){
     position: absolute;
     top: 0;
     opacity: 0;
@@ -18,7 +18,7 @@
     transition: opacity 0.333s linear;
     contain: content; /* see https://www.w3.org/TR/2018/CR-css-contain-1-20181108/#valdef-contain-content */
   }
-  .virtual-list-item.shown {
+  :global(.virtual-list-item.shown ){
     opacity: 1;
     pointer-events: auto;
   }

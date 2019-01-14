@@ -13,28 +13,28 @@
           on:click="onGoBack(event)">Back</button>
 </div>
 <style>
-  .dynamic-page-banner {
+  :global(.dynamic-page-banner ){
     display: grid;
     align-items: center;
     margin: 20px 20px 20px;
     grid-template-columns: 1fr min-content;
     grid-column-gap: 10px;
   }
-  .dynamic-page-banner.dynamic-page-with-icon {
+  :global(.dynamic-page-banner.dynamic-page-with-icon ){
     grid-template-columns: min-content 1fr min-content;
   }
-  .dynamic-page-banner-svg {
+  :global(.dynamic-page-banner-svg ){
     width: 24px;
     height: 24px;
     fill: var(--body-text-color);
   }
-  .dynamic-page-title {
+  :global(.dynamic-page-title ){
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .dynamic-page-go-back {
+  :global(.dynamic-page-go-back ){
     font-size: 1.3em;
     color: var(--anchor-text);
     border: 0;
@@ -42,21 +42,21 @@
     background: none;
     justify-self: flex-end;
   }
-  .dynamic-page-go-back:hover {
+  :global(.dynamic-page-go-back:hover ){
     text-decoration: underline;
   }
-  .dynamic-page-go-back::before {
+  :global(.dynamic-page-go-back::before ){
     content: '←';
     margin-right: 5px;
   }
   @media (max-width: 767px) {
-    .dynamic-page-banner {
+    :global(.dynamic-page-banner ){
       margin: 20px 10px 20px;
     }
-    .dynamic-page-title {
+    :global(.dynamic-page-title ){
       font-size: 1.3em;
     }
-    .dynamic-page-go-back {
+    :global(.dynamic-page-go-back ){
       font-size: 1.3em;
     }
   }

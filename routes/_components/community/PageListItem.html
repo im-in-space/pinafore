@@ -16,48 +16,48 @@
   </a>
 </li>
 <style>
-  .page-list-item {
+  :global(.page-list-item ){
     border: 1px solid var(--settings-list-item-border);
     font-size: 1.3em;
     display: flex;
     flex-direction: column;
   }
-  .page-list-item a {
+  :global(.page-list-item a ){
     padding: 20px 40px;
     background: var(--settings-list-item-bg);
     display: grid;
     grid-template-columns: min-content 1fr min-content;
     align-items: center;
   }
-  .page-list-item a, .page-list-item a:visited {
+  :global(.page-list-item a, .page-list-item a:visited ){
     color: var(--body-text-color);
   }
-  .page-list-item a:hover {
+  :global(.page-list-item a:hover ){
     text-decoration: none;
     background: var(--settings-list-item-bg-hover);
     color: var(--body-text-color);
   }
-  .page-list-item a:active {
+  :global(.page-list-item a:active ){
     background: var(--settings-list-item-bg-active);
   }
-  .page-list-item-svg {
+  :global(.page-list-item-svg ){
     width: 24px;
     height: 24px;
     display: inline-block;
     margin-right: 20px;
     fill: var(--body-text-color);
   }
-  .page-list-item span {
+  :global(.page-list-item span ){
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   @media (max-width: 767px) {
-    .page-list-item a {
+    :global(.page-list-item a ){
       padding: 20px 10px;
     }
-    .page-list-item-svg {
+    :global(.page-list-item-svg ){
       margin-right: 10px;
     }
   }

@@ -5,7 +5,7 @@
   {/each}
 </div>
 <style>
-  .status-media {
+  :global(.status-media ){
     grid-area: media;
     display: grid;
     align-items: center;
@@ -15,17 +15,17 @@
     grid-row-gap: 10px;
     margin: 10px 0;
   }
-  .status-media.status-media-is-sensitive {
+  :global(.status-media.status-media-is-sensitive ){
     margin: 0;
   }
-  .status-media {
+  :global(.status-media ){
     overflow: hidden;
   }
-  .status-media {
+  :global(.status-media ){
     max-width: calc(100vw - 40px);
   }
   @media (max-width: 767px) {
-    .status-media {
+    :global(.status-media ){
       max-width: calc(100vw - 20px);
     }
   }

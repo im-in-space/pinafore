@@ -23,34 +23,34 @@
   </div>
 {/if}
 <style>
-  .search-input-form {
+  :global(.search-input-form ){
     display: grid;
     grid-template-columns: 1fr min-content;
     grid-gap: 10px;
   }
-  .search-input-wrapper {
+  :global(.search-input-wrapper ){
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  .search-input {
+  :global(.search-input ){
     padding: 10px 15px;
     border-radius: 10px;
     flex: 1;
   }
-  .search-button-svg {
+  :global(.search-button-svg ){
     fill: var(--button-primary-text);
     width: 18px;
     height: 18px;
     flex: 1;
   }
-  .search-results-container {
+  :global(.search-results-container ){
     position: relative;
     margin-top: 20px;
   }
   @media (min-width: 768px) {
-    .search-button {
+    :global(.search-button ){
       min-width: 100px;
     }
   }

@@ -16,21 +16,21 @@
   </FreeTextLayout>
 </HiddenFromSSR>
 <style>
-  .not-logged-in-home {
+  :global(.not-logged-in-home ){
     margin: 10px;
   }
-  .not-logged-in-home .banner {
+  :global(.not-logged-in-home .banner ){
     display: flex;
     align-items: center;
     margin: 0 0 30px;
   }
-  .not-logged-in-home-svg {
+  :global(.not-logged-in-home-svg ){
     width: 70px;
     height: 70px;
     fill: royalblue;
     display: inline-block;
   }
-  .not-logged-in-home h1 {
+  :global(.not-logged-in-home h1 ){
     color: royalblue;
     display: inline-block;
     font-size: 3em;
@@ -38,7 +38,7 @@
   }
 
   @media (max-width: 767px) {
-    .not-logged-in-home h1 {
+    :global(.not-logged-in-home h1 ){
       font-size: 2.7em;
     }
   }

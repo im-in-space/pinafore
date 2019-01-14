@@ -37,7 +37,7 @@
 </article>
 
 <style>
-  .status-article {
+  :global(.status-article ){
     cursor: pointer;
     max-width: calc(100vw - 40px);
     padding: 10px 20px;
@@ -56,16 +56,16 @@
     grid-template-rows: repeat(8, max-content);
   }
 
-  .status-article.status-in-timeline {
+  :global(.status-article.status-in-timeline ){
     width: 560px;
     border-bottom: 1px solid var(--main-border);
   }
 
-  .status-article.status-direct {
+  :global(.status-article.status-direct ){
     background-color: var(--status-direct-background);
   }
 
-  .status-article.status-in-own-thread {
+  :global(.status-article.status-in-own-thread ){
     grid-template-areas:
       "sidebar     author-name"
       "sidebar     author-handle"
@@ -82,11 +82,11 @@
   }
 
   @media (max-width: 767px) {
-    .status-article {
+    :global(.status-article ){
       padding: 10px 10px;
       max-width: calc(100vw - 20px);
     }
-    .status-article.status-in-timeline {
+    :global(.status-article.status-in-timeline ){
       width: 580px;
     }
   }

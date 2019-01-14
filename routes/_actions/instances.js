@@ -55,7 +55,7 @@ export async function logOutOfInstance (instanceName) {
   })
   store.save()
   toast.say(`Logged out of ${instanceName}`)
-  switchToTheme(instanceThemes[newInstance] || 'default')
+  switchToTheme(instanceThemes[newInstance] || 'space')
   /* no await */ database.clearDatabaseForInstance(instanceName)
   goto('/settings/instances')
 }

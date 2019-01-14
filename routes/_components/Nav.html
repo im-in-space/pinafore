@@ -15,7 +15,7 @@
 </nav>
 
 <style>
-	.main-nav {
+	:global(.main-nav ){
 		border-bottom: 1px solid var(--nav-border);
 		background: var(--nav-bg);
 		position: fixed;
@@ -26,7 +26,7 @@
     contain: content; /* see https://www.w3.org/TR/2018/CR-css-contain-1-20181108/#valdef-contain-content */
 	}
 
-  .main-nav-ul {
+  :global(.main-nav-ul ){
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -34,12 +34,12 @@
 		align-items: stretch;
 	}
 
-  .main-nav-li {
+  :global(.main-nav-li ){
     display: flex;
   }
 
   @media (max-width: 991px) {
-    .main-nav-li {
+    :global(.main-nav-li ){
       flex: 1;
     }
   }

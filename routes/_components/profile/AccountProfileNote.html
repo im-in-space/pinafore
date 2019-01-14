@@ -3,7 +3,7 @@
   {@html massagedNote}
 </div>
 <style>
-  .account-profile-note {
+  :global(.account-profile-note ){
     grid-area: note;
     padding: 10px 0;
     font-size: 0.9em;
@@ -25,7 +25,7 @@
   }
 
   @media (max-width: 767px) {
-    .account-profile-note {
+    :global(.account-profile-note ){
       padding: 5px 0;
     }
   }

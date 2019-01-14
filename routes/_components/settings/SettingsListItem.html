@@ -11,52 +11,52 @@
   </a>
 </li>
 <style>
-  .settings-list-item {
+  :global(.settings-list-item ){
     border: 1px solid var(--settings-list-item-border);
     font-size: 1.3em;
     display: flex;
     flex-direction: column;
   }
-  .settings-list-item a {
+  :global(.settings-list-item a ){
     display: flex;
     padding: 20px 40px;
     background: var(--settings-list-item-bg);
   }
-  .settings-list-item a, .settings-list-item a:visited {
+  :global(.settings-list-item a, .settings-list-item a:visited ){
     color: var(--settings-list-item-text);
   }
-  .settings-list-item a:hover {
+  :global(.settings-list-item a:hover ){
     text-decoration: none;
     background: var(--settings-list-item-bg-hover);
     color: var(--settings-list-item-text-hover);
   }
-  .settings-list-item a:active {
+  :global(.settings-list-item a:active ){
     background: var(--settings-list-item-bg-active);
   }
-  .settings-list-item-svg {
+  :global(.settings-list-item-svg ){
     width: 24px;
     height: 24px;
     display: inline-block;
     margin-right: 20px;
     fill: var(--svg-fill);
   }
-  .settings-list-item .offset-for-icon {
+  :global(.settings-list-item .offset-for-icon ){
     margin-left: 44px;
   }
-  .settings-list-item span {
+  :global(.settings-list-item span ){
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   @media (max-width: 767px) {
-    .settings-list-item a {
+    :global(.settings-list-item a ){
       padding: 20px 10px;
     }
-    .settings-list-item-svg {
+    :global(.settings-list-item-svg ){
       margin-right: 10px;
     }
-    .settings-list-item .offset-for-icon {
+    :global(.settings-list-item .offset-for-icon ){
       margin-left: 34px;
     }
   }

@@ -12,19 +12,19 @@
   </div>
 </div>
 <style>
-  .account-profile {
+  :global(.account-profile ){
     position: relative;
     background-size: cover;
     background-position: center;
     padding-top: 175px;
   }
 
-  .account-profile.header-image-is-missing {
+  :global(.account-profile.header-image-is-missing ){
     padding-top: 0;
     background-color: #ccc;
   }
 
-  .account-profile-grid {
+  :global(.account-profile-grid ){
     display: grid;
     grid-template-areas: "avatar     name        label     followed-by   follow"
                          "avatar     username    username  username      follow"
@@ -53,7 +53,7 @@
   }
 
   @media (max-width: 767px) {
-    .account-profile-grid {
+    :global(.account-profile-grid ){
       display: grid;
       grid-template-areas: "avatar     name          follow"
                            "avatar     label         follow"

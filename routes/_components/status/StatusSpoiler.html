@@ -7,7 +7,7 @@
   </button>
 </div>
 <style>
-  .status-spoiler {
+  :global(.status-spoiler ){
     grid-area: spoiler;
     word-wrap: break-word;
     overflow: hidden;
@@ -16,24 +16,24 @@
     margin: 10px 5px;
   }
 
-  .status-spoiler.status-in-own-thread {
+  :global(.status-spoiler.status-in-own-thread ){
     font-size: 1.3em;
     margin: 20px 5px 10px;
   }
 
-  .status-spoiler.status-in-notification {
+  :global(.status-spoiler.status-in-notification ){
     color: var(--very-deemphasized-text-color);
   }
 
-  .status-spoiler-button {
+  :global(.status-spoiler-button ){
     grid-area: spoiler-btn;
     margin: 10px 5px;
   }
 
-  .status-spoiler-button.status-in-own-thread {
+  :global(.status-spoiler-button.status-in-own-thread ){
   }
 
-  .status-spoiler-button button {
+  :global(.status-spoiler-button button ){
     padding: 5px 10px;
     font-size: 1.1em;
   }

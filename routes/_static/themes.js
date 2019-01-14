@@ -1,7 +1,13 @@
 const themes = [
   {
+    name: 'space',
+    label: 'Space',
+    dark: true,
+    color: '#222233'
+  },
+  {
     name: 'default',
-    label: 'Royal (default)',
+    label: 'Royal',
     dark: false,
     color: 'royalblue'
   },
