@@ -1,25 +1,25 @@
 import chokidar from 'chokidar'
 import fs from 'fs'
 import path from 'path'
-import pify from 'pify'
+import { promisify } from 'util'
 import { buildSass } from './build-sass'
 import { buildInlineScript } from './build-inline-script'
 import { buildSvg } from './build-svg'
 import now from 'performance-now'
 import debounce from 'lodash-es/debounce'
 
-const writeFile = pify(fs.writeFile.bind(fs))
+const writeFile = promisify(fs.writeFile)
 
 const DEBOUNCE = 500
 
 const builders = [
   {
-    watch: 'scss',
+    watch: 'src/scss',
     comment: '<!-- inline CSS -->',
     rebuild: buildSass
   },
   {
-    watch: 'inline-script.js',
+    watch: 'src/inline-script/inline-script.js',
     comment: '<!-- inline JS -->',
     rebuild: buildInlineScript
   },
@@ -34,7 +34,7 @@ const builders = [
 const partials = buildPartials()
 
 function buildPartials () {
-  let rawTemplate = fs.readFileSync(path.resolve(__dirname, '../src-build/template.html'), 'utf8')
+  let rawTemplate = fs.readFileSync(path.resolve(__dirname, '../src/build/template.html'), 'utf8')
 
   let partials = [rawTemplate]
 

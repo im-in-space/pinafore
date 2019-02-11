@@ -38,7 +38,6 @@ Compatible versions of each (Opera, Brave, Samsung, etc.) should be fine.
 - Serve as an alternative frontend tied to a particular instance
 - Support for non-English languages (i18n)
 - Offline search
-- Keyboard shortcuts
 
 ### Non-goals
 
@@ -53,13 +52,13 @@ Compatible versions of each (Opera, Brave, Samsung, etc.) should be fine.
 
 ## Building
 
-Pinafore requires [Node.js](https://nodejs.org/en/) v8+ and `npm`.
+Pinafore requires [Node.js](https://nodejs.org/en/) v8+ and [Yarn](https://yarnpkg.com).
 
 To build Pinafore for production:
 
-    npm install
-    npm run build
-    PORT=4002 npm start
+    yarn --pure-lockfile
+    yarn build
+    PORT=4002 yarn start
 
 ### Docker
 
@@ -80,7 +79,7 @@ To keep your version of Pinafore up to date, you can use `git` to check out the 
 
 You can export Pinafore as a static site. Run:
 
-    npm run export
+    yarn run export
 
 Static files will be written to `__sapper__/export`.
 
@@ -96,6 +95,8 @@ how to run Pinafore in dev mode and run tests.
 ## Changelog
 
 For a changelog, see the [GitHub releases](http://github.com/nolanlawson/pinafore/releases/).
+
+For a list of breaking changes, see [BREAKING_CHANGES.md](https://github.com/nolanlawson/pinafore/blob/master/BREAKING_CHANGES.md).
 
 ## What's with the name?
 

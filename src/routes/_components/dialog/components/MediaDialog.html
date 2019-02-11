@@ -1,0 +1,314 @@
+<ModalDialog
+  {id}
+  {label}
+  background="var(--muted-modal-bg)"
+  muted="true"
+  className="media-modal-dialog"
+>
+  <div class="media-container">
+    <ul class="media-scroll" ref:scroller>
+      {#each mediaItems as media (media.id)}
+        <li class="media-scroll-item">
+          <div class="media-scroll-item-inner">
+            <div class="media-scroll-item-inner-inner">
+                {#if canPinchZoom && pinchZoomMode}
+                  <PinchZoomable className='media-pinch-zoom' >
+                    <MediaInDialog {media} />
+                  </PinchZoomable>
+                {:else}
+                  <MediaInDialog {media} />
+                {/if}
+            </div>
+          </div>
+        </li>
+      {/each}
+    </ul>
+    <div class="media-controls-outside">
+      {#if canPinchZoom}
+        <IconButton
+          className="media-control-button media-control-button-dummy-spacer"
+          href="#fa-search"
+          label=""
+          ariaHidden={true}
+        />
+      {/if}
+      {#if dots.length > 1}
+        <div class="media-controls">
+            <IconButton
+              className="media-control-button"
+              disabled={scrolledItem === 0}
+              label="Show previous media"
+              href="#fa-angle-left"
+              on:click="prev()"
+            />
+            {#each dots as dot, i (dot.i)}
+              <IconButton
+                className="media-control-button"
+                pressable={true}
+                label="Show {nth(i)} media"
+                pressed={i === scrolledItem}
+                href={i === scrolledItem ? '#fa-circle' : '#fa-circle-o'}
+                sameColorWhenPressed={true}
+                on:click="onClick(i)"
+              />
+            {/each}
+            <IconButton
+              className="media-control-button"
+              disabled={scrolledItem === length - 1}
+              label="Show next media"
+              href="#fa-angle-right"
+              on:click="next()"
+            />
+        </div>
+      {/if}
+      {#if canPinchZoom}
+        <IconButton
+          className="media-control-button"
+          pressable={true}
+          pressed={pinchZoomMode}
+          label={pinchZoomMode ? 'Disable pinch-zoom mode' : 'Enable pinch-zoom mode'}
+          href="#fa-search"
+          on:click="togglePinchZoomMode()"
+        />
+      {/if}
+    </div>
+  </div>
+</ModalDialog>
+
+<Shortcut scope='mediaDialog' key="ArrowLeft" on:pressed="prev()" />
+<Shortcut scope='mediaDialog' key="ArrowRight" on:pressed="next()" />
+<style>
+  :global(.media-modal-dialog) {
+    max-width: calc(100vw);
+  }
+  .media-container {
+    height: calc(100% - 64px); /* 44px X button height + 20px padding */
+    width: calc(100vw);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  .media-scroll {
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    width: 100%;
+    flex: 1;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  ul.media-scroll {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .media-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .media-scroll-item {
+    height: 100%;
+  }
+  .media-scroll-item-inner {
+    width: 100vw;
+    height: 100%;
+    overflow: hidden;
+  }
+  .media-scroll-item-inner-inner {
+    height: calc(100% - 10px);
+    width: calc(100% - 10px);
+    padding: 5px;
+  }
+
+  .media-controls-outside {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+  }
+
+  .media-controls {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  :global(.media-pinch-zoom) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.media-control-button-dummy-spacer) {
+    visibility: hidden;
+  }
+
+  :global(.icon-button.media-control-button) {
+    margin: 0 5px;
+  }
+
+  @media (max-width: 767px) {
+    :global(.icon-button.media-control-button) {
+      margin: 0;
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+  }
+
+  @media (max-width: 320px) {
+    :global(.icon-button.media-control-button) {
+      padding-left: 2px;
+      padding-right: 2px;
+    }
+  }
+
+  @supports (scroll-snap-align: start) {
+    /* modern scroll snap points */
+    .media-scroll {
+      scroll-snap-type: x mandatory;
+    }
+    .media-scroll-item {
+      scroll-snap-align: center;
+    }
+  }
+  @supports not (scroll-snap-align: start) {
+    /* old scroll snap points spec */
+    .media-scroll {
+      -webkit-scroll-snap-type: mandatory;
+              scroll-snap-type: mandatory;
+      -webkit-scroll-snap-destination: 0% center;
+              scroll-snap-destination: 0% center;
+      -webkit-scroll-snap-points-x: repeat(100%);
+              scroll-snap-points-x: repeat(100%);
+    }
+
+    .media-scroll-item {
+      scroll-snap-coordinate: 0 0;
+    }
+
+  }
+</style>
+<script>
+  import ModalDialog from './ModalDialog.html'
+  import MediaInDialog from './MediaInDialog.html'
+  import IconButton from '../../IconButton.html'
+  import Shortcut from '../../shortcut/Shortcut.html'
+  import PinchZoomable from './PinchZoomable.html'
+  import { show } from '../helpers/showDialog'
+  import { oncreate as onCreateDialog } from '../helpers/onCreateDialog'
+  import debounce from 'lodash-es/debounce'
+  import times from 'lodash-es/times'
+  import { smoothScroll, hasNativeSmoothScroll } from '../../../_utils/smoothScroll'
+  import { doubleRAF } from '../../../_utils/doubleRAF'
+  import { store } from '../../../_store/store'
+  import {
+    pushShortcutScope,
+    popShortcutScope } from '../../../_utils/shortcuts'
+
+  export default {
+    oncreate () {
+      onCreateDialog.call(this)
+
+      this.onScroll = debounce(this.onScroll.bind(this), 50, { leading: false, trailing: true })
+
+      let { scrolledItem } = this.get()
+      if (scrolledItem) {
+        doubleRAF(() => {
+          this.scrollToItem(scrolledItem, false)
+          this.setupScroll()
+        })
+      } else {
+        this.setupScroll()
+      }
+      pushShortcutScope('mediaDialog')
+    },
+    ondestroy () {
+      this.teardownScroll()
+      popShortcutScope('mediaDialog')
+    },
+    store: () => store,
+    data: () => ({
+      pinchZoomMode: false
+    }),
+    computed: {
+      length: ({ mediaItems }) => mediaItems.length,
+      dots: ({ length }) => times(length, i => ({ i })),
+      canPinchZoom: ({ mediaItems }) => !mediaItems.some(media => media.type === 'video')
+    },
+    components: {
+      ModalDialog,
+      MediaInDialog,
+      IconButton,
+      Shortcut,
+      PinchZoomable
+    },
+    helpers: {
+      nth (i) {
+        switch (i) {
+          case 0:
+            return 'first'
+          case 1:
+            return 'second'
+          case 2:
+            return 'third'
+          case 3:
+            return 'fourth'
+        }
+      }
+    },
+    methods: {
+      show,
+      setupScroll () {
+        this.refs.scroller.addEventListener('scroll', this.onScroll)
+      },
+      teardownScroll () {
+        this.refs.scroller.removeEventListener('scroll', this.onScroll)
+      },
+      onScroll () {
+        let { length } = this.get()
+        let { scrollWidth, scrollLeft } = this.refs.scroller
+        let scrolledItem = Math.round((scrollLeft / scrollWidth) * length)
+        this.set({ scrolledItem })
+      },
+      onClick (i) {
+        let { scrolledItem } = this.get()
+        if (scrolledItem !== i) {
+          this.scrollToItem(i, true)
+        }
+      },
+      next () {
+        let { scrolledItem, length } = this.get()
+        if (scrolledItem < length - 1) {
+          this.scrollToItem(scrolledItem + 1, true)
+        }
+      },
+      prev () {
+        let { scrolledItem } = this.get()
+        if (scrolledItem > 0) {
+          this.scrollToItem(scrolledItem - 1, true)
+        }
+      },
+      scrollToItem (scrolledItem, smooth) {
+        this.set({ scrolledItem: scrolledItem })
+        let { length } = this.get()
+        let { scroller } = this.refs
+        let { scrollWidth } = scroller
+        let scrollLeft = Math.floor(scrollWidth * (scrolledItem / length))
+        if (smooth) {
+          if (!hasNativeSmoothScroll && 'StyleMedia' in window) {
+            // Edge has a weird bug where it changes the height if we try to
+            // smooth scroll, so disable smooth scrolling
+            scroller.scrollLeft = scrollLeft
+          } else {
+            smoothScroll(scroller, scrollLeft, true)
+          }
+        } else {
+          scroller.scrollLeft = scrollLeft
+        }
+      },
+      togglePinchZoomMode () {
+        this.set({ pinchZoomMode: !this.get().pinchZoomMode })
+      }
+    }
+  }
+</script>

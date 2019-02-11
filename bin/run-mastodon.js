@@ -1,5 +1,5 @@
 import { restoreMastodonData } from './restore-mastodon-data'
-import pify from 'pify'
+import { promisify } from 'util'
 import childProcessPromise from 'child-process-promise'
 import path from 'path'
 import fs from 'fs'
@@ -8,13 +8,13 @@ import mkdirpCB from 'mkdirp'
 
 const exec = childProcessPromise.exec
 const spawn = childProcessPromise.spawn
-const mkdirp = pify(mkdirpCB)
-const stat = pify(fs.stat.bind(fs))
-const writeFile = pify(fs.writeFile.bind(fs))
+const mkdirp = promisify(mkdirpCB)
+const stat = promisify(fs.stat)
+const writeFile = promisify(fs.writeFile)
 const dir = __dirname
 
 const GIT_URL = 'https://github.com/tootsuite/mastodon.git'
-const GIT_TAG = 'v2.6.5'
+const GIT_TAG = 'v2.7.0'
 
 const DB_NAME = 'pinafore_development'
 const DB_USER = 'pinafore'
@@ -65,13 +65,13 @@ async function setupMastodonDatabase () {
     env: Object.assign({ PGPASSWORD: DB_PASS }, process.env)
   })
 
-  let dumpFile = path.join(dir, '../fixtures/dump.sql')
+  let dumpFile = path.join(dir, '../tests/fixtures/dump.sql')
   await exec(`psql -h 127.0.0.1 -U ${DB_USER} -w -d ${DB_NAME} -f "${dumpFile}"`, {
     cwd: mastodonDir,
     env: Object.assign({ PGPASSWORD: DB_PASS }, process.env)
   })
 
-  let tgzFile = path.join(dir, '../fixtures/system.tgz')
+  let tgzFile = path.join(dir, '../tests/fixtures/system.tgz')
   let systemDir = path.join(mastodonDir, 'public/system')
   await mkdirp(systemDir)
   await exec(`tar -xzf "${tgzFile}"`, { cwd: systemDir })

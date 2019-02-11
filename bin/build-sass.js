@@ -1,17 +1,17 @@
 import sass from 'node-sass'
 import path from 'path'
 import fs from 'fs'
-import pify from 'pify'
+import { promisify } from 'util'
 
-const writeFile = pify(fs.writeFile.bind(fs))
-const readdir = pify(fs.readdir.bind(fs))
-const render = pify(sass.render.bind(sass))
+const writeFile = promisify(fs.writeFile)
+const readdir = promisify(fs.readdir)
+const render = promisify(sass.render.bind(sass))
 
-const globalScss = path.join(__dirname, '../scss/global.scss')
-const defaultThemeScss = path.join(__dirname, '../scss/themes/space.scss')
-const offlineThemeScss = path.join(__dirname, '../scss/themes/_offline.scss')
-const customScrollbarScss = path.join(__dirname, '../scss/custom-scrollbars.scss')
-const themesScssDir = path.join(__dirname, '../scss/themes')
+const globalScss = path.join(__dirname, '../src/scss/global.scss')
+const defaultThemeScss = path.join(__dirname, '../src/scss/themes/space.scss')
+const offlineThemeScss = path.join(__dirname, '../src/scss/themes/_offline.scss')
+const customScrollbarScss = path.join(__dirname, '../src/scss/custom-scrollbars.scss')
+const themesScssDir = path.join(__dirname, '../src/scss/themes')
 const assetsDir = path.join(__dirname, '../static')
 
 async function renderCss (file) {

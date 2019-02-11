@@ -36,12 +36,13 @@
   {/if}
 </article>
 {#if shortcutScope}
-<Shortcut scope="{shortcutScope}" key="o" on:pressed="open()"/>
+  <Shortcut scope={shortcutScope} key="o" on:pressed="open()" />
+  <Shortcut scope={shortcutScope} key="p" on:pressed="openAuthorProfile()" />
+  <Shortcut scope={shortcutScope} key="m" on:pressed="mentionAuthor()" />
 {/if}
 
 <style>
   .status-article {
-    cursor: pointer;
     max-width: calc(100vw - 40px);
     padding: 10px 20px;
     display: grid;
@@ -58,6 +59,10 @@
         "compose compose      compose       compose";
     grid-template-columns: min-content minmax(0, max-content) 1fr min-content;
     grid-template-rows: repeat(8, max-content);
+  }
+
+  .status-article.tap-on-status {
+    cursor: pointer;
   }
 
   .status-article.status-in-timeline {
@@ -127,6 +132,7 @@
   import { measureText } from '../../_utils/measureText'
   import { LONG_POST_LENGTH, LONG_POST_TEXT } from '../../_static/statuses'
   import { absoluteDateFormatter } from '../../_utils/formatters'
+  import { composeNewStatusMentioning } from '../../_actions/mention'
 
   const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea'])
   const isUserInputElement = node => INPUT_TAGS.has(node.localName)
@@ -165,6 +171,7 @@
       Shortcut
     },
     data: () => ({
+      active: false,
       notification: void 0,
       replyVisibility: void 0,
       contentPreloaded: false,
@@ -197,6 +204,14 @@
       open () {
         let { originalStatusId } = this.get()
         goto(`/statuses/${originalStatusId}`)
+      },
+      openAuthorProfile () {
+        let { accountForShortcut } = this.get()
+        goto(`/accounts/${accountForShortcut.id}`)
+      },
+      async mentionAuthor () {
+        let { accountForShortcut } = this.get()
+        await composeNewStatusMentioning(accountForShortcut)
       }
     },
     computed: {
@@ -210,6 +225,7 @@
       accountId: ({ account }) => account.id,
       originalAccount: ({ originalStatus }) => originalStatus.account,
       originalAccountId: ({ originalAccount }) => originalAccount.id,
+      accountForShortcut: ({ originalAccount, notification }) => notification ? notification.account : originalAccount,
       visibility: ({ originalStatus }) => originalStatus.visibility,
       plainTextContent: ({ content }) => htmlToPlainText(content),
       plainTextContentLength: ({ plainTextContent }) => measureText(plainTextContent),
@@ -256,12 +272,14 @@
         status.reblog ||
         timelineType === 'pinned'
       ),
-      className: ({ visibility, timelineType, isStatusInOwnThread, active }) => (classname(
+      className: ({ visibility, timelineType, isStatusInOwnThread, active, $underlineLinks, $disableTapOnStatus }) => (classname(
         'status-article',
         visibility === 'direct' && 'status-direct',
         timelineType !== 'search' && 'status-in-timeline',
         isStatusInOwnThread && 'status-in-own-thread',
-        active && 'status-active'
+        active && 'status-active',
+        $underlineLinks && 'underline-links',
+        !$disableTapOnStatus && 'tap-on-status'
       )),
       content: ({ originalStatus }) => originalStatus.content || '',
       showContent: ({ spoilerText, spoilerShown }) => !spoilerText || spoilerShown,

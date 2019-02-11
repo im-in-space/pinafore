@@ -1,7 +1,7 @@
 {
   "name": "pinafore",
   "description": "Alternative web client for Mastodon",
-  "version": "0.17.0",
+  "version": "1.0.1",
   "scripts": {
     "lint": "standard && standard --plugin html 'src/routes/**/*.html'",
     "lint-fix": "standard --fix && standard --fix --plugin html 'src/routes/**/*.html'",
@@ -10,16 +10,16 @@
     "sapper-dev": "cross-env NODE_ENV=development PORT=4002 sapper dev",
     "sapper-prod": "cross-env PORT=4002 node __sapper__/build",
     "before-build": "run-s build-template-html build-third-party-assets",
-    "build": "cross-env NODE_ENV=production npm run build-steps",
+    "build": "cross-env NODE_ENV=production run-s build-steps",
     "build-steps": "run-s before-build sapper-build",
     "sapper-build": "sapper build",
-    "start": "cross-env NODE_ENV=production npm run sapper-prod",
+    "start": "cross-env NODE_ENV=production run-s sapper-prod",
     "build-and-start": "run-s build start",
     "build-template-html": "node -r esm ./bin/build-template-html.js",
     "build-template-html-watch": "node -r esm ./bin/build-template-html.js --watch",
     "build-third-party-assets": "node -r esm ./bin/build-third-party-assets.js",
     "run-mastodon": "node -r esm ./bin/run-mastodon.js",
-    "test": "cross-env BROWSER=chrome:headless npm run test-browser",
+    "test": "cross-env BROWSER=chrome:headless run-s test-browser",
     "test-browser": "run-p --race run-mastodon build-and-start test-mastodon",
     "test-mastodon": "run-s wait-for-mastodon-to-start wait-for-mastodon-data testcafe",
     "test-browser-suite0": "run-p --race run-mastodon build-and-start test-mastodon-suite0",
@@ -44,7 +44,6 @@
   "dependencies": {
     "@gamestdio/websocket": "^0.2.8",
     "@webcomponents/custom-elements": "^1.2.1",
-    "browserslist": "^4.4.0",
     "cheerio": "^1.0.0-rc.2",
     "child-process-promise": "^2.2.1",
     "chokidar": "^2.0.4",
@@ -57,7 +56,7 @@
     "emoji-regex": "^7.0.3",
     "encoding": "^0.1.12",
     "escape-html": "^1.0.3",
-    "esm": "^3.0.84",
+    "esm": "^3.1.4",
     "events-light": "^1.0.5",
     "express": "^4.16.4",
     "file-api": "^0.10.4",
@@ -67,7 +66,7 @@
     "helmet": "^3.15.0",
     "idb-keyval": "^3.1.0",
     "indexeddb-getall-shim": "^1.3.5",
-    "inferno-compat": "^7.0.5",
+    "inferno-compat": "^7.1.0",
     "intersection-observer": "^0.5.1",
     "localstorage-memory": "^1.0.3",
     "lodash-es": "^4.17.11",
@@ -79,15 +78,15 @@
     "p-any": "^1.1.0",
     "page-lifecycle": "^0.1.1",
     "performance-now": "^2.1.0",
-    "pify": "^4.0.1",
+    "pinch-zoom-element": "^1.1.0",
     "prop-types": "^15.6.2",
     "quick-lru": "^2.0.0",
     "remount": "^0.9.3",
     "requestidlecallback": "^0.3.0",
-    "rollup": "^1.1.0",
+    "rollup": "^1.1.2",
     "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-terser": "^4.0.2",
-    "sapper": "github:nolanlawson/sapper#nolan/sw-index-html-built",
+    "rollup-plugin-terser": "^4.0.3",
+    "sapper": "^0.25.0",
     "serve-static": "^1.13.2",
     "stringz": "^1.0.0",
     "svelte": "^2.16.0",
@@ -99,16 +98,16 @@
     "tiny-queue": "^0.2.1",
     "uuid": "^3.3.2",
     "web-animations-js": "^2.3.1",
-    "webpack": "^4.28.4",
+    "webpack": "^4.29.0",
     "webpack-bundle-analyzer": "^3.0.3"
   },
   "devDependencies": {
     "assert": "^1.4.1",
     "eslint-plugin-html": "^5.0.0",
     "mocha": "^5.2.0",
-    "now": "^13.0.4",
+    "now": "^13.1.2",
     "standard": "^12.0.1",
-    "testcafe": "^0.23.3"
+    "testcafe": "^1.0.0"
   },
   "engines": {
     "node": ">= 8"
@@ -173,10 +172,10 @@
       "src-build",
       "static",
       "package.json",
-      "package-lock.json",
       "thirdparty",
       "webpack",
-      "webpack.config.js"
+      "webpack.config.js",
+      "yarn.lock"
     ],
     "engines": {
       "node": "^10.0.0"

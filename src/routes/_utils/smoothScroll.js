@@ -1,3 +1,5 @@
+import { store } from '../_store/store'
+
 // via https://github.com/tootsuite/mastodon/blob/f59ed3a4fafab776b4eeb92f805dfe1fecc17ee3/app/javascript/mastodon/scroll.js
 const easingOutQuint = (x, t, b, c, d) =>
   c * ((t = t / d - 1) * t * t * t * t + 1) + b
@@ -59,15 +61,18 @@ function testSupportsSmoothScroll () {
   return supports
 }
 
-const smoothScrollSupported = process.browser && testSupportsSmoothScroll()
+export const hasNativeSmoothScroll = process.browser && testSupportsSmoothScroll()
 
-export function smoothScroll (node, top) {
-  if (smoothScrollSupported) {
+export function smoothScroll (node, topOrLeft, horizontal) {
+  if (store.get().reduceMotion) {
+    // don't do smooth-scroll at all for users who prefer reduced motion
+    node[horizontal ? 'scrollLeft' : 'scrollTop'] = topOrLeft
+  } else if (hasNativeSmoothScroll) {
     return node.scrollTo({
-      top: top,
+      [horizontal ? 'left' : 'top']: topOrLeft,
       behavior: 'smooth'
     })
   } else {
-    return smoothScrollPolyfill(node, 'scrollTop', top)
+    return smoothScrollPolyfill(node, horizontal ? 'scrollLeft' : 'scrollTop', topOrLeft)
   }
 }

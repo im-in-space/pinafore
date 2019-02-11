@@ -3,6 +3,7 @@
           title={label}
           aria-label={label}
           aria-pressed={pressable ? !!pressed : void 0}
+          aria-hidden={ariaHidden}
           class={computedClass}
           {disabled}
           delegate-key={delegateKey}
@@ -16,6 +17,7 @@
           title={label}
           aria-label={label}
           aria-pressed={pressable ? !!pressed : void 0}
+          aria-hidden={ariaHidden}
           class={computedClass}
           focus-key={focusKey || ''}
           {disabled}
@@ -55,19 +57,20 @@
     fill: var(--action-button-fill-color-hover);
   }
 
-  :global(.icon-button.not-pressable:active .icon-button-svg ){
+  .icon-button.not-pressable:active .icon-button-svg,
+  .icon-button.same-pressed:active .icon-button-svg {
     fill: var(--action-button-fill-color-active);
   }
 
-  :global(.icon-button.pressed .icon-button-svg ){
+  .icon-button.pressed.not-same-pressed .icon-button-svg {
     fill: var(--action-button-fill-color-pressed);
   }
 
-  :global(.icon-button.pressed:hover .icon-button-svg ){
+  .icon-button.pressed.not-same-pressed:hover .icon-button-svg {
     fill: var(--action-button-fill-color-pressed-hover);
   }
 
-  :global(.icon-button.pressed:active .icon-button-svg ){
+  .icon-button.pressed.not-same-pressed:active .icon-button-svg {
     fill: var(--action-button-fill-color-pressed-active);
   }
 
@@ -83,19 +86,20 @@
     fill: var(--action-button-deemphasized-fill-color-hover);
   }
 
-  :global(.icon-button.muted-style.not-pressable:active .icon-button-svg ){
+  .icon-button.muted-style.not-pressable:active .icon-button-svg,
+  .icon-button.muted-style.same-pressed:active .icon-button-svg {
     fill: var(--action-button-deemphasized-fill-color-active);
   }
 
-  :global(.icon-button.muted-style.pressed .icon-button-svg ){
+  .icon-button.muted-style.pressed.not-same-pressed .icon-button-svg {
     fill: var(--action-button-deemphasized-fill-color-pressed);
   }
 
-  :global(.icon-button.muted-style.pressed:hover .icon-button-svg ){
+  .icon-button.muted-style.pressed.not-same-pressed:hover .icon-button-svg {
     fill: var(--action-button-deemphasized-fill-color-pressed-hover);
   }
 
-  :global(.icon-button.muted-style.pressed:active .icon-button-svg ){
+  .icon-button.muted-style.pressed.not-same-pressed:active .icon-button-svg {
     fill: var(--action-button-deemphasized-fill-color-pressed-active);
   }
 
@@ -114,17 +118,20 @@
       pressable: false,
       pressed: false,
       className: void 0,
-      delegateKey: void 0
+      delegateKey: void 0,
+      sameColorWhenPressed: false,
+      ariaHidden: false
     }),
     store: () => store,
     computed: {
-      computedClass: ({ pressable, pressed, big, muted, className }) => {
+      computedClass: ({ pressable, pressed, big, muted, sameColorWhenPressed, className }) => {
         return classname(
           'icon-button',
           !pressable && 'not-pressable',
           pressed && 'pressed',
           big && 'big-icon',
           muted && 'muted-style',
+          sameColorWhenPressed ? 'same-pressed' : 'not-same-pressed',
           className
         )
       }
