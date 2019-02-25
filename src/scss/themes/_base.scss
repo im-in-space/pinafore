@@ -1,11 +1,11 @@
 :root {
   $deemphasized-color: #666;
 
-  --button-primary-bg: #{lighten($main-theme-color, 7%)};
+  --button-primary-bg: #{$main-theme-color};
   --button-primary-text: #{$secondary-text-color};
-  --button-primary-border: #{darken($main-theme-color, 30%)};
-  --button-primary-bg-active: #{lighten($main-theme-color, 1%)};
-  --button-primary-bg-hover: #{lighten($main-theme-color, 9%)};
+  --button-primary-border: #{darken($main-theme-color, 10%)};
+  --button-primary-bg-active: #{lighten($main-theme-color, 9%)};
+  --button-primary-bg-hover: #{lighten($main-theme-color, 5%)};
 
   --button-bg: #{darken($main-bg-color, 10%)};
   --button-text: #{$main-text-color};
@@ -26,10 +26,12 @@
   --form-border: #{darken($border-color, 10%)};
 
   --nav-bg: #{$main-theme-color};
+  --nav-active-bg: #{lighten($main-theme-color, 9%)};
   --nav-border: #{darken($main-theme-color, 10%)};
   --nav-a-border: #{$main-theme-color};
   --nav-a-selected-border: #{$secondary-text-color};
   --nav-a-selected-bg: #{lighten($main-theme-color, 10%)};
+  --nav-a-selected-active-bg: #{lighten($main-theme-color, 17%)};
   --nav-svg-fill: #{$secondary-text-color};
   --nav-text-color: #{$secondary-text-color};
 
@@ -80,7 +82,6 @@
   --very-deemphasized-text-color: #{rgba(#666, 0.6)};
 
   --status-direct-background: #{darken($body-bg-color, 5%)};
-  --status-active-background: #{lighten($body-bg-color, 2%)};
   --main-theme-color: #{$main-theme-color};
   --warning-color: #{#e01f19};
   --alt-input-bg: #{rgba($main-bg-color, 0.7)};
@@ -97,4 +98,6 @@
   --compose-button-halo: #{rgba(255, 255, 255, 0.1)};
 
   --file-drop-mask: #{rgba(255, 255, 255, 0.8)};
+
+  --banner-fill: #{$main-theme-color};
 }

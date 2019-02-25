@@ -1,7 +1,7 @@
 import {
-  getNthStatus, scrollToStatus, closeDialogButton, modalDialogContents, getActiveElementClass, goBack, getUrl,
+  getNthStatus, scrollToStatus, closeDialogButton, modalDialogContents, goBack, getUrl,
   goBackButton, getActiveElementInnerText, getNthReplyButton, getActiveElementInsideNthStatus, focus,
-  getNthStatusSelector, getActiveElementTagName
+  getNthStatusSelector, getActiveElementTagName, getActiveElementClassList
 } from '../utils'
 import { loginAsFoobar } from '../roles'
 import { Selector as $ } from 'testcafe'
@@ -23,7 +23,7 @@ test('modal preserves focus', async t => {
   await t.click($(`${getNthStatusSelector(idx)} .play-video-button`))
     .click(closeDialogButton)
     .expect(modalDialogContents.exists).notOk()
-    .expect(getActiveElementClass()).contains('play-video-button')
+    .expect(getActiveElementClassList()).contains('play-video-button')
     .expect(getActiveElementInsideNthStatus()).eql(idx.toString())
 })
 
@@ -37,7 +37,8 @@ test('timeline preserves focus', async t => {
 
   await goBack()
   await t.expect(getUrl()).eql('http://localhost:4002/')
-    .expect(getActiveElementClass()).contains('status-article status-in-timeline')
+    .expect(getActiveElementClassList()).contains('status-article')
+    .expect(getActiveElementClassList()).contains('status-in-timeline')
     .expect(getActiveElementInsideNthStatus()).eql('0')
 })
 
@@ -55,7 +56,7 @@ test('timeline link preserves focus', async t => {
     .expect(getUrl()).contains('/accounts/')
     .click(goBackButton)
     .expect(getUrl()).eql('http://localhost:4002/')
-    .expect(getActiveElementClass()).contains('status-sidebar')
+    .expect(getActiveElementClassList()).contains('status-sidebar')
     .expect(getActiveElementInsideNthStatus()).eql('0')
 })
 
@@ -67,17 +68,19 @@ test('notification timeline preserves focus', async t => {
   await t.click($(`${getNthStatusSelector(5)} .status-header a`))
     .expect(getUrl()).contains('/accounts/')
     .click(goBackButton)
-    .expect(getUrl()).eql('http://localhost:4002/notifications')
+    .expect(getUrl()).contains('/notifications')
     .expect(getNthStatus(0).exists).ok()
     .expect(getActiveElementInnerText()).eql('quux')
     .expect(getActiveElementInsideNthStatus()).eql('5')
 })
 
-// TODO: this test is really flakey in CI for some reason
-test.skip('thread preserves focus', async t => {
+test('thread preserves focus', async t => {
+  const timeout = 30000
+
   await loginAsFoobar(t)
   await t
     .navigateTo('/accounts/3')
+    .expect(getNthStatus(0).exists).ok({ timeout })
     .hover(getNthStatus(0))
   await scrollToStatus(t, 2)
   await t.click(getNthStatus(2))
@@ -87,15 +90,16 @@ test.skip('thread preserves focus', async t => {
     .click(goBackButton)
     .expect(getUrl()).contains('/statuses/')
     .expect(getNthStatus(24).exists).ok()
-    .expect(getActiveElementClass()).contains('status-sidebar')
+    .expect(getActiveElementClassList()).contains('status-sidebar')
     .expect(getActiveElementInsideNthStatus()).eql('24')
     .hover(getNthStatus(23))
     .click(getNthStatus(23))
-    .expect($(`${getNthStatusSelector(23)} .status-absolute-date`).exists).ok()
+    .expect($(`${getNthStatusSelector(23)} .status-absolute-date`).exists).ok({ timeout })
   await goBack()
-  await t.expect($(`${getNthStatusSelector(24)} .status-absolute-date`).exists).ok()
-    .expect(getActiveElementClass()).contains('status-article status-in-timeline')
-    .expect(getActiveElementInsideNthStatus()).eql('23')
+  await t.expect($(`${getNthStatusSelector(24)} .status-absolute-date`).exists).ok({ timeout })
+    .expect(getActiveElementClassList()).contains('status-article', { timeout })
+    .expect(getActiveElementClassList()).contains('status-in-timeline', { timeout })
+    .expect(getActiveElementInsideNthStatus()).eql('23', { timeout })
 })
 
 test('reply preserves focus and moves focus to the text input', async t => {
@@ -103,7 +107,7 @@ test('reply preserves focus and moves focus to the text input', async t => {
   await t
     .expect(getNthStatus(1).exists).ok({ timeout: 20000 })
     .click(getNthReplyButton(1))
-    .expect(getActiveElementClass()).contains('compose-box-input')
+    .expect(getActiveElementClassList()).contains('compose-box-input')
 })
 
 test('focus main content element on index page load', async t => {

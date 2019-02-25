@@ -11,7 +11,7 @@
 
       <p>Read the <ExternalLink href="https://nolanlawson.com/2018/04/09/introducing-pinafore-for-mastodon/">introductory blog post</ExternalLink>, or get started by logging in to an instance:</p>
 
-      <p style="text-align: right;"><a class="button primary" href="/settings/instances/add">Add instance</a></p>
+      <p style="text-align: right;"><a class="button primary" rel="prefetch" href="/settings/instances/add">Add instance</a></p>
     </div>
   </FreeTextLayout>
 </HiddenFromSSR>
@@ -27,11 +27,11 @@
   :global(.not-logged-in-home-svg ){
     width: 70px;
     height: 70px;
-    fill: royalblue;
+    fill: var(--banner-fill);
     display: inline-block;
   }
-  :global(.not-logged-in-home h1 ){
-    color: royalblue;
+  .not-logged-in-home h1 {
+    color: var(--banner-fill);
     display: inline-block;
     font-size: 3em;
     margin: auto 15px;

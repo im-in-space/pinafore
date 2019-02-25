@@ -1,4 +1,4 @@
-<div class="compose-media">
+<div class="compose-media compose-media-realm-{realm}">
   <img src={mediaItem.data.preview_url} {alt} />
   <div class="compose-media-delete">
     <button class="compose-media-delete-button"
@@ -77,6 +77,16 @@
     fill: var(--button-text);
     width: 18px;
     height: 18px;
+  }
+
+  .compose-media-realm-dialog {
+    max-height: 20vh;
+  }
+
+  @media (max-width: 767px) {
+    .compose-media-realm-dialog {
+      max-height: 15vh;
+    }
   }
 </style>
 <script>

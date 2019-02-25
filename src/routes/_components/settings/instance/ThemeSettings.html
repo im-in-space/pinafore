@@ -2,21 +2,21 @@
   <div class="theme-groups">
     {#each themeGroups as themeGroup}
     <div class="theme-group">
-      {#if themeGroup.dark}
-        <h2>Dark Background</h2>
-      {:else}
-        <h2>Light Background</h2>
-      {/if}
+      <h3>
+        {themeGroup.dark ? 'Dark background' : 'Light background' }
+      </h3>
       {#each themeGroup.themes as theme}
       <div class="theme-picker">
         <input type="radio" id="choice-theme-{theme.name}"
                value={theme.name} checked="$currentTheme === theme.name"
                bind:group="selectedTheme" on:change="onThemeChange()">
-        <div class="theme-preview theme-preview-{themeGroup.dark ? 'dark' : 'light'}"
-             style="background-color: {theme.color};" >
-        </div>
         <label class="theme-picker-label" for="choice-theme-{theme.name}">
-          {theme.label}
+          <div class="theme-preview theme-preview-{themeGroup.dark ? 'dark' : 'light'}"
+               style="background-color: {theme.color};" >
+          </div>
+          <span class="theme-picker-label-span">
+            {theme.label} {theme.name === DEFAULT_THEME ? '(default)' : ''}
+          </span>
         </label>
       </div>
       {/each}
@@ -45,15 +45,18 @@
   }
   :global(.theme-picker ){
     display: flex;
-    flex-direction: row;
     align-items: center;
   }
-  :global(.theme-picker-label ){
+  .theme-picker-label {
+    display: flex;
+    align-items: center;
+  }
+  .theme-picker-label-span {
     margin: 2px 10px 0;
   }
-  :global(.theme-preview ){
-    width: 1.5em;
-    height: 1.5em;
+  .theme-preview {
+    width: 21px;
+    height: 21px;
     box-sizing: border-box;
     border-radius: 2px;
     margin: 0 2px 0 10px;
@@ -65,9 +68,17 @@
     border: 2px solid #dadada;
   }
 
+  h3 {
+    font-size: 1.4em;
+  }
+
   @media (max-width: 479px) {
     :global(.theme-groups ){
       grid-template-columns: 1fr;
+    }
+
+    h3 {
+      margin-top: 0.5em;
     }
   }
 </style>
@@ -75,19 +86,21 @@
   import { changeTheme } from '../../../_actions/instances'
   import { store } from '../../../_store/store'
   import { themes } from '../../../_static/themes'
+  import { DEFAULT_THEME } from '../../../_utils/themeEngine'
 
   export default {
     async oncreate () {
       let { instanceName } = this.get()
       let { instanceThemes } = this.store.get()
       this.set({
-        selectedTheme: instanceThemes[instanceName] || 'space'
+        selectedTheme: instanceThemes[instanceName] || DEFAULT_THEME
       })
     },
     store: () => store,
     data: () => ({
       themes,
-      selectedTheme: 'space'
+      DEFAULT_THEME,
+      selectedTheme: DEFAULT_THEME
     }),
     computed: {
       themeGroups: ({ themes }) => ([

@@ -1,5 +1,11 @@
 let meta = process.browser && document.getElementById('theThemeColor')
 let offlineStyle = process.browser && document.getElementById('theOfflineStyle')
+// let prefersDarkTheme = process.browser && window.matchMedia('(prefers-color-scheme: dark)').matches
+let prefersDarkTheme = true
+
+export const DEFAULT_LIGHT_THEME = 'default'
+export const DEFAULT_DARK_THEME = 'space'
+export const DEFAULT_THEME = prefersDarkTheme ? DEFAULT_DARK_THEME : DEFAULT_LIGHT_THEME
 
 function getExistingThemeLink () {
   return document.head.querySelector('link[rel=stylesheet][href^="/theme-"]')
@@ -30,10 +36,10 @@ function loadCSS (href) {
   document.head.insertBefore(link, offlineStyle)
 }
 
-export function switchToTheme (themeName = 'default') {
+export function switchToTheme (themeName = DEFAULT_THEME) {
   let themeColor = window.__themeColors[themeName]
-  meta.content = themeColor || window.__themeColors['default']
-  if (themeName !== 'default') {
+  meta.content = themeColor || window.__themeColors[DEFAULT_THEME]
+  if (themeName !== DEFAULT_LIGHT_THEME) {
     loadCSS(`/theme-${themeName}.css`)
   } else {
     resetExistingTheme()

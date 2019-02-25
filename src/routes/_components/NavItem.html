@@ -2,24 +2,14 @@
    aria-label={ariaLabel}
    aria-current={selected}
    on:click="onClick(event)"
+   rel="prefetch"
    {href} >
   <div class="nav-icon-and-label">
-    {#if name === 'notifications'}
-    <div class="nav-link-svg-wrapper">
-      <svg class="nav-link-svg">
-        <use xlink:href={svg} />
-      </svg>
-      {#if $hasNotifications}
-      <span class="nav-link-notifications nav-link-notifications-digits-{notificationDigits}" aria-hidden="true">
-          {$numberOfNotifications}
-        </span>
-      {/if}
-    </div>
-    {:else}
-    <svg class="nav-link-svg">
-      <use xlink:href={svg} />
-    </svg>
-    {/if}
+    <NavItemIcon
+      {showBadge}
+      {badgeNumber}
+      {svg}
+    />
     <span class="nav-link-label">{label}</span>
   </div>
   <div class="nav-indicator"
@@ -45,41 +35,7 @@
     flex: 1;
   }
 
-  :global(.nav-link-svg-wrapper ){
-    position: relative;
-    display: inline-block;
-  }
-
-  :global(.nav-link-svg-wrapper, .nav-link-svg ){
-    width: 20px;
-    height: 20px;
-  }
-
-  :global(.nav-link-notifications ){
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    transform: translate(10px, 7px);
-    z-index: 10;
-    border: 1px solid var(--nav-bg);
-    background: var(--nav-svg-fill);
-    color: var(--nav-bg);
-    border-radius: 100%;
-    font-size: 0.8em;
-    margin: 0 0 3px;
-    font-weight: 600;
-  }
-
-  :global(.nav-link-notifications-digits-2, .nav-link-notifications-digits-3 ){
-    font-size: 0.7em;
-  }
-
-  :global(.main-nav-link.selected ){
+  .main-nav-link.selected {
     background: var(--nav-a-selected-bg);
   }
 
@@ -119,13 +75,13 @@
   :global(.main-nav-link:hover .nav-link-label ){
     color: var(--nav-text-color-hover);
   }
-  :global(.main-nav-link:hover .nav-link-svg ){
-    fill: var(--nav-svg-fill-hover);
+
+  .main-nav-link:active {
+    background-color: var(--nav-active-bg);
   }
 
-  :global(.nav-link-svg ){
-    display: inline-block;
-    fill: var(--nav-svg-fill);
+  .main-nav-link.selected:active {
+    background-color: var(--nav-a-selected-active-bg);
   }
 
   :global(.nav-link-label ){
@@ -141,20 +97,13 @@
     :global(.main-nav-link .nav-link-label ){
       display: none;
     }
-    :global(.nav-link-svg-wrapper, .nav-link-svg ){
-      width: 25px;
-      height: 25px;
-    }
-    :global(.nav-icon-and-label ){
+    .nav-icon-and-label {
       padding: 20px 0;
-    }
-    :global(.nav-link-notifications ){
-      transform: translate(15px, 7px);
-      margin: 2px 1px 4px;
     }
   }
 </style>
 <script>
+  import NavItemIcon from './NavItemIcon.html'
   import { store } from '../_store/store'
   import { smoothScroll } from '../_utils/smoothScroll'
   import { on, emit } from '../_utils/eventBus'
@@ -209,9 +158,8 @@
         }
         return res
       },
-      notificationDigits: ({ $numberOfNotifications }) => (
-        $numberOfNotifications.toString().length
-      )
+      showBadge: ({ name, $hasNotifications }) => name === 'notifications' && $hasNotifications,
+      badgeNumber: ({ name, $numberOfNotifications }) => name === 'notifications' && $numberOfNotifications
     },
     methods: {
       onClick (e) {
@@ -219,10 +167,18 @@
         if (!selected) {
           return
         }
+        let scroller = getScrollContainer()
+        let { scrollTop } = scroller
+        if (scrollTop === 0) {
+          return
+        }
         e.preventDefault()
         e.stopPropagation()
-        smoothScroll(getScrollContainer(), 0)
+        smoothScroll(scroller, 0)
       }
+    },
+    components: {
+      NavItemIcon
     }
   }
 </script>

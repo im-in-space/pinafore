@@ -16,14 +16,19 @@ import { show } from '../helpers/showDialog'
 import { close } from '../helpers/closeDialog'
 import { oncreate } from '../helpers/onCreateDialog'
 import { setAccountBlocked } from '../../../_actions/block'
-import { setAccountMuted } from '../../../_actions/mute'
 import { setStatusPinnedOrUnpinned } from '../../../_actions/pin'
 import { setConversationMuted } from '../../../_actions/muteConversation'
 import { copyText } from '../../../_actions/copyText'
 import { deleteAndRedraft } from '../../../_actions/deleteAndRedraft'
+import { shareStatus } from '../../../_actions/share'
+import { toggleMute } from '../../../_actions/toggleMute'
+import { reportStatusOrAccount } from '../../../_actions/report'
 
 export default {
   oncreate,
+  data: () => ({
+    supportsWebShare: process.browser && typeof navigator.share === 'function'
+  }),
   computed: {
     relationship: ({ $currentAccountRelationship }) => $currentAccountRelationship,
     account: ({ $currentAccountProfile }) => $currentAccountProfile,
@@ -75,17 +80,18 @@ export default {
     mutingConversation: ({ status }) => !!status.muted,
     muteConversationLabel: ({ mutingConversation }) => mutingConversation ? `Unmute conversation` : `Mute conversation`,
     muteConversationIcon: ({ mutingConversation }) => mutingConversation ? '#fa-volume-up' : '#fa-volume-off',
+    isPublicOrUnlisted: ({ visibility }) => visibility === 'public' || visibility === 'unlisted',
     items: ({
       blockLabel, blocking, blockIcon, muteLabel, muteIcon, followLabel, followIcon,
       following, followRequested, pinLabel, isUser, visibility, mentionsUser, mutingConversation,
-      muteConversationLabel, muteConversationIcon
+      muteConversationLabel, muteConversationIcon, supportsWebShare, isPublicOrUnlisted
     }) => ([
       isUser && {
         key: 'delete',
         label: 'Delete',
         icon: '#fa-trash'
       },
-      visibility !== 'private' && visibility !== 'direct' && isUser && {
+      isPublicOrUnlisted && isUser && {
         key: 'pin',
         label: pinLabel,
         icon: '#fa-thumb-tack'
@@ -115,7 +121,17 @@ export default {
         label: 'Delete and redraft',
         icon: '#fa-pencil'
       },
-      {
+      !isUser && {
+        key: 'report',
+        label: 'Report toot',
+        icon: '#fa-flag'
+      },
+      isPublicOrUnlisted && supportsWebShare && {
+        key: 'share',
+        label: 'Share toot',
+        icon: '#fa-share-square-o'
+      },
+      isPublicOrUnlisted && {
         key: 'copy',
         label: 'Copy link to toot',
         icon: '#fa-link'
@@ -148,6 +164,10 @@ export default {
           return this.onMuteConversationClicked()
         case 'redraft':
           return this.onRedraft()
+        case 'share':
+          return this.onShare()
+        case 'report':
+          return this.onReport()
       }
     },
     async onDeleteClicked () {
@@ -171,9 +191,9 @@ export default {
       await setAccountBlocked(accountId, !blocking, true)
     },
     async onMuteClicked () {
-      let { accountId, muting } = this.get()
+      let { account, muting } = this.get()
       this.close()
-      await setAccountMuted(accountId, !muting, true)
+      await toggleMute(account, !muting)
     },
     async onMuteConversationClicked () {
       let { statusId, mutingConversation } = this.get()
@@ -183,13 +203,23 @@ export default {
     async onCopyClicked () {
       let { status } = this.get()
       let { url } = status
-      await copyText(url)
       this.close()
+      await copyText(url)
     },
     async onRedraft () {
       let { status } = this.get()
-      await deleteAndRedraft(status)
       this.close()
+      await deleteAndRedraft(status)
+    },
+    async onShare () {
+      let { status } = this.get()
+      this.close()
+      await shareStatus(status)
+    },
+    async onReport () {
+      let { status, account } = this.get()
+      this.close()
+      await reportStatusOrAccount(({ status, account }))
     }
   }
 }

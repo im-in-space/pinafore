@@ -1,11 +1,12 @@
-<article class={className}
+<article id={elementId}
+         class={className}
          tabindex="0"
-         delegate-key={delegateKey}
-         focus-key={delegateKey}
          aria-posinset={index}
          aria-setsize={length}
          aria-label={ariaLabel}
-         on:recalculateHeight>
+         on:recalculateHeight
+         on:applyFocusStylesToParent="noop()"
+>
   {#if showHeader}
     <StatusHeader {...params} />
   {/if}
@@ -35,7 +36,7 @@
     <StatusComposeBox {...params} on:recalculateHeight />
   {/if}
 </article>
-{#if shortcutScope}
+{#if enableShortcuts}
   <Shortcut scope={shortcutScope} key="o" on:pressed="open()" />
   <Shortcut scope={shortcutScope} key="p" on:pressed="openAuthorProfile()" />
   <Shortcut scope={shortcutScope} key="m" on:pressed="mentionAuthor()" />
@@ -74,8 +75,8 @@
     background-color: var(--status-direct-background);
   }
 
-  .status-article.status-active {
-    background-color: var(--status-active-background);
+  .status-article:focus {
+    outline: none; /* focus is on the parent instead */
   }
 
   .status-article.status-in-own-thread {
@@ -133,6 +134,8 @@
   import { LONG_POST_LENGTH, LONG_POST_TEXT } from '../../_static/statuses'
   import { absoluteDateFormatter } from '../../_utils/formatters'
   import { composeNewStatusMentioning } from '../../_actions/mention'
+  import { applyFocusStylesToParent } from '../../_utils/events'
+  import noop from 'lodash-es/noop'
 
   const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea'])
   const isUserInputElement = node => INPUT_TAGS.has(node.localName)
@@ -141,11 +144,11 @@
 
   export default {
     oncreate () {
-      let { delegateKey, isStatusInOwnThread, showContent } = this.get()
+      let { elementId, isStatusInOwnThread, showContent } = this.get()
       let { disableTapOnStatus } = this.store.get()
       if (!isStatusInOwnThread && !disableTapOnStatus) {
         // the whole <article> is clickable in this case
-        registerClickDelegate(this, delegateKey, (e) => this.onClickOrKeydown(e))
+        registerClickDelegate(this, elementId, (e) => this.onClickOrKeydown(e))
       }
       if (!showContent) {
         scheduleIdleTask(() => {
@@ -171,14 +174,14 @@
       Shortcut
     },
     data: () => ({
-      active: false,
       notification: void 0,
       replyVisibility: void 0,
       contentPreloaded: false,
-      shortcutScope: null
+      enableShortcuts: null
     }),
     store: () => store,
     methods: {
+      noop,
       onClickOrKeydown (e) {
         let { type, keyCode, target } = e
 
@@ -237,7 +240,8 @@
       uuid: ({ $currentInstance, timelineType, timelineValue, notificationId, statusId }) => (
         `${$currentInstance}/${timelineType}/${timelineValue}/${notificationId || ''}/${statusId}`
       ),
-      delegateKey: ({ uuid }) => `status-${uuid}`,
+      elementId: ({ uuid }) => `status-${uuid}`,
+      shortcutScope: ({ elementId }) => elementId,
       isStatusInOwnThread: ({ timelineType, timelineValue, originalStatusId }) => (
         (timelineType === 'status' || timelineType === 'reply') && timelineValue === originalStatusId
       ),
@@ -272,12 +276,12 @@
         status.reblog ||
         timelineType === 'pinned'
       ),
-      className: ({ visibility, timelineType, isStatusInOwnThread, active, $underlineLinks, $disableTapOnStatus }) => (classname(
+      className: ({ visibility, timelineType, isStatusInOwnThread, $underlineLinks, $disableTapOnStatus }) => (classname(
         'status-article',
+        'shortcut-list-item',
         visibility === 'direct' && 'status-direct',
         timelineType !== 'search' && 'status-in-timeline',
         isStatusInOwnThread && 'status-in-own-thread',
-        active && 'status-active',
         $underlineLinks && 'underline-links',
         !$disableTapOnStatus && 'tap-on-status'
       )),
@@ -287,7 +291,7 @@
         account, accountId, uuid, isStatusInNotification, isStatusInOwnThread,
         originalAccount, originalAccountId, spoilerShown, visibility, replyShown,
         replyVisibility, spoilerText, originalStatus, originalStatusId, inReplyToId,
-        createdAtDate, timeagoFormattedDate, shortcutScope, absoluteFormattedDate }) => ({
+        createdAtDate, timeagoFormattedDate, enableShortcuts, absoluteFormattedDate, shortcutScope }) => ({
         notification,
         notificationId,
         status,
@@ -310,9 +314,13 @@
         inReplyToId,
         createdAtDate,
         timeagoFormattedDate,
-        shortcutScope,
-        absoluteFormattedDate
+        enableShortcuts,
+        absoluteFormattedDate,
+        shortcutScope
       })
+    },
+    events: {
+      applyFocusStylesToParent
     }
   }
 </script>

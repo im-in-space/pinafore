@@ -1,6 +1,7 @@
-<a class="status-relative-date {isStatusInNotification ? 'status-in-notification' : '' }"
+<a id={elementId}
+   class="status-relative-date {isStatusInNotification ? 'status-in-notification' : '' }"
    href="/statuses/{originalStatusId}"
-   focus-key={focusKey}
+   rel="prefetch"
 >
   <time datetime={createdAtDate} title={absoluteFormattedDate}
         aria-label="{timeagoFormattedDate} – click to show thread">
@@ -31,7 +32,7 @@
 <script>
   export default {
     computed: {
-      focusKey: ({ uuid }) => `status-relative-date-${uuid}`
+      elementId: ({ uuid }) => `status-relative-date-${uuid}`
     }
   }
 </script>

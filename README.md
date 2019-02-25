@@ -54,11 +54,17 @@ Compatible versions of each (Opera, Brave, Samsung, etc.) should be fine.
 
 Pinafore requires [Node.js](https://nodejs.org/en/) v8+ and [Yarn](https://yarnpkg.com).
 
-To build Pinafore for production:
+To build Pinafore for production, first install dependencies:
 
     yarn --pure-lockfile
+
+Then build:
+
     yarn build
-    PORT=4002 yarn start
+
+Then run:
+
+    PORT=4002 node server.js
 
 ### Docker
 

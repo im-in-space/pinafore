@@ -43,5 +43,8 @@ module.exports = [
   { id: 'fa-angle-left', src: 'src/thirdparty/font-awesome-svg-png/white/svg/angle-left.svg' },
   { id: 'fa-angle-right', src: 'src/thirdparty/font-awesome-svg-png/white/svg/angle-right.svg' },
   { id: 'fa-search-minus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/search-minus.svg' },
-  { id: 'fa-search-plus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/search-plus.svg' }
+  { id: 'fa-search-plus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/search-plus.svg' },
+  { id: 'fa-share-square-o', src: 'src/thirdparty/font-awesome-svg-png/white/svg/share-square-o.svg' },
+  { id: 'fa-flag', src: 'src/thirdparty/font-awesome-svg-png/white/svg/flag.svg' },
+  { id: 'fa-suitcase', src: 'src/thirdparty/font-awesome-svg-png/white/svg/suitcase.svg' }
 ]

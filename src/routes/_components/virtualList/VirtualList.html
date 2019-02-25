@@ -18,8 +18,6 @@
     {/if}
   </div>
 </VirtualListContainer>
-<ScrollListShortcuts bind:items=$visibleItems
-                     itemToKey={(visibleItem) => visibleItem.key} />
 <style>
   :global(.virtual-list ){
     position: relative;
@@ -30,7 +28,6 @@
   import VirtualListLazyItem from './VirtualListLazyItem'
   import VirtualListFooter from './VirtualListFooter.html'
   import VirtualListHeader from './VirtualListHeader.html'
-  import ScrollListShortcuts from '../shortcut/ScrollListShortcuts.html'
   import { virtualListStore } from './virtualListStore'
   import throttle from 'lodash-es/throttle'
   import { mark, stop } from '../../_utils/marks'
@@ -102,8 +99,7 @@
       VirtualListContainer,
       VirtualListLazyItem,
       VirtualListFooter,
-      VirtualListHeader,
-      ScrollListShortcuts
+      VirtualListHeader
     },
     computed: {
       distanceFromBottom: ({ $scrollHeight, $scrollTop, $offsetHeight }) => {
@@ -111,7 +107,8 @@
       },
       scrollTop: ({ $scrollTop }) => $scrollTop,
       // TODO: bug in svelte store, shouldn't need to do this
-      allVisibleItemsHaveHeight: ({ $allVisibleItemsHaveHeight }) => $allVisibleItemsHaveHeight
+      allVisibleItemsHaveHeight: ({ $allVisibleItemsHaveHeight }) => $allVisibleItemsHaveHeight,
+      visibleItemKeys: ({ $visibleItems }) => ($visibleItems || []).map(_ => _.key)
     },
     methods: {
       observe,
@@ -122,7 +119,9 @@
           return
         }
         mark('calculateListOffset')
-        let listOffset = node.offsetParent.offsetTop
+        let { offsetParent } = node
+        // TODO: offsetParent is null sometimes in testcafe tests
+        let listOffset = offsetParent ? offsetParent.offsetTop : 0
         this.store.setForRealm({ listOffset })
         stop('calculateListOffset')
       }

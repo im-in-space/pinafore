@@ -77,6 +77,10 @@
       width: 560px;
       max-width: calc(100vw - 40px);
     }
+
+    .compose-box-realm-dialog {
+      overflow-x: hidden;
+    }
   }
 </style>
 <script>
@@ -136,6 +140,7 @@
     computed: {
       computedClassName: ({ overLimit, realm, size, postPrivacyKey, isReply }) => (classname(
         'compose-box',
+        `compose-box-realm-${realm}`,
         overLimit && 'over-char-limit',
         size === 'slim' && 'slim-size',
         isReply && postPrivacyKey === 'direct' && 'direct-reply'

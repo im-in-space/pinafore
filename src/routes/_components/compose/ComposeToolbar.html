@@ -53,16 +53,6 @@
   import { mediaAccept } from '../../_static/media'
 
   export default {
-    oncreate () {
-      // for testing
-      window.__fakeFileInput = (file) => {
-        this.onFileChange({
-          target: {
-            files: [file]
-          }
-        })
-      }
-    },
     components: {
       IconButton,
       ComposeAutosuggest

@@ -1,18 +1,19 @@
 {#if status}
   <Status {index} {length} {timelineType} {timelineValue} {focusSelector}
-          {status} {notification} {active} {shortcutScope} on:recalculateHeight
+          {status} {notification} {enableShortcuts} on:recalculateHeight
   />
 {:else}
-  <article class={className}
+  <article id={elementId}
+           class={className}
            tabindex="0"
            aria-posinset={index}
            aria-setsize={length}
            aria-label={ariaLabel}
-           status-active={active}
+           on:applyFocusStylesToParent="noop()"
   >
     <StatusHeader {notification} {notificationId} {status} {statusId} {timelineType}
                   {account} {accountId} {uuid} isStatusInNotification="true" />
-    {#if shortcutScope}
+    {#if enableShortcuts}
       <Shortcut scope={shortcutScope} key="p" on:pressed="openAuthorProfile()" />
       <Shortcut scope={shortcutScope} key="m" on:pressed="mentionAuthor()" />
     {/if}
@@ -25,8 +26,8 @@
     padding: 10px 20px;
     border-bottom: 1px solid var(--main-border);
   }
-  .notification-article.status-active {
-    background-color: var(--status-active-background);
+  .notification-article:focus {
+    outline: none; /* focus is on the parent instead */
   }
   @media (max-width: 767px) {
     :global(.notification-article ){
@@ -45,6 +46,8 @@
   import { goto } from '../../../../__sapper__/client'
   import { composeNewStatusMentioning } from '../../_actions/mention'
   import { classname } from '../../_utils/classname'
+  import { applyFocusStylesToParent } from '../../_utils/events'
+  import noop from 'lodash-es/noop'
 
   export default {
     components: {
@@ -53,8 +56,7 @@
       Shortcut
     },
     data: () => ({
-      active: false,
-      shortcutScope: null
+      enableShortcuts: null
     }),
     store: () => store,
     computed: {
@@ -66,16 +68,19 @@
       uuid: ({ $currentInstance, timelineType, timelineValue, notificationId, statusId }) => {
         return `${$currentInstance}/${timelineType}/${timelineValue}/${notificationId}/${statusId || ''}`
       },
+      elementId: ({ uuid }) => `notification-${uuid}`,
+      shortcutScope: ({ elementId }) => elementId,
       ariaLabel: ({ status, account, $omitEmojiInDisplayNames }) => (
         !status && `${getAccountAccessibleName(account, $omitEmojiInDisplayNames)} followed you, @${account.acct}`
       ),
-      className: ({ active, $underlineLinks }) => (classname(
+      className: ({ $underlineLinks }) => (classname(
         'notification-article',
-        active && 'status-active',
+        'shortcut-list-item',
         $underlineLinks && 'underline-links'
       ))
     },
     methods: {
+      noop,
       openAuthorProfile () {
         let { accountId } = this.get()
         goto(`/accounts/${accountId}`)
@@ -84,6 +89,9 @@
         let { account } = this.get()
         await composeNewStatusMentioning(account)
       }
+    },
+    events: {
+      applyFocusStylesToParent
     }
   }
 </script>

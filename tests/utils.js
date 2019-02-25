@@ -47,6 +47,8 @@ export const neverMarkMediaSensitiveInput = $('#choice-never-mark-media-sensitiv
 export const removeEmojiFromDisplayNamesInput = $('#choice-omit-emoji-in-display-names')
 export const dialogOptionsOption = $(`.modal-dialog button`)
 export const emojiSearchInput = $('.emoji-mart-search input')
+export const confirmationDialogOKButton = $('.confirmation-dialog-form-flex button:nth-child(1)')
+export const confirmationDialogCancelButton = $('.confirmation-dialog-form-flex button:nth-child(2)')
 
 export const composeModalInput = $('.modal-dialog .compose-box-input')
 export const composeModalComposeButton = $('.modal-dialog .compose-box-button')
@@ -74,8 +76,8 @@ export const sleep = timeout => new Promise(resolve => setTimeout(resolve, timeo
 
 export const getUrl = exec(() => window.location.href)
 
-export const getActiveElementClass = exec(() =>
-  (document.activeElement && document.activeElement.getAttribute('class')) || ''
+export const getActiveElementClassList = exec(() =>
+  (document.activeElement && (document.activeElement.getAttribute('class') || '').split(/\s+/)) || []
 )
 
 export const getActiveElementTagName = exec(() =>
@@ -85,6 +87,10 @@ export const getActiveElementTagName = exec(() =>
 export const getActiveElementInnerText = exec(() =>
   (document.activeElement && document.activeElement.innerText) || ''
 )
+
+export const getActiveElementRectTop = exec(() => (
+  (document.activeElement && document.activeElement.getBoundingClientRect().top) || -1
+))
 
 export const getActiveElementInsideNthStatus = exec(() => {
   let element = document.activeElement
@@ -129,7 +135,10 @@ export const uploadKittenImage = i => (exec(() => {
   let image = images[`kitten${i}`]
   let blob = blobUtils.base64StringToBlob(image.data, 'image/png')
   blob.name = image.name
-  window.__fakeFileInput(blob)
+  let fileDrop = document.querySelector('file-drop')
+  let event = new Event('filedrop', { bubbles: false })
+  event.files = [blob]
+  fileDrop.dispatchEvent(event)
 }, {
   dependencies: {
     images,
@@ -145,6 +154,22 @@ export const focus = (selector) => (exec(() => {
     selector
   }
 }))
+
+export const isNthStatusActive = (idx) => (exec(() => {
+  return document.activeElement &&
+    document.activeElement.getAttribute('aria-posinset') === idx.toString()
+}, {
+  dependencies: { idx }
+}))
+
+export const isActiveStatusPinned = exec(() => {
+  let el = document.activeElement
+  return el &&
+    (
+      (el.parentElement.getAttribute('class') || '').includes('pinned') ||
+      (el.parentElement.parentElement.getAttribute('class') || '').includes('pinned')
+    )
+})
 
 export const scrollToBottom = exec(() => {
   document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight
