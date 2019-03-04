@@ -1,30 +1,14 @@
-import {
-  META_STORE,
-  STATUS_TIMELINES_STORE,
-  STATUSES_STORE,
-  ACCOUNTS_STORE,
-  RELATIONSHIPS_STORE,
-  NOTIFICATIONS_STORE,
-  NOTIFICATION_TIMELINES_STORE,
-  PINNED_STATUSES_STORE,
-  TIMESTAMP,
-  REBLOG_ID,
-  THREADS_STORE,
-  STATUS_ID,
-  USERNAME_LOWERCASE
-} from './constants'
+import { DB_VERSION_CURRENT } from './constants'
 import { addKnownInstance, deleteKnownInstance } from './knownInstances'
+import { migrations } from './migrations'
+import { clearAllCaches } from './cache'
 
 const openReqs = {}
 const databaseCache = {}
 
-const DB_VERSION_INITIAL = 9
-const DB_VERSION_SEARCH_ACCOUNTS = 10
-const DB_VERSION_CURRENT = 10
-
 function createDatabase (instanceName) {
   return new Promise((resolve, reject) => {
-    let req = indexedDB.open(instanceName, DB_VERSION_CURRENT)
+    let req = indexedDB.open(instanceName, DB_VERSION_CURRENT.version)
     openReqs[instanceName] = req
     req.onerror = reject
     req.onblocked = () => {
@@ -34,50 +18,16 @@ function createDatabase (instanceName) {
       let db = req.result
       let tx = e.currentTarget.transaction
 
-      function createObjectStore (name, init, indexes) {
-        let store = init
-          ? db.createObjectStore(name, init)
-          : db.createObjectStore(name)
-        if (indexes) {
-          Object.keys(indexes).forEach(indexKey => {
-            store.createIndex(indexKey, indexes[indexKey])
-          })
-        }
-      }
+      let migrationsToDo = migrations.filter(({ version }) => e.oldVersion < version)
 
-      if (e.oldVersion < DB_VERSION_INITIAL) {
-        createObjectStore(STATUSES_STORE, { keyPath: 'id' }, {
-          [TIMESTAMP]: TIMESTAMP,
-          [REBLOG_ID]: REBLOG_ID
-        })
-        createObjectStore(STATUS_TIMELINES_STORE, null, {
-          'statusId': ''
-        })
-        createObjectStore(NOTIFICATIONS_STORE, { keyPath: 'id' }, {
-          [TIMESTAMP]: TIMESTAMP,
-          [STATUS_ID]: STATUS_ID
-        })
-        createObjectStore(NOTIFICATION_TIMELINES_STORE, null, {
-          'notificationId': ''
-        })
-        createObjectStore(ACCOUNTS_STORE, { keyPath: 'id' }, {
-          [TIMESTAMP]: TIMESTAMP
-        })
-        createObjectStore(RELATIONSHIPS_STORE, { keyPath: 'id' }, {
-          [TIMESTAMP]: TIMESTAMP
-        })
-        createObjectStore(THREADS_STORE, null, {
-          'statusId': ''
-        })
-        createObjectStore(PINNED_STATUSES_STORE, null, {
-          'statusId': ''
-        })
-        createObjectStore(META_STORE)
+      function doNextMigration () {
+        if (!migrationsToDo.length) {
+          return
+        }
+        let { migration } = migrationsToDo.shift()
+        migration(db, tx, doNextMigration)
       }
-      if (e.oldVersion < DB_VERSION_SEARCH_ACCOUNTS) {
-        tx.objectStore(ACCOUNTS_STORE)
-          .createIndex(USERNAME_LOWERCASE, USERNAME_LOWERCASE)
-      }
+      doNextMigration()
     }
     req.onsuccess = () => resolve(req.result)
   })
@@ -124,4 +74,17 @@ export function deleteDatabase (instanceName) {
     req.onerror = () => reject(req.error)
     req.onblocked = () => console.error(`database ${instanceName} blocked`)
   }).then(() => deleteKnownInstance(instanceName))
+    .then(() => clearAllCaches(instanceName))
+}
+
+// this should probably only be used in unit tests
+export function closeDatabase (instanceName) {
+  // close any open requests
+  let openReq = openReqs[instanceName]
+  if (openReq && openReq.result) {
+    openReq.result.close()
+  }
+  delete openReqs[instanceName]
+  delete databaseCache[instanceName]
+  clearAllCaches(instanceName)
 }

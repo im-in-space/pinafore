@@ -1,3 +1,9 @@
+.git
+BREAKING_CHANGES.md
+CONTRIBUTING.md
+docs
+README.md
+tests
 .DS_Store
 /node_modules
 /__sapper__

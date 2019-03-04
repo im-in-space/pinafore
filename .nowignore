@@ -5,7 +5,7 @@
 /mastodon.log
 /src/template.html
 /static/*.css
-/static/robots.txt
+/static/icons.svg
 /static/inline-script.js.map
 /static/emoji-mart-all.json
 /src/inline-script/checksum.js

@@ -13,3 +13,11 @@ export const ACCOUNT_ID = '__pinafore_acct_id'
 export const STATUS_ID = '__pinafore_status_id'
 export const REBLOG_ID = '__pinafore_reblog_id'
 export const USERNAME_LOWERCASE = '__pinafore_acct_lc'
+
+export const DB_VERSION_INITIAL = 9
+export const DB_VERSION_SEARCH_ACCOUNTS = 10
+export const DB_VERSION_SNOWFLAKE_IDS = 11
+
+// Using an object for these so that unit tests can change them
+export const DB_VERSION_CURRENT = { version: 11 }
+export const CURRENT_TIME = { now: () => Date.now() }
