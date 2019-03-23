@@ -36,7 +36,8 @@ module.exports = {
         }
       },
       {
-        test: /node_modules\/emoji-mart/,
+        test: /\.m?js$/,
+        include: /node_modules\/emoji-mart/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -94,15 +95,10 @@ module.exports = {
     })
   ] : [
 
-    new BundleAnalyzerPlugin({ // generates report.html and stats.json
+    new BundleAnalyzerPlugin({ // generates report.html
       analyzerMode: 'static',
-      generateStatsFile: true,
-      statsOptions: {
-        // allows usage with http://chrisbateman.github.io/webpack-visualizer/
-        chunkModules: true
-      },
       openAnalyzer: false,
-      logLevel: 'silent' // do not bother Webpacker, who runs with --json and parses stdout
+      logLevel: 'silent'
     })
   ]),
   devtool: dev ? 'inline-source-map' : 'source-map',
