@@ -39,20 +39,13 @@
       "avatar toolbar    toolbar   length"
       "avatar media      media     media";
     grid-template-columns: min-content minmax(0, max-content) 1fr 1fr;
-    width: 560px;
-    max-width: calc(100vw - 40px);
   }
 
   :global(.compose-box.direct-reply ){
     background-color: var(--status-direct-background);
   }
 
-  :global(.compose-box.slim-size ){
-    width: 540px;
-    max-width: calc(100vw - 60px);
-  }
-
-  :global(.compose-box-fade-in ){
+  .compose-box-fade-in {
     transition: opacity 0.2s linear; /* main page reveal */
   }
 
@@ -69,13 +62,6 @@
   @media (max-width: 767px) {
     :global(.compose-box ){
       padding: 10px 10px 0 10px;
-      max-width: calc(100vw - 20px);
-      width: 580px;
-    }
-
-    :global(.compose-box.slim-size ){
-      width: 560px;
-      max-width: calc(100vw - 40px);
     }
 
     .compose-box-realm-dialog {
@@ -142,7 +128,6 @@
         'compose-box',
         `compose-box-realm-${realm}`,
         overLimit && 'over-char-limit',
-        size === 'slim' && 'slim-size',
         isReply && postPrivacyKey === 'direct' && 'direct-reply'
       )),
       hideAndFadeIn: ({ hidden }) => (classname(

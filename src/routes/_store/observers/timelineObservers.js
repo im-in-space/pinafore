@@ -26,6 +26,7 @@ export function timelineObservers () {
       !(
         timeline !== 'local' &&
         timeline !== 'federated' &&
+        timeline !== 'direct' &&
         !timeline.startsWith('list/') &&
         !timeline.startsWith('tag/')
       )

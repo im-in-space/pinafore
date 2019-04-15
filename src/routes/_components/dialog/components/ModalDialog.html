@@ -22,7 +22,7 @@
     <slot></slot>
   </div>
 </div>
-<Shortcut scope="modal" key="Backspace" on:pressed="closeDialog(id)"/>
+<Shortcut scope="modal-{id}" key="Backspace" on:pressed="closeDialog(id)"/>
 <style>
   :global(.modal-dialog[aria-hidden='true']) {
     display: none;
@@ -59,6 +59,8 @@
     display: flex;
     flex-direction: row;
     max-height: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+    flex: 0 1 580px;
   }
   :global(.modal-dialog-contents.should-animate ){
     transition: opacity 0.2s linear;
@@ -69,7 +71,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-width: calc(100vw - 20px);
+    width: 100%;
+    max-width: 100%;
     flex: 1;
   }
   :global(.modal-dialog-header ){
@@ -133,6 +136,14 @@
       height: 18px;
     }
   }
+
+  @media(min-width: 768px) {
+    /* On desktop, some dialogs look bad if they expand to fit all the way. So we shrink
+       them to fit if shrinkWidthToFit is true.*/
+    .modal-dialog-contents.shrink-width-to-fit {
+      flex: none;
+    }
+  }
 </style>
 <script>
   import Shortcut from '../../shortcut/Shortcut.html'
@@ -142,14 +153,16 @@
   import { on, emit } from '../../../_utils/eventBus'
   import {
     pushShortcutScope,
-    popShortcutScope } from '../../../_utils/shortcuts'
+    popShortcutScope
+  } from '../../../_utils/shortcuts'
 
   export default {
     oncreate () {
+      let { id } = this.get()
+      this.onPopState = this.onPopState.bind(this)
       let dialogElement = this.refs.node.parentElement
       this._a11yDialog = new A11yDialog(dialogElement)
       this._a11yDialog.on('hide', () => {
-        let { id } = this.get()
         document.body.classList.toggle('modal-open', false)
         this.fire('close')
         this._a11yDialog.destroy()
@@ -158,10 +171,16 @@
       })
       on('showDialog', this, this.showDialog)
       on('closeDialog', this, this.closeDialog)
-      pushShortcutScope('modal')
+      pushShortcutScope(`modal-${id}`)
     },
     ondestroy () {
-      popShortcutScope('modal')
+      window.removeEventListener('popstate', this.onPopState)
+      let { statePopped, statePushed, id } = this.get()
+      if (statePushed && !statePopped) {
+        // If we weren't closed due to popstate, then pop state to ensure the correct history.
+        window.history.back()
+      }
+      popShortcutScope(`modal-${id}`)
     },
     components: { Shortcut, SvgIcon },
     data: () => ({
@@ -170,7 +189,8 @@
       fadedIn: false,
       muted: false,
       className: void 0,
-      title: void 0
+      title: void 0,
+      shrinkWidthToFit: false
     }),
     computed: {
       backdropClass: ({ fadedIn, shouldAnimate }) => {
@@ -180,36 +200,51 @@
           shouldAnimate && 'should-animate'
         )
       },
-      contentsClass: ({ fadedIn, muted, shouldAnimate, className }) => {
+      contentsClass: ({ fadedIn, muted, shouldAnimate, shrinkWidthToFit, className }) => {
         return classname(
           'modal-dialog-contents',
           !fadedIn && 'hidden',
           muted && 'muted-style',
           shouldAnimate && 'should-animate',
+          shrinkWidthToFit && 'shrink-width-to-fit',
           className
         )
       }
     },
     methods: {
-      showDialog (thisId) {
+      showDialog (otherId) {
         let { id } = this.get()
-        if (id !== thisId) {
+        if (otherId !== id) {
           return
         }
-        document.body.classList.toggle('modal-open', true)
-        this._a11yDialog.show()
-        requestAnimationFrame(() => {
-          this.set({ fadedIn: true })
+        // This setTimeout is dumb, but it fixes issues with modals opening other modals
+        // due to the popstate/pushstate dance.
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            window.addEventListener('popstate', this.onPopState)
+            this.set({ statePushed: true })
+            window.history.pushState({ modal: id }, null, location.href)
+            document.body.classList.toggle('modal-open', true)
+            this._a11yDialog.show()
+            this.set({ fadedIn: true })
+          })
         })
       },
-      closeDialog (thisId) {
+      onPopState (event) {
         let { id } = this.get()
-        if (id !== thisId) {
+        if (!(event.state && event.state.modal === id)) {
+          // If the new state is not us, just assume that we need to be closed.
+          // This will only fail if modals are ever nested more than 2 levels deep.
+          this.set({ statePopped: true })
+          this.closeDialog(id)
+        }
+      },
+      closeDialog (otherId) {
+        let { id } = this.get()
+        if (id !== otherId) {
           return
         }
-        setTimeout(() => { // use setTimeout to workaround svelte timing issue
-          this._a11yDialog.hide()
-        }, 0)
+        this._a11yDialog.hide()
       }
     }
   }

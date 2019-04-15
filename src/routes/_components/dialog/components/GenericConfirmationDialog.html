@@ -3,6 +3,7 @@
   {label}
   {title}
   {className}
+  shrinkWidthToFit={true}
   background="var(--main-bg)"
 >
   <form class="confirmation-dialog-form">
@@ -42,7 +43,8 @@
     },
     data: () => ({
       positiveText: void 0,
-      negativeText: void 0
+      negativeText: void 0,
+      className: ''
     }),
     methods: {
       show,

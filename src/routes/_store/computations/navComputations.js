@@ -24,6 +24,13 @@ export function navComputations (store) {
           svg: '#fa-globe',
           label: 'Federated'
         }
+      } else if (pinnedPage === '/direct') {
+        pinnedPageObject = {
+          name: 'direct',
+          href: '/direct',
+          svg: '#fa-envelope',
+          label: 'Direct messages'
+        }
       } else if (pinnedPage === '/favorites') {
         pinnedPageObject = {
           name: 'favorites',

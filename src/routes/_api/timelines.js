@@ -12,6 +12,8 @@ function getTimelineUrlPath (timeline) {
       return 'notifications'
     case 'favorites':
       return 'favourites'
+    case 'direct':
+      return 'conversations'
   }
   if (timeline.startsWith('tag/')) {
     return 'timelines/tag'
@@ -22,16 +24,16 @@ function getTimelineUrlPath (timeline) {
   }
 }
 
-export function getTimeline (instanceName, accessToken, timeline, maxId, since, limit) {
+export async function getTimeline (instanceName, accessToken, timeline, maxId, since, limit) {
   let timelineUrlName = getTimelineUrlPath(timeline)
   let url = `${basename(instanceName)}/api/v1/${timelineUrlName}`
 
   if (timeline.startsWith('tag/')) {
-    url += '/' + timeline.split('/').slice(-1)[0]
+    url += '/' + timeline.split('/')[1]
   } else if (timeline.startsWith('account/')) {
-    url += '/' + timeline.split('/').slice(-1)[0] + '/statuses'
+    url += '/' + timeline.split('/')[1] + '/statuses'
   } else if (timeline.startsWith('list/')) {
-    url += '/' + timeline.split('/').slice(-1)[0]
+    url += '/' + timeline.split('/')[1]
   }
 
   let params = {}
@@ -51,7 +53,20 @@ export function getTimeline (instanceName, accessToken, timeline, maxId, since, 
     params.local = true
   }
 
+  if (timeline.startsWith('account/')) {
+    if (timeline.endsWith('media')) {
+      params.only_media = true
+    } else {
+      params.exclude_replies = !timeline.endsWith('/with_replies')
+    }
+  }
+
   url += '?' + paramsString(params)
 
-  return get(url, auth(accessToken), { timeout: DEFAULT_TIMEOUT })
+  const items = await get(url, auth(accessToken), { timeout: DEFAULT_TIMEOUT })
+
+  if (timeline === 'direct') {
+    return items.map(item => item.last_status)
+  }
+  return items
 }

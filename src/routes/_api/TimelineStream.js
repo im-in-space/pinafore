@@ -12,6 +12,8 @@ function getStreamName (timeline) {
       return 'user'
     case 'notifications':
       return 'user:notification'
+    case 'direct':
+      return 'direct'
   }
   if (timeline.startsWith('tag/')) {
     return 'hashtag'

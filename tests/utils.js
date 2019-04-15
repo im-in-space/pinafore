@@ -5,8 +5,10 @@ import * as blobUtils from './blobUtils'
 export const settingsButton = $('nav a[aria-label=Settings]')
 export const instanceInput = $('#instanceInput')
 export const modalDialog = $('.modal-dialog')
+export const visibleModalDialog = $('.modal-dialog:not([aria-hidden="true"])')
 export const modalDialogContents = $('.modal-dialog-contents')
-export const closeDialogButton = $('.close-dialog-button')
+export const modalDialogBackdrop = $('.modal-dialog-backdrop')
+export const closeDialogButton = $('.modal-dialog:not([aria-hidden="true"]) .close-dialog-button')
 export const notificationsNavButton = $('nav a[href="/notifications"]')
 export const homeNavButton = $('nav a[href="/"]')
 export const localTimelineNavButton = $('nav a[href="/local"]')
@@ -56,6 +58,12 @@ export const composeModalContentWarningInput = $('.modal-dialog .content-warning
 export const composeModalEmojiButton = $('.modal-dialog .compose-box-toolbar button:nth-child(1)')
 export const composeModalPostPrivacyButton = $('.modal-dialog .compose-box-toolbar button:nth-child(3)')
 
+export const postPrivacyDialogButtonUnlisted = $('[aria-label="Post privacy dialog"] li:nth-child(2) button')
+
+export const accountProfileFilterStatuses = $('.account-profile-filters li:nth-child(1)')
+export const accountProfileFilterStatusesAndReplies = $('.account-profile-filters li:nth-child(2)')
+export const accountProfileFilterMedia = $('.account-profile-filters li:nth-child(3)')
+
 export function getComposeModalNthMediaAltInput (n) {
   return $(`.modal-dialog .compose-media:nth-child(${n}) .compose-media-alt input`)
 }
@@ -75,6 +83,8 @@ export const reblogsCountElement = $('.status-reblogs').addCustomDOMProperties({
 export const sleep = timeout => new Promise(resolve => setTimeout(resolve, timeout))
 
 export const getUrl = exec(() => window.location.href)
+
+export const getMediaScrollLeft = exec(() => document.querySelector('.media-scroll').scrollLeft || 0)
 
 export const getActiveElementClassList = exec(() =>
   (document.activeElement && (document.activeElement.getAttribute('class') || '').split(/\s+/)) || []
@@ -241,6 +251,10 @@ export function getNthStatusSensitiveMediaButton (n) {
 
 export function getNthStatusMedia (n) {
   return $(`${getNthStatusSelector(n)} .status-media`)
+}
+
+export function getNthStatusMediaButton (n) {
+  return $(`${getNthStatusSelector(n)} .status-media button`)
 }
 
 export function getNthStatusRelativeDate (n) {
