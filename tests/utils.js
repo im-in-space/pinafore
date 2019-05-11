@@ -64,6 +64,9 @@ export const accountProfileFilterStatuses = $('.account-profile-filters li:nth-c
 export const accountProfileFilterStatusesAndReplies = $('.account-profile-filters li:nth-child(2)')
 export const accountProfileFilterMedia = $('.account-profile-filters li:nth-child(3)')
 
+export const notificationFiltersAll = $('.notification-filters li:nth-child(1)')
+export const notificationFiltersMention = $('.notification-filters li:nth-child(2)')
+
 export function getComposeModalNthMediaAltInput (n) {
   return $(`.modal-dialog .compose-media:nth-child(${n}) .compose-media-alt input`)
 }
@@ -189,6 +192,10 @@ export const scrollToTop = exec(() => {
   document.scrollingElement.scrollTop = 0
 })
 
+export const getScrollTop = exec(() => {
+  return document.scrollingElement.scrollTop || 0
+})
+
 export function getNthMediaAltInput (n) {
   return $(`.compose-box .compose-media:nth-child(${n}) .compose-media-alt input`)
 }
@@ -206,7 +213,7 @@ export function getNthPostPrivacyButton (n) {
 }
 
 export function getNthAutosuggestionResult (n) {
-  return $(`.compose-autosuggest-list-item:nth-child(${n}) button`)
+  return $(`.compose-autosuggest-list-item:nth-child(${n})`)
 }
 
 export function getSearchResultByHref (href) {

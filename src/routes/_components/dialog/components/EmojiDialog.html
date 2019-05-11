@@ -4,6 +4,7 @@
   {title}
   shrinkWidthToFit={true}
   background="var(--main-bg)"
+  on:show="onShow()"
 >
   <div class="emoji-container" {style} ref:container >
     {#if loaded}
@@ -74,7 +75,7 @@
   import { show } from '../helpers/showDialog'
   import { close } from '../helpers/closeDialog'
   import { oncreate as onCreateDialog } from '../helpers/onCreateDialog'
-  import { define } from 'remount/es6'
+  import { define } from 'remount'
   import LoadingSpinner from '../../../_components/LoadingSpinner.html'
   import { on } from '../../../_utils/eventBus'
   import { createEmojiMartPicker } from '../../../_react/createEmojiMartPicker'
@@ -104,7 +105,6 @@
           define({ 'emoji-mart': Picker })
         }
         this.set({ loaded: true })
-        this.focusIfNecessary()
       } catch (error) {
         this.set({ error }) // should never happen, but you never know
       }
@@ -168,12 +168,17 @@
         insertEmoji(realm, emoji)
         this.close()
       },
+      onShow () {
+        this.focusIfNecessary()
+      },
       focusIfNecessary () {
         let { autoFocus } = this.get()
         if (!autoFocus) {
           return
         }
-        requestAnimationFrame(() => {
+        // The setTimeout is to work around timing issues where
+        // sometimes the search input isn't rendered yet.
+        setTimeout(() => requestAnimationFrame(() => {
           let container = this.refs.container
           if (container) {
             let searchInput = container.querySelector('emoji-mart .emoji-mart-search input')
@@ -182,7 +187,7 @@
               searchInput.focus()
             }
           }
-        })
+        }), 50)
       }
     }
   }

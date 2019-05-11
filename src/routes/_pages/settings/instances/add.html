@@ -24,7 +24,7 @@
     </noscript>
 
     <label class="add-new-instance-label" for="instanceInput">Instance:</label>
-    <input class="add-new-instance-input" type="text" id="instanceInput"
+    <input class="add-new-instance-input" type="text" inputmode="url" id="instanceInput"
            bind:value='$instanceNameInSearch' placeholder="Enter instance name" required
     >
     <button class="primary add-new-instance-button" type="submit" id="submitButton"
@@ -34,7 +34,15 @@
   </form>
 
   {#if !$isUserLoggedIn}
-  <p>Don't have an instance? <ExternalLink href="https://joinmastodon.org">Join Mastodon!</ExternalLink></p>
+  <p>
+    Don't have an
+    <Tooltip
+      text="instance"
+      tooltipText="An instance is your Mastodon home server, such as mastodon.social or cybre.space."
+    />
+    ?
+    <ExternalLink href="https://joinmastodon.org">Join Mastodon!</ExternalLink>
+  </p>
   {/if}
 </SettingsLayout>
 <style>
@@ -78,6 +86,7 @@
   import { logInToInstance, handleOauthCode } from '../../../_actions/addInstance'
   import ExternalLink from '../../../_components/ExternalLink.html'
   import { testHasIndexedDB, testHasLocalStorage } from '../../../_utils/testStorage'
+  import Tooltip from '../../../_components/Tooltip.html'
 
   export default {
     async oncreate () {
@@ -92,7 +101,8 @@
     },
     components: {
       SettingsLayout,
-      ExternalLink
+      ExternalLink,
+      Tooltip
     },
     store: () => store,
     data: () => ({

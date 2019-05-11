@@ -4,14 +4,6 @@ export const importTimeline = () => import(
   /* webpackChunkName: 'Timeline' */ '../_components/timeline/Timeline.html'
   ).then(getDefault)
 
-export const importPageLifecycle = () => import(
-  /* webpackChunkName: 'page-lifecycle' */ 'page-lifecycle/dist/lifecycle.mjs'
-  ).then(getDefault)
-
-export const importWebSocketClient = () => import(
-  /* webpackChunkName: '@gamestdio/websocket' */ '@gamestdio/websocket'
-  ).then(getDefault)
-
 export const importVirtualList = () => import(
   /* webpackChunkName: 'VirtualList.html' */ '../_components/virtualList/VirtualList.html'
   ).then(getDefault)
@@ -46,4 +38,8 @@ export const importEmojiMart = () => import(
 
 export const importToast = () => import(
   /* webpackChunkName: 'Toast.html' */ '../_components/toast/Toast.html'
+  ).then(getDefault)
+
+export const importSnackbar = () => import(
+  /* webpackChunkName: 'Snackbar.html' */ '../_components/snackbar/Snackbar.html'
   ).then(getDefault)

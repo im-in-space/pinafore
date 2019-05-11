@@ -1,7 +1,10 @@
 <ul class="generic-dialog-list">
   {#each items as item (item.key)}
   <li class="generic-dialog-list-item">
-    <button class="generic-dialog-list-button" on:click="fire('click', item)">
+    <button
+        class="generic-dialog-list-button"
+        on:applyFocusStylesToParent="noop()"
+        on:click="fire('click', item)">
       <SvgIcon className="generic-dialog-list-item-svg" href={item.icon} />
       <span class="generic-dialog-list-button-span">
         {item.label}
@@ -15,24 +18,25 @@
   {/each}
 </ul>
 <style>
-  :global(.generic-dialog-list ){
+  .generic-dialog-list {
     list-style: none;
     width: 100%;
     border: 1px solid var(--settings-list-item-border);
     box-sizing: border-box;
     min-width: 350px;
   }
-  :global(.generic-dialog-list-item ){
+  .generic-dialog-list-item {
     border: 1px solid var(--settings-list-item-border);
     font-size: 1.2em;
     display: flex;
+    outline-width: 4px;
   }
   :global(.generic-dialog-list-item-svg) {
     width: 24px;
     height: 24px;
     fill: var(--svg-fill);
   }
-  :global(.generic-dialog-list-button ){
+  .generic-dialog-list-button {
     flex: 1;
     padding: 20px;
     background: var(--settings-list-item-bg);
@@ -41,7 +45,10 @@
     display: flex;
     flex-direction: row;
   }
-  :global(.generic-dialog-list-button-span ){
+  .generic-dialog-list-button:focus {
+    outline: none; /* focus style is on parent instead */
+  }
+  .generic-dialog-list-button-span {
     flex: 1;
     margin-left: 20px;
     text-align: left;
@@ -50,18 +57,18 @@
     text-overflow: ellipsis;
     overflow: hidden;
   }
-  :global(.generic-dialog-list-button:hover ){
+  .generic-dialog-list-button:hover {
     background: var(--settings-list-item-bg-hover);
   }
-  :global(.generic-dialog-list-button:active ){
+  .generic-dialog-list-button:active {
     background: var(--settings-list-item-bg-active);
   }
 
   @media (max-width: 767px) {
-    :global(.generic-dialog-list-button ){
+    .generic-dialog-list-button {
       padding: 20px 10px;
     }
-    :global(.generic-dialog-list-button-span ){
+    .generic-dialog-list-button-span {
       margin-left: 10px;
     }
   }
@@ -70,10 +77,10 @@
     .generic-dialog-list {
       min-width: calc(100% - 20px);
     }
-    :global(.generic-dialog-list-button ){
+    .generic-dialog-list-button {
       padding: 15px 10px;
     }
-    :global(.generic-dialog-list-button-span ){
+    .generic-dialog-list-button-span {
       margin-left: 10px;
     }
   }
@@ -86,8 +93,16 @@
 </style>
 <script>
   import SvgIcon from '../../SvgIcon.html'
+  import { applyFocusStylesToParent } from '../../../_utils/events'
+  import noop from 'lodash-es/noop'
 
   export default {
+    events: {
+      applyFocusStylesToParent
+    },
+    methods: {
+      noop
+    },
     components: {
       SvgIcon
     }
