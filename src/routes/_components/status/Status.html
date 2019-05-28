@@ -13,11 +13,11 @@
   <StatusAuthorName {...params} />
   <StatusAuthorHandle {...params} />
   {#if !isStatusInOwnThread}
-    <StatusRelativeDate {...params} />
+    <StatusRelativeDate {...params} {...timestampParams} />
   {/if}
   <StatusSidebar {...params} />
   {#if spoilerText}
-    <StatusSpoiler {...params} on:recalculateHeight />
+    <StatusSpoiler {...params} {spoilerShown} on:recalculateHeight />
   {/if}
   {#if !showContent}
     <StatusMentions {...params} />
@@ -31,10 +31,13 @@
   {#if showMedia }
     <StatusMediaAttachments {...params} on:recalculateHeight />
   {/if}
-  {#if isStatusInOwnThread}
-    <StatusDetails {...params} />
+  {#if showPoll}
+    <StatusPoll {...params} />
   {/if}
-  <StatusToolbar {...params} on:recalculateHeight />
+  {#if isStatusInOwnThread}
+    <StatusDetails {...params} {...timestampParams} />
+  {/if}
+  <StatusToolbar {...params} {replyShown} on:recalculateHeight />
   {#if replyShown}
     <StatusComposeBox {...params} on:recalculateHeight />
   {/if}
@@ -58,6 +61,7 @@
         "sidebar content      content       content"
         "sidebar card         card          card"
         "sidebar media-grp    media-grp     media-grp"
+        "sidebar poll         poll          poll"
         "media   media        media         media"
         "....... toolbar      toolbar       toolbar"
         "compose compose      compose       compose";
@@ -92,6 +96,7 @@
       "card        card"
       "media-grp   media-grp"
       "media       media"
+      "poll        poll"
       "details     details"
       "toolbar     toolbar"
       "compose     compose";
@@ -119,6 +124,7 @@
   import StatusSpoiler from './StatusSpoiler.html'
   import StatusComposeBox from './StatusComposeBox.html'
   import StatusMentions from './StatusMentions.html'
+  import StatusPoll from './StatusPoll.html'
   import Shortcut from '../shortcut/Shortcut.html'
   import { store } from '../../_store/store'
   import { goto } from '../../../../__sapper__/client'
@@ -138,7 +144,7 @@
   import { createStatusOrNotificationUuid } from '../../_utils/createStatusOrNotificationUuid'
   import { statusHtmlToPlainText } from '../../_utils/statusHtmlToPlainText'
 
-  const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea'])
+  const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea', 'label'])
   const isUserInputElement = node => INPUT_TAGS.has(node.localName)
   const isToolbar = node => node.classList.contains('status-toolbar')
   const isStatusArticle = node => node.classList.contains('status-article')
@@ -170,6 +176,7 @@
       StatusMediaAttachments,
       StatusContent,
       StatusCard,
+      StatusPoll,
       StatusSpoiler,
       StatusComposeBox,
       StatusMentions,
@@ -261,19 +268,24 @@
         originalStatus.card &&
         originalStatus.card.title
       ),
+      showPoll: ({ originalStatus }) => (
+        originalStatus.poll
+      ),
       showMedia: ({ originalStatus, isStatusInNotification }) => (
         !isStatusInNotification &&
         originalStatus.media_attachments &&
         originalStatus.media_attachments.length
       ),
       originalAccountEmojis: ({ originalAccount }) => (originalAccount.emojis || []),
+      originalStatusEmojis: ({ originalStatus }) => (originalStatus.emojis || []),
       originalAccountDisplayName: ({ originalAccount }) => (originalAccount.display_name || originalAccount.username),
       originalAccountAccessibleName: ({ originalAccount, $omitEmojiInDisplayNames }) => {
         return getAccountAccessibleName(originalAccount, $omitEmojiInDisplayNames)
       },
       createdAtDate: ({ originalStatus }) => originalStatus.created_at,
-      absoluteFormattedDate: ({ createdAtDate }) => absoluteDateFormatter.format(new Date(createdAtDate)),
-      timeagoFormattedDate: ({ createdAtDate }) => formatTimeagoDate(createdAtDate),
+      createdAtDateTS: ({ createdAtDate }) => new Date(createdAtDate).getTime(),
+      absoluteFormattedDate: ({ createdAtDateTS }) => absoluteDateFormatter.format(createdAtDateTS),
+      timeagoFormattedDate: ({ createdAtDateTS, $now }) => formatTimeagoDate(createdAtDateTS, $now),
       reblog: ({ status }) => status.reblog,
       ariaLabel: ({ originalAccount, account, plainTextContent, timeagoFormattedDate, spoilerText,
         showContent, reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels }) => (
@@ -282,7 +294,7 @@
           reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels)
       ),
       showHeader: ({ notification, status, timelineType }) => (
-        (notification && (notification.type === 'reblog' || notification.type === 'favourite')) ||
+        (notification && ['reblog', 'favourite', 'poll'].includes(notification.type)) ||
         status.reblog ||
         timelineType === 'pinned'
       ),
@@ -293,15 +305,26 @@
         timelineType !== 'search' && 'status-in-timeline',
         isStatusInOwnThread && 'status-in-own-thread',
         $underlineLinks && 'underline-links',
-        !$disableTapOnStatus && 'tap-on-status'
+        !$disableTapOnStatus && !isStatusInOwnThread && 'tap-on-status'
       )),
       content: ({ originalStatus }) => originalStatus.content || '',
       showContent: ({ spoilerText, spoilerShown }) => !spoilerText || spoilerShown,
+      // These timestamp params may change every 10 seconds due to now() polling, so keep them
+      // separate from the generic `params` list to avoid costly recomputes.
+      timestampParams: ({ createdAtDate, createdAtDateTS, timeagoFormattedDate, absoluteFormattedDate }) => ({
+        createdAtDate,
+        createdAtDateTS,
+        timeagoFormattedDate,
+        absoluteFormattedDate
+      }),
+      // This params list deliberately does *not* include `spoilersShown` or `replyShown`, because these
+      // change frequently and would therefore cause costly recomputes if included here.
+      // The main goal here is to avoid typing by passing as many params as possible to child components.
       params: ({ notification, notificationId, status, statusId, timelineType,
         account, accountId, uuid, isStatusInNotification, isStatusInOwnThread,
-        originalAccount, originalAccountId, spoilerShown, visibility, replyShown,
+        originalAccount, originalAccountId, visibility,
         replyVisibility, spoilerText, originalStatus, originalStatusId, inReplyToId,
-        createdAtDate, timeagoFormattedDate, enableShortcuts, absoluteFormattedDate, shortcutScope }) => ({
+        enableShortcuts, shortcutScope, originalStatusEmojis }) => ({
         notification,
         notificationId,
         status,
@@ -314,19 +337,15 @@
         isStatusInOwnThread,
         originalAccount,
         originalAccountId,
-        spoilerShown,
         visibility,
-        replyShown,
         replyVisibility,
         spoilerText,
         originalStatus,
         originalStatusId,
         inReplyToId,
-        createdAtDate,
-        timeagoFormattedDate,
         enableShortcuts,
-        absoluteFormattedDate,
-        shortcutScope
+        shortcutScope,
+        originalStatusEmojis
       })
     },
     events: {

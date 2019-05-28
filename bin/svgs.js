@@ -42,9 +42,14 @@ module.exports = [
   { id: 'fa-circle-o', src: 'src/thirdparty/font-awesome-svg-png/white/svg/circle-o.svg' },
   { id: 'fa-angle-left', src: 'src/thirdparty/font-awesome-svg-png/white/svg/angle-left.svg' },
   { id: 'fa-angle-right', src: 'src/thirdparty/font-awesome-svg-png/white/svg/angle-right.svg' },
+  { id: 'fa-angle-down', src: 'src/thirdparty/font-awesome-svg-png/white/svg/angle-down.svg' },
   { id: 'fa-search-minus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/search-minus.svg' },
   { id: 'fa-search-plus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/search-plus.svg' },
   { id: 'fa-share-square-o', src: 'src/thirdparty/font-awesome-svg-png/white/svg/share-square-o.svg' },
   { id: 'fa-flag', src: 'src/thirdparty/font-awesome-svg-png/white/svg/flag.svg' },
-  { id: 'fa-suitcase', src: 'src/thirdparty/font-awesome-svg-png/white/svg/suitcase.svg' }
+  { id: 'fa-suitcase', src: 'src/thirdparty/font-awesome-svg-png/white/svg/suitcase.svg' },
+  { id: 'fa-bar-chart', src: 'src/thirdparty/font-awesome-svg-png/white/svg/bar-chart.svg' },
+  { id: 'fa-clock', src: 'src/thirdparty/font-awesome-svg-png/white/svg/clock-o.svg' },
+  { id: 'fa-refresh', src: 'src/thirdparty/font-awesome-svg-png/white/svg/refresh.svg' },
+  { id: 'fa-plus', src: 'src/thirdparty/font-awesome-svg-png/white/svg/plus.svg' }
 ]

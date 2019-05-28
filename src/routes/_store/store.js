@@ -19,6 +19,7 @@ const persistedState = {
   largeInlineMedia: false,
   instanceNameInSearch: '',
   instanceThemes: {},
+  instanceSettings: {},
   loggedInInstances: {},
   loggedInInstancesInOrder: [],
   markMediaAsSensitive: false,
@@ -38,6 +39,7 @@ const nonPersistedState = {
   instanceLists: {},
   online: !process.browser || navigator.onLine,
   pinnedStatuses: {},
+  polls: {},
   pushNotificationsSupport:
     process.browser &&
     ('serviceWorker' in navigator &&

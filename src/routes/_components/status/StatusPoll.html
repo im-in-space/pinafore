@@ -1,0 +1,327 @@
+<div class={computedClass} aria-busy={loading} >
+  {#if voted || expired }
+    <ul aria-label="Poll results">
+      {#each options as option}
+        <li class="option">
+          <div class="option-text">
+            <strong>{option.share}%</strong> {option.title}
+          </div>
+          <svg aria-hidden="true">
+            <line x1="0" y1="0" x2="{option.share}%" y2="0" />
+          </svg>
+        </li>
+      {/each}
+    </ul>
+  {:else}
+    <form class="poll-form" aria-label="Vote on poll" on:submit="onSubmit(event)" ref:form>
+      <ul aria-label="Poll choices">
+        {#each options as option, i}
+          <li class="poll-form-option">
+            <input type="{multiple ? 'checkbox' : 'radio'}"
+                   id="poll-choice-{uuid}-{i}"
+                   name="poll-choice-{uuid}"
+                   value="{i}"
+                   on:change="onChange()"
+            >
+            <label for="poll-choice-{uuid}-{i}">
+              {option.title}
+            </label>
+          </li>
+        {/each}
+      </ul>
+      <button disabled={formDisabled} type="submit">Vote</button>
+    </form>
+  {/if}
+  <div class="poll-details">
+    <div class="poll-stat">
+      <SvgIcon className="poll-icon" href="#fa-bar-chart" />
+      <span class="poll-stat-text">{votesCount} {votesCount === 1 ? 'vote' : 'votes'}</span>
+    </div>
+    <div class="poll-stat">
+      <SvgIcon className="poll-icon" href="#fa-clock" />
+      <span class="poll-stat-text poll-stat-expiry">
+        <span class="{useNarrowSize ? 'sr-only' : ''}">{expiryText}</span>
+        <time datetime={expiresAt} title={expiresAtAbsoluteFormatted}>
+          {expiresAtTimeagoFormatted}
+        </time>
+      </span>
+    </div>
+    <button class="poll-stat {expired ? 'poll-expired' : ''}" id={refreshElementId}>
+      <SvgIcon className="poll-icon" href="#fa-refresh" />
+      <span class="poll-stat-text">
+        Refresh
+      </span>
+    </button>
+  </div>
+</div>
+<style>
+  .poll {
+    grid-area: poll;
+    margin: 10px 10px 10px 5px;
+    padding: 20px;
+    border: 1px solid var(--main-border);
+    border-radius: 2px;
+    transition: opacity 0.2s linear;
+  }
+
+  .poll.status-in-own-thread {
+    padding: 20px;
+  }
+
+  .poll.poll-loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  .option {
+    margin: 0 0 10px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    stroke: var(--svg-fill);
+    stroke-width: 10px;
+  }
+
+  .option-text {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 1.1em;
+  }
+
+  svg {
+    height: 10px;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .status-in-notification .option-text {
+    color: var(--very-deemphasized-text-color);
+  }
+
+  .status-in-notification svg {
+    opacity: 0.5;
+  }
+
+  .status-in-own-thread .option-text {
+    font-size: 1.2em;
+  }
+
+  .poll-details {
+    display: grid;
+    grid-template-columns: max-content minmax(0, max-content) max-content;
+    grid-gap: 20px;
+    align-items: center;
+    justify-content: left;
+    margin-top: 10px;
+  }
+
+  button.poll-stat {
+    /* reset button styles */
+    background: none;
+    box-shadow: none;
+    border: none;
+    border-spacing: 0;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: normal;
+    text-align: left;
+    text-decoration: none;
+    text-indent: 0;
+  }
+
+  button.poll-stat:hover {
+    text-decoration: underline;
+  }
+
+  .poll-stat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: var(--deemphasized-text-color);
+  }
+
+  .poll-stat.poll-expired {
+    display: none;
+  }
+
+  .poll-stat-text {
+    margin-left: 5px;
+  }
+
+  .poll-stat-expiry {
+    word-wrap: break-word;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  :global(.poll-icon) {
+    fill: var(--deemphasized-text-color);
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+  }
+
+  .poll-form-option {
+    padding-bottom: 10px;
+  }
+
+  .poll-form button {
+  }
+
+  .poll-form label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-word;
+    white-space: pre-wrap;
+    padding-left: 5px;
+  }
+
+  @media (max-width: 479px) {
+    .poll {
+      padding: 10px 5px;
+    }
+    .poll.status-in-own-thread {
+      padding: 10px;
+    }
+    .poll-details {
+      grid-gap: 5px;
+      justify-content: space-between;
+    }
+  }
+
+</style>
+<script>
+  import SvgIcon from '../SvgIcon.html'
+  import { store } from '../../_store/store'
+  import { formatTimeagoFutureDate, formatTimeagoDate } from '../../_intl/formatTimeagoDate'
+  import { absoluteDateFormatter } from '../../_utils/formatters'
+  import { registerClickDelegate } from '../../_utils/delegate'
+  import { classname } from '../../_utils/classname'
+  import { getPoll, voteOnPoll } from '../../_actions/polls'
+
+  const REFRESH_MIN_DELAY = 1000
+
+  async function doAsyncActionWithDelay (func) {
+    let start = Date.now()
+    let res = await func()
+    let timeElapsed = Date.now() - start
+    if (timeElapsed < REFRESH_MIN_DELAY) {
+      // If less than five seconds, then continue to show the loading animation
+      // so it's clear that something happened.
+      await new Promise(resolve => setTimeout(resolve, REFRESH_MIN_DELAY - timeElapsed))
+    }
+    return res
+  }
+
+  function getChoices (form, options) {
+    let res = []
+    for (let i = 0; i < options.length; i++) {
+      if (form.elements[i].checked) {
+        res.push(i)
+      }
+    }
+    return res
+  }
+
+  export default {
+    oncreate () {
+      this.onRefreshClick = this.onRefreshClick.bind(this)
+      let { refreshElementId } = this.get()
+      registerClickDelegate(this, refreshElementId, this.onRefreshClick)
+    },
+    data: () => ({
+      loading: false,
+      choices: []
+    }),
+    store: () => store,
+    computed: {
+      pollId: ({ originalStatus }) => originalStatus.poll.id,
+      poll: ({ originalStatus, $polls, pollId }) => $polls[pollId] || originalStatus.poll,
+      options: ({ poll }) => poll.options.map(({ title, votes_count: votesCount }) => ({
+        title,
+        share: poll.votes_count ? Math.round(votesCount / poll.votes_count * 100) : 0
+      })),
+      votesCount: ({ poll }) => poll.votes_count,
+      voted: ({ poll }) => poll.voted,
+      multiple: ({ poll }) => poll.multiple,
+      expired: ({ poll }) => poll.expired,
+      expiresAt: ({ poll }) => poll.expires_at,
+      expiresAtTS: ({ expiresAt }) => new Date(expiresAt).getTime(),
+      expiresAtTimeagoFormatted: ({ expiresAtTS, expired, $now }) => (
+        expired ? formatTimeagoDate(expiresAtTS, $now) : formatTimeagoFutureDate(expiresAtTS, $now)
+      ),
+      expiresAtAbsoluteFormatted: ({ expiresAtTS }) => absoluteDateFormatter.format(expiresAtTS),
+      expiryText: ({ expired }) => expired ? 'Ended' : 'Ends',
+      refreshElementId: ({ uuid }) => `poll-refresh-${uuid}`,
+      useNarrowSize: ({ $isMobileSize, expired }) => $isMobileSize && !expired,
+      formDisabled: ({ choices }) => !choices.length,
+      computedClass: ({ isStatusInNotification, isStatusInOwnThread, loading }) => (
+        classname(
+          'poll',
+          isStatusInNotification && 'status-in-notification',
+          isStatusInOwnThread && 'status-in-own-thread',
+          loading && 'poll-loading'
+        )
+      )
+    },
+    methods: {
+      async onRefreshClick (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        let { pollId } = this.get()
+        this.set({ loading: true })
+        try {
+          let poll = await doAsyncActionWithDelay(() => getPoll(pollId))
+          if (poll) {
+            let { polls } = this.store.get()
+            polls[pollId] = poll
+            this.store.set({ polls })
+          }
+        } finally {
+          this.set({ loading: false })
+        }
+      },
+      async onSubmit (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        let { pollId, options, formDisabled } = this.get()
+        if (formDisabled) {
+          return
+        }
+        let choices = getChoices(this.refs.form, options)
+        this.set({ loading: true })
+        try {
+          let poll = await doAsyncActionWithDelay(() => voteOnPoll(pollId, choices))
+          if (poll) {
+            let { polls } = this.store.get()
+            polls[pollId] = poll
+            this.store.set({ polls })
+          }
+        } finally {
+          this.set({ loading: false })
+        }
+      },
+      onChange () {
+        let { options } = this.get()
+        let choices = getChoices(this.refs.form, options)
+        this.set({ choices: choices })
+      }
+    },
+    components: {
+      SvgIcon
+    }
+  }
+</script>

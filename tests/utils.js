@@ -22,8 +22,9 @@ export const composeButton = $('.compose-box-button')
 export const composeLengthIndicator = $('.compose-box-length')
 export const emojiButton = $('.compose-box-toolbar button:first-child')
 export const mediaButton = $('.compose-box-toolbar button:nth-child(2)')
-export const postPrivacyButton = $('.compose-box-toolbar button:nth-child(3)')
-export const contentWarningButton = $('.compose-box-toolbar button:nth-child(4)')
+export const pollButton = $('.compose-box-toolbar button:nth-child(3)')
+export const postPrivacyButton = $('.compose-box-toolbar button:nth-child(4)')
+export const contentWarningButton = $('.compose-box-toolbar button:nth-child(5)')
 export const emailInput = $('input#user_email')
 export const passwordInput = $('input#user_password')
 export const authorizeInput = $('button[type=submit]:not(.negative)')
@@ -56,7 +57,12 @@ export const composeModalInput = $('.modal-dialog .compose-box-input')
 export const composeModalComposeButton = $('.modal-dialog .compose-box-button')
 export const composeModalContentWarningInput = $('.modal-dialog .content-warning-input')
 export const composeModalEmojiButton = $('.modal-dialog .compose-box-toolbar button:nth-child(1)')
-export const composeModalPostPrivacyButton = $('.modal-dialog .compose-box-toolbar button:nth-child(3)')
+export const composeModalPostPrivacyButton = $('.modal-dialog .compose-box-toolbar button:nth-child(4)')
+
+export const composePoll = $('.compose-poll')
+export const composePollMultipleChoice = $('.compose-poll input[type="checkbox"]')
+export const composePollExpiry = $('.compose-poll select')
+export const composePollAddButton = $('.compose-poll button:last-of-type')
 
 export const postPrivacyDialogButtonUnlisted = $('[aria-label="Post privacy dialog"] li:nth-child(2) button')
 
@@ -64,11 +70,19 @@ export const accountProfileFilterStatuses = $('.account-profile-filters li:nth-c
 export const accountProfileFilterStatusesAndReplies = $('.account-profile-filters li:nth-child(2)')
 export const accountProfileFilterMedia = $('.account-profile-filters li:nth-child(3)')
 
-export const notificationFiltersAll = $('.notification-filters li:nth-child(1)')
-export const notificationFiltersMention = $('.notification-filters li:nth-child(2)')
+export const notificationsTabAll = $('.notification-filters li:nth-child(1)')
+export const notificationsTabMentions = $('.notification-filters li:nth-child(2)')
+
+export const instanceSettingHomeReblogs = $('#instance-option-homeReblogs')
+export const instanceSettingNotificationFollows = $('#instance-option-notificationFollows')
+export const instanceSettingNotificationFavs = $('#instance-option-notificationFavs')
+export const instanceSettingNotificationReblogs = $('#instance-option-notificationReblogs')
+export const instanceSettingNotificationMentions = $('#instance-option-notificationMentions')
+
+export const notificationBadge = $('#main-nav li:nth-child(2) .nav-link-badge')
 
 export function getComposeModalNthMediaAltInput (n) {
-  return $(`.modal-dialog .compose-media:nth-child(${n}) .compose-media-alt input`)
+  return $(`.modal-dialog .compose-media:nth-child(${n}) .compose-media-alt textarea`)
 }
 
 export function getComposeModalNthMediaImg (n) {
@@ -197,7 +211,7 @@ export const getScrollTop = exec(() => {
 })
 
 export function getNthMediaAltInput (n) {
-  return $(`.compose-box .compose-media:nth-child(${n}) .compose-media-alt input`)
+  return $(`.compose-box .compose-media:nth-child(${n}) .compose-media-alt textarea`)
 }
 
 export function getNthComposeReplyInput (n) {
@@ -209,7 +223,39 @@ export function getNthComposeReplyButton (n) {
 }
 
 export function getNthPostPrivacyButton (n) {
-  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(3)`)
+  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(4)`)
+}
+
+export function getNthStatusPollOption (n, i) {
+  return $(`${getNthStatusSelector(n)} .poll li:nth-child(${i}) input`)
+}
+
+export function getNthStatusPollVoteButton (n) {
+  return $(`${getNthStatusSelector(n)} .poll button`)
+}
+
+export function getNthStatusPollForm (n) {
+  return $(`${getNthStatusSelector(n)} .poll form`)
+}
+
+export function getNthStatusPollResult (n, i) {
+  return $(`${getNthStatusSelector(n)} .poll li:nth-child(${i})`)
+}
+
+export function getNthStatusPollRefreshButton (n) {
+  return $(`${getNthStatusSelector(n)} button.poll-stat`)
+}
+
+export function getNthStatusPollVoteCount (n) {
+  return $(`${getNthStatusSelector(n)} .poll .poll-stat:nth-child(1) .poll-stat-text`)
+}
+
+export function getComposePollNthInput (n) {
+  return $(`.compose-poll input[type="text"]:nth-of-type(${n})`)
+}
+
+export function getComposePollRemoveNthButton (n) {
+  return $(`.compose-poll button:nth-of-type(${n})`)
 }
 
 export function getNthAutosuggestionResult (n) {
@@ -293,11 +339,11 @@ export function getNthReplyContentWarningInput (n) {
 }
 
 export function getNthReplyContentWarningButton (n) {
-  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(4)`)
+  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(5)`)
 }
 
 export function getNthReplyPostPrivacyButton (n) {
-  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(3)`)
+  return $(`${getNthStatusSelector(n)} .compose-box-toolbar button:nth-child(4)`)
 }
 
 export function getNthPostPrivacyOptionInDialog (n) {

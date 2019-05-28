@@ -127,12 +127,10 @@
         timelineValue !== $firstTimelineItemId &&
         timelineValue
       ),
-      itemIds: ({ $timelineItemSummaries }) => (
-        // TODO: filter
-        $timelineItemSummaries && $timelineItemSummaries.map(_ => _.id)
+      itemIds: ({ $filteredTimelineItemSummaries }) => (
+        $filteredTimelineItemSummaries && $filteredTimelineItemSummaries.map(_ => _.id)
       ),
       itemIdsToAdd: ({ $timelineItemSummariesToAdd }) => (
-        // TODO: filter
         $timelineItemSummariesToAdd && $timelineItemSummariesToAdd.map(_ => _.id)
       ),
       headerProps: ({ itemIdsToAdd }) => {

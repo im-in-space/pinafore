@@ -18,7 +18,7 @@
   --status-direct-background: #{darken($body-bg-color, 5%)};
   --main-theme-color: #{$main-theme-color};
   --warning-color: #{#c7423d};
-  --alt-input-bg: #{rgba($main-bg-color, 0.7)};
+  --alt-input-bg: #{rgba($main-bg-color, 0.9)};
 
   --muted-modal-bg: #{transparent};
   --muted-modal-focus: #{#999};
@@ -46,4 +46,6 @@
   --tab-bg-hover-non-selected: #{darken($main-bg-color, 1%)};
 
   --toast-anchor-color: #{$anchor-color};
+
+  --length-indicator-color: var(--action-button-fill-color);
 }
