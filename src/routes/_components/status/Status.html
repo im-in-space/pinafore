@@ -5,7 +5,6 @@
          aria-setsize={length}
          aria-label={ariaLabel}
          on:recalculateHeight
-         on:applyFocusStylesToParent="noop()"
 >
   {#if showHeader}
     <StatusHeader {...params} />
@@ -81,10 +80,6 @@
     background-color: var(--status-direct-background);
   }
 
-  .status-article:focus {
-    outline: none; /* focus is on the parent instead */
-  }
-
   .status-article.status-in-own-thread {
     grid-template-areas:
       "sidebar     author-name"
@@ -139,8 +134,6 @@
   import { LONG_POST_LENGTH, LONG_POST_TEXT } from '../../_static/statuses'
   import { absoluteDateFormatter } from '../../_utils/formatters'
   import { composeNewStatusMentioning } from '../../_actions/mention'
-  import { applyFocusStylesToParent } from '../../_utils/events'
-  import noop from 'lodash-es/noop'
   import { createStatusOrNotificationUuid } from '../../_utils/createStatusOrNotificationUuid'
   import { statusHtmlToPlainText } from '../../_utils/statusHtmlToPlainText'
 
@@ -190,28 +183,26 @@
     }),
     store: () => store,
     methods: {
-      noop,
       onClickOrKeydown (e) {
         let { type, keyCode, target } = e
 
         let isClick = type === 'click'
         let isEnter = type === 'keydown' && keyCode === 13
         if (!isClick && !isEnter) {
-          return
+          return false
         }
         if (checkDomAncestors(target, isUserInputElement, isStatusArticle)) {
           // this element or any ancestors up to the status-article element is
           // a user input element
-          return
+          return false
         }
         if (checkDomAncestors(target, isToolbar, isStatusArticle)) {
           // this element or any of its ancestors is the toolbar
-          return
+          return false
         }
 
-        e.preventDefault()
-        e.stopPropagation()
         this.open()
+        return true
       },
       open () {
         let { originalStatusId } = this.get()
@@ -301,6 +292,7 @@
       className: ({ visibility, timelineType, isStatusInOwnThread, $underlineLinks, $disableTapOnStatus }) => (classname(
         'status-article',
         'shortcut-list-item',
+        'focus-after',
         timelineType !== 'direct' && visibility === 'direct' && 'status-direct',
         timelineType !== 'search' && 'status-in-timeline',
         isStatusInOwnThread && 'status-in-own-thread',
@@ -347,9 +339,6 @@
         shortcutScope,
         originalStatusEmojis
       })
-    },
-    events: {
-      applyFocusStylesToParent
     }
   }
 </script>

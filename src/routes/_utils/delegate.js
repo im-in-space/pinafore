@@ -28,7 +28,14 @@ function onEvent (e) {
         return // ignore if the user is selecting text inside the clickable area
       }
     }
-    callbacks[key](e)
+    let res = callbacks[key](e) // callback returns true to indicate it has handled the action
+    if (process.env.NODE_ENV !== 'production' && typeof res !== 'boolean') {
+      console.warn(`Callback returned a non-boolean response: "${key}". This should never happen.`)
+    }
+    if (res) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
   }
 }
 

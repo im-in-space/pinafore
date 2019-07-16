@@ -1,25 +1,27 @@
-{#if type === 'video'}
+{#if type === 'video' || type === 'audio'}
   <button id={elementId}
           type="button"
-          class="play-video-button {$largeInlineMedia ? '' : 'fixed-size'}"
+          class="play-video-button focus-after {$largeInlineMedia ? '' : 'fixed-size'} {type === 'audio' ? 'play-audio-button' : ''}"
           aria-label="Play video: {description}"
           style="width: {inlineWidth}px; height: {inlineHeight}px;">
     <PlayVideoIcon />
-    <LazyImage
-      alt={description}
-      title={description}
-      src={previewUrl}
-      fallback={oneTransparentPixel}
-      width={inlineWidth}
-      height={inlineHeight}
-      background="var(--loading-bg)"
-      {focus}
-    />
+    {#if type === 'video'}
+      <LazyImage
+        alt={description}
+        title={description}
+        src={previewUrl}
+        fallback={oneTransparentPixel}
+        width={inlineWidth}
+        height={inlineHeight}
+        background="var(--loading-bg)"
+        {focus}
+      />
+    {/if}
   </button>
 {:else}
   <button id={elementId}
           type="button"
-          class="show-image-button {$largeInlineMedia ? '' : 'fixed-size'}"
+          class="show-image-button focus-after {$largeInlineMedia ? '' : 'fixed-size'}"
           aria-label="Show image: {description}"
           title={description}
           on:mouseover="set({mouseover: event})"
@@ -70,22 +72,9 @@
     border-radius: 0;
     border: none;
     background: none;
-    position: relative;
   }
-
-  /* the actual focus outline is not very visible, so use an ::after pseudo-element */
-  .play-video-button:focus, .show-image-button:focus {
-    outline: none;
-  }
-
-  .play-video-button:focus::after, .show-image-button:focus::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    border: 2px solid var(--focus-outline);
+  .play-audio-button {
+    background: var(--audio-bg);
   }
 
   .show-image-button {
@@ -141,10 +130,13 @@
       type: ({ media }) => media.type
     },
     methods: {
-      async onClick () {
-        let { mediaAttachments, index } = this.get()
-        let showMediaDialog = await importShowMediaDialog()
-        showMediaDialog(mediaAttachments, index)
+      onClick () {
+        (async () => {
+          let { mediaAttachments, index } = this.get()
+          let showMediaDialog = await importShowMediaDialog()
+          showMediaDialog(mediaAttachments, index)
+        })()
+        return true
       }
     },
     data: () => ({

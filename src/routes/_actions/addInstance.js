@@ -6,17 +6,26 @@ import { store } from '../_store/store'
 import { updateVerifyCredentialsForInstance } from './instances'
 import { updateCustomEmojiForInstance } from './emoji'
 import { database } from '../_database/database'
+import { DOMAIN_BLOCKS } from '../_static/blocks'
 
 const REDIRECT_URI = (typeof location !== 'undefined'
   ? location.origin : 'https://pf.im-in.space') + '/settings/instances/add'
 
+function createKnownError (message) {
+  let err = new Error(message)
+  err.knownError = true
+  return err
+}
+
 async function redirectToOauth () {
   let { instanceNameInSearch, loggedInInstances } = store.get()
-  instanceNameInSearch = instanceNameInSearch.replace(/^https?:\/\//, '').replace(/\/$/, '').replace('/$', '').toLowerCase()
+  instanceNameInSearch = instanceNameInSearch.replace(/^https?:\/\//, '').replace(/\/+$/, '').toLowerCase()
   if (Object.keys(loggedInInstances).includes(instanceNameInSearch)) {
-    let err = new Error(`You've already logged in to ${instanceNameInSearch}`)
-    err.knownError = true
-    throw err
+    throw createKnownError(`You've already logged in to ${instanceNameInSearch}`)
+  }
+  let instanceHostname = new URL(`http://${instanceNameInSearch}`).hostname
+  if (DOMAIN_BLOCKS.some(domain => new RegExp(`(?:\\.|^)${domain}$`, 'i').test(instanceHostname))) {
+    throw createKnownError('This service is blocked')
   }
   let registrationPromise = registerApplication(instanceNameInSearch, REDIRECT_URI)
   let instanceInfo = await getInstanceInfo(instanceNameInSearch)
