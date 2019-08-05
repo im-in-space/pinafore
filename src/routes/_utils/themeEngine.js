@@ -1,4 +1,4 @@
-// const prefersDarkTheme = process.browser && window.matchMedia('(prefers-color-scheme: dark)').matches
+// const prefersDarkTheme = process.browser && matchMedia('(prefers-color-scheme: dark)').matches
 const prefersDarkTheme = true
 const meta = process.browser && document.getElementById('theThemeColor')
 
@@ -12,16 +12,16 @@ function getExistingThemeLink () {
 }
 
 function resetExistingTheme () {
-  let existingLink = getExistingThemeLink()
+  const existingLink = getExistingThemeLink()
   if (existingLink) {
     document.head.removeChild(existingLink)
   }
 }
 
 function loadCSS (href) {
-  let existingLink = getExistingThemeLink()
+  const existingLink = getExistingThemeLink()
 
-  let link = document.createElement('link')
+  const link = document.createElement('link')
   link.rel = 'stylesheet'
   link.href = href
 
@@ -37,9 +37,9 @@ function loadCSS (href) {
 
 export function switchToTheme (themeName = DEFAULT_THEME, enableGrayscale) {
   if (enableGrayscale) {
-    themeName = prefersDarkTheme ? 'grayscale-dark' : 'grayscale'
+    themeName = prefersDarkTheme ? 'dark-grayscale' : 'grayscale'
   }
-  let themeColor = window.__themeColors[themeName]
+  const themeColor = window.__themeColors[themeName]
   meta.content = themeColor || window.__themeColors[DEFAULT_THEME]
   if (themeName !== INLINE_THEME) {
     loadCSS(`/theme-${themeName}.css`)

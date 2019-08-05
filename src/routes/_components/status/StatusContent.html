@@ -21,19 +21,46 @@
     display: block;
   }
 
-  :global(.status-content p) {
+  :global(.status-content li) {
+    font-size: 1.3em;
+  }
+
+  :global(
+      .status-content p,
+      .status-content blockquote,
+      .status-content ul,
+      .status-content ol) {
     margin: 0 0 20px;
   }
 
-  :global(.status-content p:first-child) {
+  :global(
+      .status-content p:first-child,
+      .status-content blockquote:first-child,
+      .status-content ul:first-child,
+      .status-content ol:first-child) {
     margin: 0 0 20px;
   }
 
-  :global(.status-content p:last-child) {
+  :global(
+      .status-content p:last-child,
+      .status-content blockquote:last-child,
+      .status-content ul:last-child,
+      .status-content ol:last-child) {
     margin: 0;
   }
 
-  :global(.status-content.status-in-notification ){
+  :global(.status-content blockquote) {
+    padding-left: 1.5rem;
+    border-left: 5px solid var(--body-bg);
+    color: var(--very-deemphasized-text-color);
+    font-style: italic;
+  }
+
+  :global(.status-content ul, .status-content ol) {
+    padding-left: 2rem;
+  }
+
+  .status-content.status-in-notification {
     color: var(--very-deemphasized-text-color);
   }
   :global(.status-content.status-in-notification a, .status-content.status-in-notification a:hover) {
@@ -83,16 +110,16 @@
     methods: {
       hydrateContent () {
         mark('hydrateContent')
-        let node = this.refs.node
-        let { originalStatus, uuid } = this.get()
-        let { mentions, tags } = originalStatus
+        const node = this.refs.node
+        const { originalStatus, uuid } = this.get()
+        const { mentions, tags } = originalStatus
         let count = 0
-        let anchors = Array.from(node.getElementsByTagName('A'))
+        const anchors = Array.from(node.getElementsByTagName('A'))
 
-        for (let anchor of anchors) {
+        for (const anchor of anchors) {
           // hydrate hashtag
           if (tags && anchor.classList.contains('hashtag')) {
-            for (let tag of tags) {
+            for (const tag of tags) {
               if (anchor.getAttribute('href').endsWith(`/tags/${tag.name}`)) {
                 anchor.setAttribute('href', `/tags/${tag.name}`)
                 anchor.setAttribute('id', `status-content-link-${uuid}-${++count}`)
@@ -102,7 +129,7 @@
             }
           // hydrate mention
           } else if (mentions && anchor.classList.contains('mention')) {
-            for (let mention of mentions) {
+            for (const mention of mentions) {
               if (anchor.getAttribute('href') === mention.url) {
                 anchor.setAttribute('href', `/accounts/${mention.id}`)
                 anchor.setAttribute('title', `@${mention.acct}`)
@@ -113,7 +140,7 @@
             }
           }
           // hydrate external links
-          let href = anchor.getAttribute('href')
+          const href = anchor.getAttribute('href')
           if (new URL(href, location.href).origin !== location.origin) {
             anchor.setAttribute('title', href)
             anchor.setAttribute('target', '_blank')

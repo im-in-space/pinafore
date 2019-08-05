@@ -65,7 +65,10 @@ export const composeModalPostPrivacyButton = $('.modal-dialog .compose-box-toolb
 
 export const composePoll = $('.compose-poll')
 export const composePollMultipleChoice = $('.compose-poll input[type="checkbox"]')
+export const composePollMultipleChoiceInDialog = $('.modal-dialog .compose-poll input[type="checkbox"]')
 export const composePollExpiry = $('.compose-poll select')
+export const composePollExpiryOption = $('.compose-poll select option')
+export const composePollExpiryInDialog = $('.modal-dialog .compose-poll select')
 export const composePollAddButton = $('.compose-poll button:last-of-type')
 
 export const postPrivacyDialogButtonUnlisted = $('[aria-label="Post privacy dialog"] li:nth-child(2) button')
@@ -162,7 +165,7 @@ export const getOpacity = selector => exec(() => window.getComputedStyle(documen
 })
 
 export const getCurrentTheme = exec(() => {
-  let themeLink = document.head.querySelector('link[rel=stylesheet][href^="/theme-"]')
+  const themeLink = document.head.querySelector('link[rel=stylesheet][href^="/theme-"]')
   if (themeLink) {
     return themeLink.getAttribute('href').match(/^\/theme-(.*)\.css$/, '')[1]
   }
@@ -170,11 +173,11 @@ export const getCurrentTheme = exec(() => {
 })
 
 export const uploadKittenImage = i => (exec(() => {
-  let image = images[`kitten${i}`]
-  let blob = blobUtils.base64StringToBlob(image.data, 'image/png')
+  const image = images[`kitten${i}`]
+  const blob = blobUtils.base64StringToBlob(image.data, 'image/png')
   blob.name = image.name
-  let fileDrop = document.querySelector('file-drop')
-  let event = new Event('filedrop', { bubbles: false })
+  const fileDrop = document.querySelector('file-drop')
+  const event = new Event('filedrop', { bubbles: false })
   event.files = [blob]
   fileDrop.dispatchEvent(event)
 }, {
@@ -201,7 +204,7 @@ export const isNthStatusActive = (idx) => (exec(() => {
 }))
 
 export const isActiveStatusPinned = exec(() => {
-  let el = document.activeElement
+  const el = document.activeElement
   return el &&
     (
       (el.parentElement.getAttribute('class') || '').includes('pinned') ||
@@ -263,6 +266,10 @@ export function getNthStatusPollVoteCount (n) {
 
 export function getComposePollNthInput (n) {
   return $(`.compose-poll input[type="text"]:nth-of-type(${n})`)
+}
+
+export function getComposePollNthInputInDialog (n) {
+  return $(`.modal-dialog .compose-poll input[type="text"]:nth-of-type(${n})`)
 }
 
 export function getComposePollRemoveNthButton (n) {
@@ -420,7 +427,7 @@ export function getNthPinnedStatusFavoriteButton (n) {
 export async function validateTimeline (t, timeline) {
   const timeout = 30000
   for (let i = 0; i < timeline.length; i++) {
-    let status = timeline[i]
+    const status = timeline[i]
     // hovering forces TestCafé to scroll to that element: https://git.io/vABV2
     await t.hover(getNthStatus(1 + i))
     if (status.content) {
@@ -451,7 +458,7 @@ export async function scrollToStatus (t, n) {
 }
 
 export async function scrollFromStatusToStatus (t, start, end) {
-  let timeout = 20000
+  const timeout = 20000
   for (let i = start; i < end; i++) {
     await t.expect(getNthStatus(i).exists).ok({ timeout })
       .hover(getNthStatus(i))
@@ -473,7 +480,7 @@ export async function clickToNotificationsAndBackHome (t) {
 // like lodash.times but I don't want to try to figure out esm
 // just to import lodash-es
 export function times (n, cb) {
-  let arr = []
+  const arr = []
   for (let i = 0; i < n; i++) {
     arr.push(cb(i))
   }

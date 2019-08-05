@@ -4,12 +4,12 @@ import { doDeleteStatus } from './delete'
 import { store } from '../_store/store'
 
 export async function deleteAndRedraft (status) {
-  let deleteStatusPromise = doDeleteStatus(status.id)
-  let dialogPromise = importShowComposeDialog()
-  await deleteStatusPromise
+  const deleteStatusPromise = doDeleteStatus(status.id)
+  const dialogPromise = importShowComposeDialog()
+  const deletedStatus = await deleteStatusPromise
 
   store.setComposeData('dialog', {
-    text: statusHtmlToPlainText(status.content, status.mentions),
+    text: deletedStatus.text || statusHtmlToPlainText(status.content, status.mentions),
     contentWarningShown: !!status.spoiler_text,
     contentWarning: status.spoiler_text || '',
     postPrivacy: status.visibility,
@@ -17,8 +17,13 @@ export async function deleteAndRedraft (status) {
       description: _.description || '',
       data: _
     })),
-    inReplyToId: status.in_reply_to_id
+    inReplyToId: status.in_reply_to_id,
+    // note that for polls there is no real way to preserve the original expiry
+    poll: status.poll && {
+      multiple: !!status.poll.multiple,
+      options: (status.poll.options || []).map(option => option.title)
+    }
   })
-  let showComposeDialog = await dialogPromise
+  const showComposeDialog = await dialogPromise
   showComposeDialog()
 }

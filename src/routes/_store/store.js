@@ -35,7 +35,7 @@ const persistedState = {
   pushSubscriptions: {},
   reduceMotion:
     !process.browser ||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    matchMedia('(prefers-reduced-motion: reduce)').matches,
   underlineLinks: false
 }
 
@@ -79,9 +79,4 @@ observers(store)
 
 if (process.browser && process.env.NODE_ENV !== 'production') {
   window.store = store // for debugging
-}
-
-// needed for tests
-if (process.browser) {
-  window.__forceOnline = online => store.set({ online })
 }
