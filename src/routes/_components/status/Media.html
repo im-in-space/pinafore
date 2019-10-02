@@ -1,32 +1,38 @@
-{#if type === 'video' || type === 'audio'}
-  <button id={elementId}
-          type="button"
-          class="play-video-button focus-after {$largeInlineMedia ? '' : 'fixed-size'} {type === 'audio' ? 'play-audio-button' : ''}"
-          aria-label="Play video: {description}"
-          style="width: {inlineWidth}px; height: {inlineHeight}px;">
-    <PlayVideoIcon />
-    {#if type === 'video'}
-      <LazyImage
-        alt={description}
-        title={description}
-        src={previewUrl}
-        fallback={oneTransparentPixel}
-        width={inlineWidth}
-        height={inlineHeight}
-        background="var(--loading-bg)"
-        {focus}
-      />
-    {/if}
-  </button>
+{#if !blurhash && (type === 'video' || type === 'audio')}
+    <button id={elementId}
+            type="button"
+            class="inline-media play-video-button focus-after {$largeInlineMedia ? '' : 'fixed-size'} {type === 'audio' ? 'play-audio-button' : ''}"
+            aria-label="Play {type === 'video' ? 'video' : 'audio'}: {description}"
+            {tabindex}
+            aria-hidden={ariaHidden}
+            style={inlineMediaStyle}>
+      <PlayVideoIcon />
+      {#if type === 'video'}
+        <LazyImage
+          alt={description}
+          title={description}
+          src={previewUrl}
+          fallback={oneTransparentPixel}
+          {blurhash}
+          width={inlineWidth}
+          height={inlineHeight}
+          background="var(--loading-bg)"
+          {focus}
+        />
+      {/if}
+    </button>
 {:else}
   <button id={elementId}
           type="button"
-          class="show-image-button focus-after {$largeInlineMedia ? '' : 'fixed-size'}"
+          class="inline-media show-image-button focus-after {$largeInlineMedia ? '' : 'fixed-size'}"
           aria-label="Show image: {description}"
           title={description}
           on:mouseover="set({mouseover: event})"
-          style="width: {inlineWidth}px; height: {inlineHeight}px;">
-  {#if type === 'gifv' && $autoplayGifs}
+          style={inlineMediaStyle}
+          {tabindex}
+          aria-hidden={ariaHidden}
+  >
+  {#if type === 'gifv' && $autoplayGifs && !blurhash}
     <AutoplayVideo
       ariaLabel="Animated GIF: {description}"
       poster={previewUrl}
@@ -35,13 +41,15 @@
       height={inlineHeight}
       {focus}
     />
-  {:elseif type === 'gifv' && !$autoplayGifs}
+  {:elseif type === 'gifv'}
     <NonAutoplayGifv
       class={noNativeWidthHeight ? 'no-native-width-height' : ''}
       label="Animated GIF: {description}"
       poster={previewUrl}
+      {blurhash}
       src={url}
       staticSrc={previewUrl}
+      useWidthHeight={!blurhash}
       width={inlineWidth}
       height={inlineHeight}
       playing={mouseover}
@@ -53,6 +61,7 @@
       title={description}
       src={previewUrl}
       fallback={oneTransparentPixel}
+      {blurhash}
       width={inlineWidth}
       height={inlineHeight}
       background="var(--loading-bg)"
@@ -80,6 +89,16 @@
   .show-image-button {
     cursor: zoom-in;
   }
+
+  .inline-media {
+    position: relative;
+  }
+
+  @media (max-width: 240px) {
+    .inline-media {
+      min-height: 100px; /* TODO: hack for KaiOS, which renders the grouped-images style as 0 height */
+    }
+  }
 </style>
 <script>
   import { DEFAULT_MEDIA_WIDTH, DEFAULT_MEDIA_HEIGHT, ONE_TRANSPARENT_PIXEL } from '../../_static/media'
@@ -91,9 +110,10 @@
   import LazyImage from '../LazyImage.html'
   import AutoplayVideo from '../AutoplayVideo.html'
   import { registerClickDelegate } from '../../_utils/delegate'
+  import { convertCssPropertyToDataUrl } from '../../_utils/convertCssPropertyToDataUrl'
 
-  export default {
-    oncreate () {
+export default {
+    async oncreate () {
       const { elementId } = this.get()
       registerClickDelegate(this, elementId, () => this.onClick())
     },
@@ -126,8 +146,27 @@
       elementId: ({ media, uuid }) => `media-${uuid}-${media.id}`,
       description: ({ media }) => media.description || '',
       previewUrl: ({ media }) => media.preview_url,
+      decodedBlurhash: ({ media }) => media.decodedBlurhash,
+      blurhashToUse: ({ decodedBlurhash, $ignoreBlurhash }) => {
+        if (!$ignoreBlurhash && decodedBlurhash) {
+          return decodedBlurhash
+        }
+        // Convert the var(--loading-bg) variable into a data URL based on a single pixel of color
+        // TODO: this is hacky
+        return convertCssPropertyToDataUrl('--mask-bg')
+      },
+      blurhash: ({ blurhashToUse, showAsSensitive }) => showAsSensitive && blurhashToUse,
       url: ({ media }) => media.url,
-      type: ({ media }) => media.type
+      type: ({ media }) => media.type,
+      inlineMediaStyle: ({ type, inlineWidth, inlineHeight, blurhash, $largeInlineMedia }) => {
+        if ((type === 'audio') || (blurhash && $largeInlineMedia)) {
+          return ''
+        } else {
+          return `width: ${inlineWidth}px; height: ${inlineHeight}px;`
+        }
+      },
+      tabindex: ({ showAsSensitive }) => showAsSensitive ? '-1' : '0',
+      ariaHidden: ({ showAsSensitive }) => showAsSensitive
     },
     methods: {
       onClick () {
@@ -141,7 +180,7 @@
     },
     data: () => ({
       oneTransparentPixel: ONE_TRANSPARENT_PIXEL,
-      mouseover: void 0
+      mouseover: undefined
     }),
     store: () => store,
     events: {

@@ -7,12 +7,11 @@
     aria-hidden="true"
   />
   <div class="compose-media-buttons">
-    <button class="compose-media-button compose-media-focal-button {focalHidden ? 'compose-media-hidden' : ''}"
-            aria-hidden={focalHidden}
-            aria-label="Change preview"
-            title="Change preview"
-            on:click="onSetFocalPoint()" >
-      <SvgIcon className="compose-media-button-svg" href="#fa-crosshairs" />
+    <button class="compose-media-button compose-media-focal-button"
+            aria-label="Edit"
+            title="Edit"
+            on:click="onEdit()" >
+      <SvgIcon className="compose-media-button-svg" href="#fa-pencil" />
     </button>
     <button class="compose-media-button compose-media-delete-button"
             aria-label="Delete"
@@ -98,11 +97,6 @@
     height: 18px;
   }
 
-  .compose-media-hidden {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
   .audio-preview {
     background: var(--audio-bg);
   }
@@ -119,11 +113,16 @@
       max-height: 7vh;
     }
   }
+
+  @media (max-width: 320px) {
+    .compose-media-realm-dialog .compose-media-alt-input {
+      display: none; /* too small to show this - use the edit button instead */
+    }
+  }
 </style>
 <script>
   import { store } from '../../_store/store'
   import { deleteMedia } from '../../_actions/media'
-  import debounce from 'lodash-es/debounce'
   import { scheduleIdleTask } from '../../_utils/scheduleIdleTask'
   import { observe } from 'svelte-extras'
   import SvgIcon from '../SvgIcon.html'
@@ -131,7 +130,11 @@
   import { ONE_TRANSPARENT_PIXEL } from '../../_static/media'
   import { get } from '../../_utils/lodash-lite'
   import { coordsToPercent } from '../../_utils/coordsToPercent'
-  import { importMediaFocalPointDialog } from '../dialog/asyncDialogs'
+  import { importShowMediaEditDialog } from '../dialog/asyncDialogs'
+  import { throttleTimer } from '../../_utils/throttleTimer'
+
+  const updateMediaInStore = throttleTimer(scheduleIdleTask)
+  const resizeTextarea = process.browser && throttleTimer(requestAnimationFrame)
 
   export default {
     oncreate () {
@@ -163,8 +166,7 @@
           return 'center center'
         }
         return `${coordsToPercent(focusX)}% ${100 - coordsToPercent(focusY)}%`
-      },
-      focalHidden: ({ type }) => type !== 'image'
+      }
     },
     store: () => store,
     methods: {
@@ -176,6 +178,7 @@
           const text = get(media, [index, 'description'], '')
           if (rawText !== text) {
             this.set({ rawText: text })
+            resizeTextarea(() => autosize.update(this.refs.textarea))
           }
           const focusX = get(media, [index, 'focusX'], 0)
           const focusY = get(media, [index, 'focusY'], 0)
@@ -183,15 +186,15 @@
         })
       },
       setupSyncToStore () {
-        const saveStore = debounce(() => scheduleIdleTask(() => this.store.save()), 1000)
-
         this.observe('rawText', rawText => {
-          const { realm, index, media } = this.get()
-          if (media[index].description !== rawText) {
-            media[index].description = rawText
-            this.store.setComposeData(realm, { media })
-            saveStore()
-          }
+          updateMediaInStore(() => {
+            const { realm, index, media } = this.get()
+            if (media[index].description !== rawText) {
+              media[index].description = rawText
+              this.store.setComposeData(realm, { media })
+              this.store.save()
+            }
+          })
         }, { init: false })
       },
       setupAutosize () {
@@ -204,10 +207,10 @@
         const { realm, index } = this.get()
         deleteMedia(realm, index)
       },
-      async onSetFocalPoint () {
-        const { realm, index } = this.get()
-        const showMediaFocalPointDialog = await importMediaFocalPointDialog()
-        showMediaFocalPointDialog(realm, index)
+      async onEdit () {
+        const { realm, index, type } = this.get()
+        const showMediaEditDialog = await importShowMediaEditDialog()
+        showMediaEditDialog(realm, index, type)
       }
     },
     components: {

@@ -8,13 +8,15 @@ import { updateCustomEmojiForInstance } from './emoji'
 import { database } from '../_database/database'
 import { DOMAIN_BLOCKS } from '../_static/blocks'
 
-const REDIRECT_URI = (typeof location !== 'undefined'
-  ? location.origin : 'https://pf.im-in.space') + '/settings/instances/add'
-
 function createKnownError (message) {
   const err = new Error(message)
   err.knownError = true
   return err
+}
+
+function getRedirectUri () {
+  const { copyPasteMode } = store.get()
+  return copyPasteMode ? 'urn:ietf:wg:oauth:2.0:oob' : `${location.origin}/settings/instances/add`
 }
 
 async function redirectToOauth () {
@@ -27,7 +29,8 @@ async function redirectToOauth () {
   if (DOMAIN_BLOCKS.some(domain => new RegExp(`(?:\\.|^)${domain}$`, 'i').test(instanceHostname))) {
     throw createKnownError('This service is blocked')
   }
-  const registrationPromise = registerApplication(instanceNameInSearch, REDIRECT_URI)
+  const redirectUri = getRedirectUri()
+  const registrationPromise = registerApplication(instanceNameInSearch, redirectUri)
   const instanceInfo = await getInstanceInfo(instanceNameInSearch)
   await database.setInstanceInfo(instanceNameInSearch, instanceInfo) // cache for later
   const instanceData = await registrationPromise
@@ -39,9 +42,17 @@ async function redirectToOauth () {
   const oauthUrl = generateAuthLink(
     instanceNameInSearch,
     instanceData.client_id,
-    REDIRECT_URI
+    redirectUri
   )
-  document.location.href = oauthUrl
+  // setTimeout to allow the browser to *actually* save the localStorage data (fixes Safari bug apparently)
+  const { copyPasteMode } = store.get()
+  setTimeout(() => {
+    if (copyPasteMode) {
+      window.open(oauthUrl, '_blank', 'noopener')
+    } else {
+      document.location.href = oauthUrl
+    }
+  }, 200)
 }
 
 export async function logInToInstance () {
@@ -57,7 +68,7 @@ export async function logInToInstance () {
       (err.knownError ? '' : (navigator.onLine
         ? `Is this a valid Mastodon instance? Is a browser extension
            blocking the request? Are you in private browsing mode?`
-        : `Are you offline?`))
+        : 'Are you offline?'))
     const { instanceNameInSearch } = store.get()
     store.set({
       logInToInstanceError: error,
@@ -70,12 +81,13 @@ export async function logInToInstance () {
 
 async function registerNewInstance (code) {
   const { currentRegisteredInstanceName, currentRegisteredInstance } = store.get()
+  const redirectUri = getRedirectUri()
   const instanceData = await getAccessTokenFromAuthCode(
     currentRegisteredInstanceName,
     currentRegisteredInstance.client_id,
     currentRegisteredInstance.client_secret,
     code,
-    REDIRECT_URI
+    redirectUri
   )
   const { loggedInInstances, loggedInInstancesInOrder, instanceThemes } = store.get()
   instanceThemes[currentRegisteredInstanceName] = DEFAULT_THEME
@@ -90,7 +102,8 @@ async function registerNewInstance (code) {
     loggedInInstances: loggedInInstances,
     currentInstance: currentRegisteredInstanceName,
     loggedInInstancesInOrder: loggedInInstancesInOrder,
-    instanceThemes: instanceThemes
+    instanceThemes: instanceThemes,
+    copyPasteMode: false
   })
   store.save()
   const { enableGrayscale } = store.get()
@@ -109,5 +122,18 @@ export async function handleOauthCode (code) {
     store.set({ logInToInstanceError: `${err.message || err.name}. Failed to connect to instance.` })
   } finally {
     store.set({ logInToInstanceLoading: false })
+  }
+}
+
+export async function handleCopyPasteOauthCode (code) {
+  const { currentRegisteredInstanceName, currentRegisteredInstance } = store.get()
+  if (!currentRegisteredInstanceName || !currentRegisteredInstance) {
+    store.set({
+      logInToInstanceError: 'You must log in to an instance first.',
+      logInToInstanceErrorForText: '',
+      instanceNameInSearch: ''
+    })
+  } else {
+    await handleOauthCode(code)
   }
 }

@@ -9,6 +9,7 @@ import {
   NOTIFICATION_POLLS,
   NOTIFICATION_MENTIONS
 } from '../../_static/instanceSettings'
+import { mark, stop } from '../../_utils/marks'
 
 function computeForTimeline (store, key, defaultValue) {
   store.compute(key,
@@ -45,6 +46,7 @@ function computeNotificationFilter (store, computationName, key) {
 }
 
 export function timelineComputations (store) {
+  mark('timelineComputations')
   computeForTimeline(store, 'timelineItemSummaries', null)
   computeForTimeline(store, 'timelineItemSummariesToAdd', null)
   computeForTimeline(store, 'runningUpdate', false)
@@ -59,7 +61,7 @@ export function timelineComputations (store) {
   )
   store.compute('currentTimelineValue', ['currentTimeline'], currentTimeline => {
     if (!currentTimeline) {
-      return void 0
+      return undefined
     }
     const split = currentTimeline.split('/')
     const len = split.length
@@ -152,7 +154,7 @@ export function timelineComputations (store) {
   )
 
   store.compute('timelineNotificationItemSummaries',
-    [`timelineData_timelineItemSummariesToAdd`, 'timelineFilterFunction', 'currentInstance'],
+    ['timelineData_timelineItemSummariesToAdd', 'timelineFilterFunction', 'currentInstance'],
     (root, timelineFilterFunction, currentInstance) => (
       get(root, [currentInstance, 'notifications'])
     )
@@ -181,4 +183,15 @@ export function timelineComputations (store) {
       currentPage !== 'notifications' && !!numberOfNotifications
     )
   )
+
+  store.compute('numberOfFollowRequests',
+    ['followRequestCounts', 'currentInstance'],
+    (followRequestCounts, currentInstance) => get(followRequestCounts, [currentInstance], 0)
+  )
+
+  store.compute('hasFollowRequests',
+    ['numberOfFollowRequests'],
+    (numberOfFollowRequests) => !!numberOfFollowRequests
+  )
+  stop('timelineComputations')
 }

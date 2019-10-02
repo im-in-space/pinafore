@@ -9,7 +9,7 @@
     <IconButton
       className="compose-toolbar-button"
       svgClassName={$uploadingMedia ? 'spin' : ''}
-      label="Add media"
+      label="Add media (images, video, audio)"
       href={$uploadingMedia ? '#fa-spinner' : '#fa-camera'}
       on:click="onMediaClick()"
       disabled={$uploadingMedia || (media.length === 4)}
@@ -41,6 +41,7 @@
          on:change="onFileChange(event)"
          style="display: none;"
          type="file"
+         multiple
          accept={mediaAccept} >
 </div>
 <style>
@@ -59,6 +60,12 @@
       padding-right: 5px;
     }
   }
+  @media (max-width: 240px) {
+    :global(button.icon-button.compose-toolbar-button .icon-button-svg) {
+      width: 20px;
+      height: 20px;
+    }
+  }
 </style>
 <script>
   import IconButton from '../IconButton.html'
@@ -68,6 +75,7 @@
   import { toggleContentWarningShown } from '../../_actions/contentWarnings'
   import { mediaAccept } from '../../_static/media'
   import { enablePoll, disablePoll } from '../../_actions/composePoll'
+  import { updateCustomEmojiForInstance } from '../../_actions/emoji'
 
   export default {
     components: {
@@ -80,16 +88,22 @@
     methods: {
       async onEmojiClick () {
         const { realm } = this.get()
-        const showEmojiDialog = await importShowEmojiDialog()
+        const { currentInstance } = this.store.get()
+        const [showEmojiDialog] = await Promise.all([
+          importShowEmojiDialog(),
+          updateCustomEmojiForInstance(currentInstance)
+        ])
         showEmojiDialog(realm)
       },
       onMediaClick () {
         this.refs.input.click()
       },
-      onFileChange (e) {
-        const file = e.target.files[0]
+      async onFileChange (e) {
+        const { files } = e.target
         const { realm } = this.get()
-        doMediaUpload(realm, file)
+        for (const file of files) {
+          await doMediaUpload(realm, file)
+        }
       },
       async onPostPrivacyClick () {
         const { realm } = this.get()

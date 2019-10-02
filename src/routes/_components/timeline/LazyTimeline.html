@@ -1,11 +1,7 @@
 <div class="lazy-timeline">
-  {#await importTimeline}
-    <!-- awaiting promise -->
-  {:then constructor}
-    <svelte:component this={constructor} {timeline} />
-  {:catch error}
-    <div>Component failed to load. Try refreshing! {error}</div>
-  {/await}
+  {#if timelineComponent}
+    <svelte:component this={timelineComponent} {timeline} />
+  {/if}
 </div>
 <style>
   :global(.lazy-timeline ){
@@ -13,19 +9,25 @@
   }
 </style>
 <script>
-  import { importTimeline } from '../../_utils/asyncModules'
   import { store } from '../../_store/store'
+  import { importLoggedInStoreExtensions, importTimeline } from '../../_utils/asyncModules'
 
   export default {
-    oncreate () {
+    async oncreate () {
+      console.log('LazyTimeline oncreate')
       const { currentInstance } = this.store.get()
       const { timeline } = this.get()
+      const [timelineComponent] = await Promise.all([
+        importTimeline(),
+        importLoggedInStoreExtensions()
+      ])
       this.store.set({ currentTimeline: timeline })
       this.store.setForTimeline(currentInstance, timeline, { runningUpdate: false })
+      this.set({ timelineComponent })
     },
     store: () => store,
     data: () => ({
-      importTimeline: importTimeline()
+      timelineComponent: undefined
     })
   }
 </script>

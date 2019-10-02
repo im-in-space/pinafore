@@ -1,7 +1,7 @@
 <div class={computedClass}
      style="grid-template-columns: repeat({nCols}, 1fr);" >
   {#each mediaAttachments as media, index}
-    <Media {media} {uuid} {mediaAttachments} {index} />
+    <Media {media} {uuid} {mediaAttachments} {index} {showAsSensitive} />
   {/each}
 </div>
 <style>
@@ -23,22 +23,34 @@
     border-radius: 6px;
   }
 
-  .status-media.grouped-images > :global(*) {
+  .status-media.grouped-images > :global(.inline-media) {
       padding-bottom: 56.25%;
       width: 100%;
   }
 
-  .status-media.grouped-images.two-cols > :global(*) {
+  .status-media.grouped-images.two-cols > :global(.inline-media) {
       padding-bottom: calc(112.5% + 5px);
   }
 
-  .status-media.grouped-images.odd-cols > :global(:first-child) {
+  .status-media.grouped-images.odd-cols > :global(.inline-media:first-child) {
       grid-row-end: span 2;
       padding-bottom: calc(112.5% + 5px);
       background-color: blue;
   }
 
+  .status-media.not-grouped-images > :global(.inline-media) {
+    width: 100%;
+    min-height: 250px;
+  }
+
+  .status-media.not-grouped-images :global(.inline-media img),
+  .status-media.not-grouped-images :global(.inline-media .lazy-image) {
+    width: 100%;
+    height: 100%;
+  }
+
   .status-media.status-media-is-sensitive {
+    height: inherit;
     margin: 0;
   }
 </style>
@@ -53,21 +65,20 @@
         sensitive && 'status-media-is-sensitive',
         oddCols && 'odd-cols',
         twoCols && 'two-cols',
-        !$largeInlineMedia && 'grouped-images'
+        $largeInlineMedia ? 'not-grouped-images' : 'grouped-images'
       ),
-      nCols:
-        ({ mediaAttachments, $largeInlineMedia }) => {
-          return (!$largeInlineMedia && mediaAttachments.length > 1) ? 2 : 1
-        },
-      oddCols:
-        ({ mediaAttachments }) => {
-          return (mediaAttachments.length > 1 && (mediaAttachments.length % 2))
-        },
-
-      twoCols:
-        ({ mediaAttachments }) => {
-          return (mediaAttachments.length === 2)
-        }
+      showAsSensitive: ({ sensitive, sensitiveShown }) => {
+        return sensitive ? !sensitiveShown : false
+      },
+      nCols: ({ mediaAttachments, $largeInlineMedia }) => {
+        return (!$largeInlineMedia && mediaAttachments.length > 1) ? 2 : 1
+      },
+      oddCols: ({ mediaAttachments }) => {
+        return (mediaAttachments.length > 1 && (mediaAttachments.length % 2))
+      },
+      twoCols: ({ mediaAttachments }) => {
+        return (mediaAttachments.length === 2)
+      }
     },
     components: {
       Media

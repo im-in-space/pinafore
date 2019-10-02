@@ -1,14 +1,17 @@
 <a {href}
    rel="prefetch"
    class="compose-box-avatar {loaded ? 'loaded' : 'not-loaded'}"
-   aria-hidden={true}
+   aria-hidden="true"
+   tabindex="-1"
    on:click="onClick(event)"
 >
-  <Avatar account={verifyCredentials} size="small"/>
+  <!-- the avatar is duplicated information, so hide from tab order and screenreaders -->
+  <Avatar account={verifyCredentials} size={avatarSize} />
 </a>
 <a class="compose-box-display-name {loaded ? 'loaded' : 'not-loaded'}"
    {href}
-   aria-hidden={!loaded}
+   aria-busy={!loaded}
+   aria-live="off"
    rel="prefetch"
    on:click="onClick(event)"
 >
@@ -16,7 +19,9 @@
 </a>
 
 <span class="compose-box-handle {loaded ? 'loaded' : 'not-loaded'}"
-      aria-hidden={!loaded} >
+      aria-busy={!loaded}
+      aria-live="off"
+>
   {'@' + verifyCredentials.acct}
 </span>
 <style>
@@ -58,9 +63,13 @@
   }
 
   @media (max-width: 767px) {
-    :global(.compose-box-avatar ){
-      grid-area: avatar;
+    .compose-box-avatar {
       margin-right: 5px;
+    }
+  }
+  @media (max-width: 240px) {
+    .compose-box-avatar {
+      margin-right: 0;
     }
   }
 </style>
@@ -91,7 +100,8 @@
         }
       },
       id: ({ verifyCredentials }) => (verifyCredentials && verifyCredentials.id),
-      href: ({ id }) => (id ? `/accounts/${id}` : '#')
+      href: ({ id }) => (id ? `/accounts/${id}` : '#'),
+      avatarSize: ({ $isVeryTinyMobileSize }) => $isVeryTinyMobileSize ? 'extra-small' : 'small'
     },
     methods: {
       onClick (e) {

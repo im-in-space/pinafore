@@ -3,7 +3,9 @@
    rel="prefetch"
    href="/accounts/{originalAccountId}"
    aria-hidden="true"
+   tabindex="-1"
 >
+  <!-- the avatar is duplicated information, so hide from tab order and screenreaders -->
   <Avatar account={originalAccount}
           isLink="true"
           {size} />
@@ -38,7 +40,12 @@
     },
     computed: {
       elementId: ({ uuid }) => `status-author-avatar-${uuid}`,
-      size: ({ isStatusInOwnThread }) => isStatusInOwnThread ? 'medium' : 'small'
+      size: ({ isStatusInOwnThread, $isVeryTinyMobileSize }) => {
+        if ($isVeryTinyMobileSize) {
+          return isStatusInOwnThread ? 'small' : 'extra-small'
+        }
+        return isStatusInOwnThread ? 'medium' : 'small'
+      }
     }
   }
 </script>

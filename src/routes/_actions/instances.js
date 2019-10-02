@@ -6,6 +6,7 @@ import { goto } from '../../../__sapper__/client'
 import { cacheFirstUpdateAfter } from '../_utils/sync'
 import { getInstanceInfo } from '../_api/instance'
 import { database } from '../_database/database'
+import { importVirtualListStore } from '../_utils/asyncModules'
 
 export function changeTheme (instanceName, newTheme) {
   const { instanceThemes } = store.get()
@@ -31,32 +32,53 @@ export function switchToInstance (instanceName) {
   switchToTheme(instanceThemes[instanceName], enableGrayscale)
 }
 
-export async function logOutOfInstance (instanceName) {
+export async function logOutOfInstance (instanceName, message = `Logged out of ${instanceName}`) {
   const {
-    loggedInInstances,
-    instanceThemes,
-    loggedInInstancesInOrder,
     composeData,
-    currentInstance
+    currentInstance,
+    customEmoji,
+    instanceInfos,
+    instanceLists,
+    instanceThemes,
+    loggedInInstances,
+    loggedInInstancesInOrder,
+    verifyCredentials
   } = store.get()
   loggedInInstancesInOrder.splice(loggedInInstancesInOrder.indexOf(instanceName), 1)
-  const newInstance = instanceName === currentInstance
-    ? loggedInInstancesInOrder[0]
-    : currentInstance
-  delete loggedInInstances[instanceName]
-  delete instanceThemes[instanceName]
-  delete composeData[instanceName]
+  const newInstance = instanceName === currentInstance ? loggedInInstancesInOrder[0] : currentInstance
+  const objectsToClear = [
+    composeData,
+    customEmoji,
+    instanceInfos,
+    instanceLists,
+    instanceThemes,
+    loggedInInstances,
+    verifyCredentials
+  ]
+  for (const obj of objectsToClear) {
+    delete obj[instanceName]
+  }
   store.set({
-    loggedInInstances: loggedInInstances,
-    instanceThemes: instanceThemes,
-    loggedInInstancesInOrder: loggedInInstancesInOrder,
+    composeData,
     currentInstance: newInstance,
-    searchResults: null,
+    customEmoji,
+    instanceInfos,
+    instanceLists,
+    instanceThemes,
+    loggedInInstances,
+    loggedInInstancesInOrder,
     queryInSearch: '',
-    composeData: composeData
+    searchResults: null,
+    timelineInitialized: false,
+    timelinePreinitialized: false,
+    verifyCredentials
   })
+  store.clearTimelineDataForInstance(instanceName)
+  store.clearAutosuggestDataForInstance(instanceName)
   store.save()
-  toast.say(`Logged out of ${instanceName}`)
+  const { virtualListStore } = await importVirtualListStore()
+  virtualListStore.clearRealmByPrefix(currentInstance + '/') // TODO: this is a hacky way to clear the vlist cache
+  toast.say(message)
   const { enableGrayscale } = store.get()
   switchToTheme(instanceThemes[newInstance], enableGrayscale)
   /* no await */ database.clearDatabaseForInstance(instanceName)
@@ -73,7 +95,7 @@ export async function updateVerifyCredentialsForInstance (instanceName) {
   const { loggedInInstances } = store.get()
   const accessToken = loggedInInstances[instanceName].access_token
   await cacheFirstUpdateAfter(
-    () => getVerifyCredentials(instanceName, accessToken),
+    () => getVerifyCredentials(instanceName, accessToken).catch(logOutOnUnauthorized(instanceName)),
     () => database.getInstanceVerifyCredentials(instanceName),
     verifyCredentials => database.setInstanceVerifyCredentials(instanceName, verifyCredentials),
     verifyCredentials => setStoreVerifyCredentials(instanceName, verifyCredentials)
@@ -96,4 +118,14 @@ export async function updateInstanceInfo (instanceName) {
       store.set({ instanceInfos: instanceInfos })
     }
   )
+}
+
+export function logOutOnUnauthorized (instanceName) {
+  return async error => {
+    if (error.message.startsWith('401:')) {
+      await logOutOfInstance(instanceName, `The access token was revoked, logged out of ${instanceName}`)
+    }
+
+    throw error
+  }
 }

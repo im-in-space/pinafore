@@ -19,7 +19,7 @@ export const formError = $('.form-error-user-error')
 export const composeInput = $('.compose-box-input')
 export const composeContentWarning = $('.content-warning-input')
 export const composeButton = $('.compose-box-button')
-export const composeLengthIndicator = $('.compose-box-length')
+export const composeLengthIndicator = $('.length-indicator')
 export const emojiButton = $('.compose-box-toolbar button:first-child')
 export const mediaButton = $('.compose-box-toolbar button:nth-child(2)')
 export const pollButton = $('.compose-box-toolbar button:nth-child(3)')
@@ -29,6 +29,8 @@ export const emailInput = $('input#user_email')
 export const passwordInput = $('input#user_password')
 export const authorizeInput = $('button[type=submit]:not(.negative)')
 export const logInToInstanceLink = $('a[href="/settings/instances/add"]')
+export const copyPasteModeButton = $('.copy-paste-mode-button')
+export const oauthCodeInput = $('#oauthCodeInput')
 export const searchInput = $('.search-input')
 export const postStatusButton = $('.compose-box-button')
 export const showMoreButton = $('.more-items-header button')
@@ -39,6 +41,7 @@ export const accountProfileFollowButton = $('.account-profile .account-profile-f
 export const goBackButton = $('.dynamic-page-go-back')
 export const accountProfileMoreOptionsButton = $('.account-profile-more-options button')
 export const addInstanceButton = $('#submitButton')
+export const submitOauthButton = $('#submitOauthButton')
 export const mastodonLogInButton = $('button[type="submit"]')
 export const followsButton = $('.account-profile-details > *:nth-child(2)')
 export const followersButton = $('.account-profile-details > *:nth-child(3)')
@@ -50,7 +53,9 @@ export const neverMarkMediaSensitiveInput = $('#choice-never-mark-media-sensitiv
 export const removeEmojiFromDisplayNamesInput = $('#choice-omit-emoji-in-display-names')
 export const disableInfiniteScroll = $('#choice-disable-infinite-scroll')
 export const disableUnreadNotifications = $('#choice-disable-unread-notification-counts')
-export const dialogOptionsOption = $(`.modal-dialog button`)
+export const leftRightChangesFocus = $('#choice-left-right-focus')
+export const disableHotkeys = $('#choice-disable-hotkeys')
+export const dialogOptionsOption = $('.modal-dialog button')
 export const emojiSearchInput = $('.emoji-mart-search input')
 export const confirmationDialogOKButton = $('.confirmation-dialog-form-flex button:nth-child(1)')
 export const confirmationDialogCancelButton = $('.confirmation-dialog-form-flex button:nth-child(2)')
@@ -62,6 +67,7 @@ export const composeModalComposeButton = $('.modal-dialog .compose-box-button')
 export const composeModalContentWarningInput = $('.modal-dialog .content-warning-input')
 export const composeModalEmojiButton = $('.modal-dialog .compose-box-toolbar button:nth-child(1)')
 export const composeModalPostPrivacyButton = $('.modal-dialog .compose-box-toolbar button:nth-child(4)')
+export const composeModalMediaSensitiveCheckbox = $('.modal-dialog .compose-media-sensitive input')
 
 export const composePoll = $('.compose-poll')
 export const composePollMultipleChoice = $('.compose-poll input[type="checkbox"]')
@@ -70,6 +76,8 @@ export const composePollExpiry = $('.compose-poll select')
 export const composePollExpiryOption = $('.compose-poll select option')
 export const composePollExpiryInDialog = $('.modal-dialog .compose-poll select')
 export const composePollAddButton = $('.compose-poll button:last-of-type')
+
+export const composeMediaSensitiveCheckbox = $('.compose-media-sensitive input')
 
 export const postPrivacyDialogButtonUnlisted = $('[aria-label="Post privacy dialog"] li:nth-child(2) button')
 
@@ -131,6 +139,10 @@ export const getActiveElementRectTop = exec(() => (
 
 export const getActiveElementAriaPosInSet = exec(() => (
   (document.activeElement && document.activeElement.getAttribute('aria-posinset')) || ''
+))
+
+export const getActiveElementAriaLabel = exec(() => (
+  (document.activeElement && document.activeElement.getAttribute('aria-label')) || ''
 ))
 
 export const getActiveElementInsideNthStatus = exec(() => {
@@ -257,7 +269,7 @@ export function getNthStatusPollResult (n, i) {
 }
 
 export function getNthStatusPollRefreshButton (n) {
-  return $(`${getNthStatusSelector(n)} button.poll-stat`)
+  return $(`${getNthStatusSelector(n)} .poll-stat button`)
 }
 
 export function getNthStatusPollVoteCount (n) {
@@ -352,8 +364,16 @@ export function getNthStatusAndImage (nStatus, nImage) {
   return $(`${getNthStatusSelector(nStatus)} .status-media .show-image-button:nth-child(${nImage}) img`)
 }
 
+export function getNthStatusAndSensitiveButton (nStatus, nImage) {
+  return $(`${getNthStatusSelector(nStatus)} .status-sensitive-media-button:nth-child(${nImage})`)
+}
+
+export function getNthStatusAndSensitiveImage (nStatus, nImage) {
+  return $(`${getNthStatusSelector(nStatus)} .status-media button:nth-child(${nImage}) img`)
+}
+
 export function getFirstVisibleStatus () {
-  return $(`.list-item > article[aria-posinset]`).nth(0)
+  return $('.list-item > article[aria-posinset]').nth(0)
 }
 
 export function getNthReplyButton (n) {

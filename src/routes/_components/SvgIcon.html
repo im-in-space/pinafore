@@ -18,19 +18,14 @@
     }),
     store: () => store,
     computed: {
-      inline: ({ href }) => {
-        // filled in during build
-        return process.env.INLINE_SVGS.includes(href)
-      }
+      inline: ({ href }) => process.env.INLINE_SVGS.includes(href)
     },
     methods: {
       animate (animation) {
         const { reduceMotion } = this.store.get()
-        if (!animation || reduceMotion) {
-          return
+        if (animation && !reduceMotion) {
+          animate(this.refs.svg, animation)
         }
-        const svg = this.refs.svg
-        animate(svg, animation)
       }
     }
   }

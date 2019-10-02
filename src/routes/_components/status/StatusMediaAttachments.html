@@ -1,37 +1,44 @@
 {#if sensitive }
 <div class={computedClass} style={customSize}>
   <div class="status-sensitive-inner-div">
-  {#if sensitiveShown}
-  <button id={elementId}
-          type="button"
-          class="status-sensitive-media-button"
-          aria-label="Hide sensitive media" >
-    <div class="svg-wrapper">
-      <SvgIcon className="status-sensitive-media-svg" href="#fa-eye-slash" />
-    </div>
-  </button>
-  <MediaAttachments {mediaAttachments} {sensitive} {uuid} />
-  {:else}
-    <button id={elementId}
-            type="button"
-            class="status-sensitive-media-button"
-            aria-label="Show sensitive media" >
+    {#if sensitiveShown}
+      <button id={elementId}
+              type="button"
+              class="status-sensitive-media-button"
+              aria-label="Hide sensitive media"
+              ref:hideSensitiveMedia
+      >
+        <div class="svg-wrapper">
+          <SvgIcon className="status-sensitive-media-svg"
+                   href="#fa-eye-slash" />
+        </div>
+      </button>
+    {:else}
+      <button id={elementId}
+              type="button"
+              class="status-sensitive-media-button"
+              aria-label="Show sensitive media"
+              ref:showSensitiveMedia
+      >
 
-      <div class="status-sensitive-media-warning">
-        Sensitive content. Click to show.
-      </div>
-      <div class="svg-wrapper">
-        <SvgIcon className="status-sensitive-media-svg" href="#fa-eye" />
-      </div>
-    </button>
-  {/if}
+        <div class="status-sensitive-media-warning">
+          <div class="status-sensitive-media-warning-text">
+            Sensitive content. Click to show.
+          </div>
+        </div>
+        <div class="svg-wrapper">
+          <SvgIcon className="status-sensitive-media-svg" href="#fa-eye" />
+        </div>
+      </button>
+    {/if}
+    <MediaAttachments {mediaAttachments} {sensitive} {sensitiveShown} {uuid} />
   </div>
 </div>
 {#if enableShortcuts}
-  <Shortcut scope={shortcutScope} key="y" on:pressed="toggleSensitiveMedia()"/>
+  <Shortcut scope={shortcutScope} key="y" on:pressed="toggleSensitiveMedia(false)"/>
 {/if}
 {:else}
-  <MediaAttachments {mediaAttachments} {sensitive} {uuid} />
+  <MediaAttachments {mediaAttachments} {sensitive} {sensitiveShown} {uuid} />
 {/if}
 <style>
   .status-sensitive-media-container {
@@ -49,13 +56,12 @@
   }
 
   .status-sensitive-media-container.grouped-images .status-sensitive-inner-div {
-    position: absolute;
+    position: relative;
     width: 100%;
   }
 
   .status-sensitive-media-container.grouped-images {
     grid-area: media-grp;
-    padding-bottom: 58%;
   }
 
   .status-sensitive-media-button {
@@ -75,12 +81,13 @@
 
   .status-sensitive-media-shown .status-sensitive-media-button {
     position: absolute;
-    left: 0;
-    top: 0;
+    top: 5px;
+    left: 5px;
     z-index: 90;
   }
 
   .status-sensitive-media-hidden .status-sensitive-media-button {
+    position: absolute;
     right: 0;
     bottom: 0;
     width: 100%;
@@ -92,11 +99,10 @@
     margin: 10px auto;
   }
   .status-sensitive-media-container.status-sensitive-media-hidden.not-grouped-images {
-      height: 200px;
+      height: 250px;
   }
 
   .status-sensitive-media-container .status-sensitive-media-warning {
-    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -107,6 +113,14 @@
     color: var(--deemphasized-text-color);
     z-index: 60;
     padding: 0 10px;
+    position: absolute;
+  }
+
+  .status-sensitive-media-container .status-sensitive-media-warning .status-sensitive-media-warning-text {
+    background: var(--mask-bg);
+    padding: 10px;
+    border-radius: 6px;
+    color: var(--blurhash-sensitive-text-color);
   }
 
   .status-sensitive-media-container .svg-wrapper {
@@ -119,8 +133,9 @@
   }
   .status-sensitive-media-hidden .svg-wrapper {
     position: absolute;
-    top: 0;
-    left: 0;
+    background: none;
+    top: 5px;
+    left: 5px;
     right: 0;
     bottom: 0;
   }
@@ -141,8 +156,8 @@
     padding: 6px 10px;
   }
   :global(.status-sensitive-media-container.status-sensitive-media-hidden .status-sensitive-media-svg) {
-    fill: var(--deemphasized-text-color);
-    background: var(--mask-opaque-bg);
+    fill: var(--blurhash-sensitive-text-color);
+    background: var(--mask-bg);
   }
 </style>
 <script>
@@ -156,7 +171,7 @@
   export default {
     oncreate () {
       const { elementId } = this.get()
-      registerClickDelegate(this, elementId, () => this.toggleSensitiveMedia())
+      registerClickDelegate(this, elementId, () => this.toggleSensitiveMedia(true))
     },
     components: {
       MediaAttachments,
@@ -165,9 +180,11 @@
     },
     store: () => store,
     computed: {
-      computedClass: ({ sensitiveShown, $largeInlineMedia }) => classname(
+      computedClass: ({ sensitiveShown, oddCols, twoCols, $largeInlineMedia }) => classname(
         'status-sensitive-media-container',
         sensitiveShown ? 'status-sensitive-media-shown' : 'status-sensitive-media-hidden',
+        oddCols && 'odd-cols',
+        twoCols && 'two-cols',
         $largeInlineMedia ? 'not-grouped-images' : 'grouped-images'
       ),
       mediaAttachments: ({ originalStatus }) => originalStatus.media_attachments,
@@ -181,15 +198,36 @@
           return ''
         }
         return `padding-bottom: ${Math.ceil(mediaAttachments.length / 2) * 29}%;`
+      },
+      nCols: ({ mediaAttachments, $largeInlineMedia }) => {
+        return (!$largeInlineMedia && mediaAttachments.length > 1) ? 2 : 1
+      },
+      oddCols: ({ mediaAttachments }) => {
+        return (mediaAttachments.length > 1 && (mediaAttachments.length % 2))
+      },
+      twoCols: ({ mediaAttachments }) => {
+        return (mediaAttachments.length === 2)
       }
     },
     methods: {
-      toggleSensitiveMedia () {
+      toggleSensitiveMedia (changeFocus) {
         const { uuid } = this.get()
         const { sensitivesShown } = this.store.get()
         sensitivesShown[uuid] = !sensitivesShown[uuid]
         this.store.set({ sensitivesShown })
         this.fire('recalculateHeight')
+        // Only change focus for clicks, not for hotkeys. It's weird if, when the entire toot
+        // is focused and you press "y", that the focus changes to the sensitive media button.
+        if (changeFocus) {
+          requestAnimationFrame(() => {
+            const element = this.refs.hideSensitiveMedia || this.refs.showSensitiveMedia
+            try {
+              element.focus({ preventScroll: true })
+            } catch (e) {
+              console.error('ignored focus error', e)
+            }
+          })
+        }
         return true
       }
     }

@@ -4,7 +4,7 @@ import FileApi from 'file-api'
 import { users } from './users'
 import { postStatus } from '../src/routes/_api/statuses'
 import { deleteStatus } from '../src/routes/_api/delete'
-import { authorizeFollowRequest, getFollowRequests } from '../src/routes/_actions/followRequests'
+import { authorizeFollowRequest, getFollowRequests } from '../src/routes/_api/followRequests'
 import { followAccount, unfollowAccount } from '../src/routes/_api/follow'
 import { updateCredentials } from '../src/routes/_api/updateCredentials'
 import { reblogStatus } from '../src/routes/_api/reblog'
@@ -36,10 +36,10 @@ export async function postWithSpoilerAndPrivacyAs (username, text, spoiler, priv
     null, null, true, spoiler, privacy)
 }
 
-export async function postEmptyStatusWithMediaAs (username, filename, alt) {
+export async function postEmptyStatusWithMediaAs (username, filename, alt, sensitive) {
   const mediaResponse = await submitMedia(users[username].accessToken, filename, alt)
   return postStatus(instanceName, users[username].accessToken, '',
-    null, [mediaResponse.id], false, null, 'public')
+    null, [mediaResponse.id], !!sensitive, null, 'public')
 }
 
 export async function postReplyAs (username, text, inReplyTo) {

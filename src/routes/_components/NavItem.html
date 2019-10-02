@@ -1,4 +1,4 @@
-<a class='main-nav-link {selected ? "selected" : ""}'
+<a class='main-nav-link focus-fix {selected ? "selected" : ""}'
    aria-label={ariaLabel}
    aria-current={selected}
    on:click="onClick(event)"
@@ -24,8 +24,8 @@
     flex-direction: column;
   }
 
-  :global(.nav-icon-and-label ){
-    padding: 15px 20px;
+  .nav-icon-and-label {
+    padding: var(--nav-icon-pad-v) var(--nav-icon-pad-h);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -94,9 +94,6 @@
     :global(.main-nav-link .nav-link-label ){
       display: none;
     }
-    .nav-icon-and-label {
-      padding: 20px 0;
-    }
   }
 </style>
 <script>
@@ -109,21 +106,67 @@
 
   export default {
     oncreate () {
-      const { name } = this.get()
-      const indicator = this.refs.indicator
       on('animateNavPart1', this, ({ fromPage, toPage }) => {
-        if (fromPage !== name) {
+        const { name } = this.get()
+        const { reduceMotion } = this.store.get()
+        if (fromPage === name && !reduceMotion) {
+          this.animatePart1({ toPage })
+        }
+      })
+      on('animateNavPart2', this, ({ toPage, fromRect }) => {
+        const { name } = this.get()
+        const { reduceMotion } = this.store.get()
+        if (toPage === name && !reduceMotion) {
+          this.animatePart2({ fromRect })
+        }
+      })
+    },
+    store: () => store,
+    computed: {
+      selected: ({ page, name }) => {
+        return page === name ||
+          // special case – these should both highlight the notifications tab icon
+          (name === 'notifications' && page === 'notifications/mentions')
+      },
+      ariaLabel: ({ selected, name, label, $numberOfNotifications, $numberOfFollowRequests }) => {
+        let res = label
+        if (selected) {
+          res += ' (current page)'
+        }
+        if (name === 'notifications' && $numberOfNotifications) {
+          res += ` (${$numberOfNotifications} notification${$numberOfNotifications === 1 ? '' : 's'})`
+        } else if (name === 'community' && $numberOfFollowRequests) {
+          res += ` (${$numberOfFollowRequests} follow request${$numberOfFollowRequests === 1 ? '' : 's'})`
+        }
+        return res
+      },
+      showBadge: ({ name, $hasNotifications, $hasFollowRequests }) => (
+        (name === 'notifications' && $hasNotifications) || (name === 'community' && $hasFollowRequests)
+      ),
+      badgeNumber: ({ name, $numberOfNotifications, $numberOfFollowRequests }) => (
+        (name === 'notifications' && $numberOfNotifications) || (name === 'community' && $numberOfFollowRequests) || 0
+      )
+    },
+    methods: {
+      onClick (e) {
+        const { selected } = this.get()
+        if (!selected) {
           return
         }
+        if (scrollToTop(/* smooth */ true)) {
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      },
+      animatePart1 ({ toPage }) {
+        const indicator = this.refs.indicator
         mark('animateNavPart1 gBCR')
         const fromRect = indicator.getBoundingClientRect()
         stop('animateNavPart1 gBCR')
-        emit('animateNavPart2', { fromRect, fromPage, toPage })
-      })
-      on('animateNavPart2', this, ({ fromPage, fromRect, toPage }) => {
-        if (toPage !== name) {
-          return
-        }
+        emit('animateNavPart2', { fromRect, toPage })
+      },
+      animatePart2 ({ fromRect }) {
+        const indicator = this.refs.indicator
         mark('animateNavPart2 gBCR')
         const toRect = indicator.getBoundingClientRect()
         stop('animateNavPart2 gBCR')
@@ -139,38 +182,6 @@
           indicator.classList.add('animate')
           indicator.style.transform = ''
         })
-      })
-    },
-    store: () => store,
-    computed: {
-      selected: ({ page, name }) => {
-        return page === name ||
-          // special case – these should both highlight the notifications tab icon
-          (name === 'notifications' && page === 'notifications/mentions')
-      },
-      ariaLabel: ({ selected, name, label, $numberOfNotifications }) => {
-        let res = label
-        if (selected) {
-          res += ' (current page)'
-        }
-        if (name === 'notifications' && $numberOfNotifications) {
-          res += ` (${$numberOfNotifications} notification${$numberOfNotifications === 1 ? '' : 's'})`
-        }
-        return res
-      },
-      showBadge: ({ name, $hasNotifications }) => name === 'notifications' && $hasNotifications,
-      badgeNumber: ({ name, $numberOfNotifications }) => name === 'notifications' && $numberOfNotifications
-    },
-    methods: {
-      onClick (e) {
-        const { selected } = this.get()
-        if (!selected) {
-          return
-        }
-        if (scrollToTop(/* smooth */ true)) {
-          e.preventDefault()
-          e.stopPropagation()
-        }
       }
     },
     components: {

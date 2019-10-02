@@ -7,7 +7,8 @@ import {
   onKeyDownInShortcutScope,
   popShortcutScope,
   pushShortcutScope,
-  removeFromShortcutScope } from '../../src/routes/_utils/shortcuts'
+  removeFromShortcutScope
+} from '../../src/routes/_utils/shortcuts'
 import assert from 'assert'
 
 function KeyDownEvent (key) {
@@ -233,5 +234,17 @@ describe('test-shortcuts.js', function () {
     event.altKey = true
     eventListener(event)
     assert.ok(component.notPressed())
+  })
+
+  it('works with caps lock on', function () {
+    const lmn = new Component()
+
+    addToShortcutScope('global', 'z', lmn)
+
+    assert.strictEqual(lmn.eventCount, 0)
+    eventListener(new KeyDownEvent('z'))
+    assert.strictEqual(lmn.eventCount, 1)
+    eventListener(new KeyDownEvent('Z'))
+    assert.strictEqual(lmn.eventCount, 2)
   })
 })

@@ -33,12 +33,18 @@
       padding: 20px 10px;
     }
   }
+
+  @media (max-width: 240px) {
+    .settings-list-item > :global(*) {
+      padding: 10px 10px;
+    }
+  }
 </style>
 <script>
   export default {
     data: () => ({
-      icon: void 0,
-      ariaLabel: void 0
+      icon: undefined,
+      ariaLabel: undefined
     })
   }
 </script>

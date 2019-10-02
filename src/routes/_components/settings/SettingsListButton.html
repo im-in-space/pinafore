@@ -1,4 +1,9 @@
-<a {href} on:click="fire('click', event)" rel="prefetch" aria-label={ariaLabel || label} class="settings-list-button {className ? className : ''}">
+<a {href}
+   on:click="fire('click', event)"
+   rel="prefetch"
+   aria-label={ariaLabel || label}
+   class="settings-list-button focus-fix {className ? className : ''}"
+>
   <span>
     {label}
   </span>
@@ -17,8 +22,8 @@
 <script>
   export default {
     data: () => ({
-      ariaLabel: void 0,
-      className: void 0
+      ariaLabel: undefined,
+      className: undefined
     })
   }
 </script>

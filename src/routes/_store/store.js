@@ -3,6 +3,7 @@ import { computations } from './computations/computations'
 import { mixins } from './mixins/mixins'
 import { LocalStorageStore } from './LocalStorageStore'
 import { observe } from 'svelte-extras'
+import { isKaiOS } from '../_utils/userAgent'
 
 const persistedState = {
   autoplayGifs: false,
@@ -15,7 +16,7 @@ const persistedState = {
   disableFavCounts: false,
   disableFollowerCounts: false,
   disableHotkeys: false,
-  disableInfiniteScroll: false,
+  disableInfiniteScroll: isKaiOS(),
   disableLongAriaLabels: false,
   disableNotificationBadge: false,
   disableReblogCounts: false,
@@ -23,6 +24,7 @@ const persistedState = {
   enableGrayscale: false,
   hideCards: false,
   largeInlineMedia: false,
+  leftRightChangesFocus: isKaiOS(),
   instanceNameInSearch: '',
   instanceThemes: {},
   instanceSettings: {},
@@ -30,6 +32,7 @@ const persistedState = {
   loggedInInstancesInOrder: [],
   markMediaAsSensitive: false,
   neverMarkMediaAsSensitive: false,
+  ignoreBlurhash: false,
   omitEmojiInDisplayNames: undefined,
   pinnedPages: {},
   pushSubscriptions: {},
@@ -41,6 +44,7 @@ const persistedState = {
 
 const nonPersistedState = {
   customEmoji: {},
+  followRequestCounts: {},
   instanceInfos: {},
   instanceLists: {},
   online: !process.browser || navigator.onLine,
@@ -63,7 +67,7 @@ const nonPersistedState = {
 const state = Object.assign({}, persistedState, nonPersistedState)
 const keysToStoreInLocalStorage = new Set(Object.keys(persistedState))
 
-class PinaforeStore extends LocalStorageStore {
+export class PinaforeStore extends LocalStorageStore {
   constructor (state) {
     super(state, keysToStoreInLocalStorage)
   }
@@ -77,6 +81,6 @@ mixins(PinaforeStore)
 computations(store)
 observers(store)
 
-if (process.browser && process.env.NODE_ENV !== 'production') {
-  window.store = store // for debugging
+if (process.browser) {
+  window.__store = store // for debugging
 }
