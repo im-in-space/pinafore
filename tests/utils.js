@@ -2,6 +2,7 @@ import { ClientFunction as exec, Selector as $ } from 'testcafe'
 import * as images from './images'
 import * as blobUtils from './blobUtils'
 
+export const timeline = $('[role=feed]')
 export const settingsButton = $('nav a[aria-label=Settings]')
 export const instanceInput = $('#instanceInput')
 export const modalDialog = $('.modal-dialog')
@@ -32,6 +33,7 @@ export const logInToInstanceLink = $('a[href="/settings/instances/add"]')
 export const copyPasteModeButton = $('.copy-paste-mode-button')
 export const oauthCodeInput = $('#oauthCodeInput')
 export const searchInput = $('.search-input')
+export const searchButton = $('button[aria-label=Search]')
 export const postStatusButton = $('.compose-box-button')
 export const showMoreButton = $('.more-items-header button')
 export const accountProfileName = $('.account-profile .account-profile-name')
@@ -56,7 +58,6 @@ export const disableUnreadNotifications = $('#choice-disable-unread-notification
 export const leftRightChangesFocus = $('#choice-left-right-focus')
 export const disableHotkeys = $('#choice-disable-hotkeys')
 export const dialogOptionsOption = $('.modal-dialog button')
-export const emojiSearchInput = $('.emoji-mart-search input')
 export const confirmationDialogOKButton = $('.confirmation-dialog-form-flex button:nth-child(1)')
 export const confirmationDialogCancelButton = $('.confirmation-dialog-form-flex button:nth-child(2)')
 
@@ -119,10 +120,44 @@ export const sleep = timeout => new Promise(resolve => setTimeout(resolve, timeo
 
 export const getUrl = exec(() => window.location.href)
 
+/* global emojiPickerSelector */
+const emojiPicker = $('emoji-picker')
+export const emojiSearchInput = $(() => {
+  return emojiPickerSelector().shadowRoot.querySelector('input')
+}, { dependencies: { emojiPickerSelector: emojiPicker } })
+
+export const firstEmojiInPicker = $(() => {
+  return emojiPickerSelector().shadowRoot.querySelector('.emoji-menu button')
+}, { dependencies: { emojiPickerSelector: emojiPicker } })
+
+export const getNumSyntheticListeners = exec(() => {
+  return Object.keys(window.__eventBus.$e).map(key => window.__eventBus.listenerCount(key))
+    .concat(window.__resizeListeners.size)
+    .concat(Object.keys(window.__delegateCallbacks).length)
+    .reduce((a, b) => a + b, 0)
+})
+
+export const getNumStoreListeners = exec(() => {
+  function getStoreHandlers (storeName) {
+    return window[storeName] ? window[storeName]._handlers : {}
+  }
+
+  const values = 'values' // prevent Babel from transpiling Object.values
+  return Object[values](getStoreHandlers('__store'))
+    .concat(Object[values](getStoreHandlers('__listStore')))
+    .concat(Object[values](getStoreHandlers('__virtualListStore')))
+    .map(arr => arr.length)
+    .reduce((a, b) => a + b, 0)
+})
+
 export const getMediaScrollLeft = exec(() => document.querySelector('.media-scroll').scrollLeft || 0)
 
 export const getActiveElementClassList = exec(() =>
   (document.activeElement && (document.activeElement.getAttribute('class') || '').split(/\s+/)) || []
+)
+
+export const getActiveElementHref = exec(() =>
+  (document.activeElement && (document.activeElement.getAttribute('href') || ''))
 )
 
 export const getActiveElementTagName = exec(() =>
@@ -145,6 +180,15 @@ export const getActiveElementAriaLabel = exec(() => (
   (document.activeElement && document.activeElement.getAttribute('aria-label')) || ''
 ))
 
+export const getCommunityPinRadioButtonIds = exec(() => {
+  const buttons = document.querySelectorAll('.page-list-item button')
+  const res = []
+  for (let i = 0; i < buttons.length; i++) {
+    res.push(buttons[i].id)
+  }
+  return res
+})
+
 export const getActiveElementInsideNthStatus = exec(() => {
   let element = document.activeElement
   while (element) {
@@ -154,6 +198,27 @@ export const getActiveElementInsideNthStatus = exec(() => {
     element = element.parentElement
   }
   return ''
+})
+
+export const getNthStatusId = n => exec(() => {
+  return document.querySelector(getNthStatusSelector(n))
+    .getAttribute('id')
+    .split('/')
+    .slice(-1)[0]
+}, {
+  dependencies: {
+    getNthStatusSelector,
+    n
+  }
+})
+
+export const getStatusContents = exec(() => {
+  const res = []
+  const elements = document.querySelectorAll('.list-item > article .status-content')
+  for (let i = 0; i < elements.length; i++) {
+    res.push(elements[i].innerText)
+  }
+  return res
 })
 
 export const getTitleText = exec(() => document.head.querySelector('title') && document.head.querySelector('title').innerHTML)
@@ -235,6 +300,10 @@ export const scrollToTop = exec(() => {
 export const getScrollTop = exec(() => {
   return document.scrollingElement.scrollTop || 0
 })
+
+export function getFirstModalMedia () {
+  return $('.modal-dialog .media-container img')
+}
 
 export function getNthMediaAltInput (n) {
   return $(`.compose-box .compose-media:nth-child(${n}) .compose-media-alt textarea`)
@@ -404,8 +473,8 @@ export function getNthStatusOptionsButton (n) {
   return $(`${getNthStatusSelector(n)} .status-toolbar button:nth-child(4)`)
 }
 
-export function getNthFavorited (n) {
-  return getNthFavoriteButton(n).getAttribute('aria-pressed')
+export function getNthFavoritedLabel (n) {
+  return getNthFavoriteButton(n).getAttribute('aria-label')
 }
 
 export function getNthShowOrHideButton (n) {
@@ -420,8 +489,8 @@ export function getNthReblogButton (n) {
   return $(`${getNthStatusSelector(n)} .status-toolbar button:nth-child(2)`)
 }
 
-export function getNthReblogged (n) {
-  return getNthReblogButton(n).getAttribute('aria-pressed')
+export function getNthRebloggedLabel (n) {
+  return getNthReblogButton(n).getAttribute('aria-label')
 }
 
 export function getNthDialogOptionsOption (n) {
@@ -464,11 +533,11 @@ export async function validateTimeline (t, timeline) {
     }
     if (status.rebloggedBy) {
       await t.expect(getNthStatusHeader(1 + i).innerText)
-        .match(new RegExp(status.rebloggedBy + '\\s+boosted your status'), { timeout })
+        .match(new RegExp(status.rebloggedBy + '\\s+boosted your toot'), { timeout })
     }
     if (status.favoritedBy) {
       await t.expect(getNthStatusHeader(1 + i).innerText)
-        .match(new RegExp(status.favoritedBy + '\\s+favorited your status'), { timeout })
+        .match(new RegExp(status.favoritedBy + '\\s+favorited your toot'), { timeout })
     }
   }
 }

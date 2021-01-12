@@ -1,80 +1,48 @@
-<SettingsLayout page='settings/instances/add' label="Add instance">
-  <h1 id="add-an-instance-h1">Add instance</h1>
+<SettingsLayout page='settings/instances/add' label={pageLabel}>
+  <h1 id="add-an-instance-h1">{pageLabel}</h1>
 
   <div class="add-new-instance">
     <form on:submit='onSubmitInstance(event)' aria-labelledby="add-an-instance-h1">
 
       {#if !hasIndexedDB || !hasLocalStorage}
         <div class="form-error form-error-user-error" role="alert">
-          It seems Pinafore cannot store data locally. Is your browser in private mode
-          or blocking cookies? Pinafore stores all data locally, and requires LocalStorage and
-          IndexedDB to work correctly.
+          {intl.storageError}
         </div>
       {/if}
 
       {#if $logInToInstanceError && $logInToInstanceErrorForText === $instanceNameInSearch}
         <div class="form-error form-error-user-error" role="alert">
-          Error: {$logInToInstanceError}
+          {intl.errorShort} {@html $logInToInstanceError}
         </div>
       {/if}
 
       <noscript>
         <div class="form-error" role="alert">
-          You must enable JavaScript to log in.
+          {intl.javaScriptError}
         </div>
       </noscript>
 
-      <label for="instanceInput">Instance:</label>
-      <input type="text" inputmode="url" id="instanceInput"
-             bind:value='$instanceNameInSearch' placeholder="Enter instance name" required
+      <label for="instanceInput">{intl.instanceColon}</label>
+      <input type="text" inputmode="url" autocapitalize="none" spellcheck="false" id="instanceInput"
+             bind:value='$instanceNameInSearch' placeholder="{intl.enterInstanceName}" required
       >
       <button class="primary" type="submit" id="submitButton"
               disabled={!$instanceNameInSearch || $logInToInstanceLoading}>
-        Log in
+        {intl.logIn}
       </button>
     </form>
-
-    {#if $copyPasteMode }
-      <form aria-label="Enter code" on:submit="onSubmitOauth(event)">
-        <label for="oauthCodeInput">Code:</label>
-        <input type="text" id="oauthCodeInput"
-               bind:value='oauthCode' placeholder="Enter code" required
-        >
-        <button class="primary" type="submit" id="submitOauthButton"
-                disabled={!oauthCode}>
-          Submit
-        </button>
-      </form>
-    {/if}
   </div>
 
   {#if !$isUserLoggedIn}
     <p>
-      Don't have an
+      {intl.getAnInstancePre}
       <Tooltip
-        text="instance"
-        tooltipText="An instance is your Mastodon home server, such as mastodon.social or cybre.space."
+        text="{intl.getAnInstanceText}"
+        tooltipText="{intl.getAnInstanceDescription}"
       />
-      ?
-      <ExternalLink href="https://joinmastodon.org">Join Mastodon!</ExternalLink>
+      {intl.getAnInstancePost}
+      <a rel="noopener" target="_blank" href="https://joinmastodon.org">{intl.joinMastodon}</a>
     </p>
-  {/if}
-  <p>
-    {#if $copyPasteMode}
-      Switch back to
-    {:else}
-      Trouble logging in? Switch to
-    {/if}
-    <button on:click="onCopyPasteModeButtonClick()"
-            class="copy-paste-mode-button"
-            aria-pressed={$copyPasteMode}>
-      {$copyPasteMode ? 'regular' : 'basic'} login mode
-    </button>.
-  </p>
-  {#if $copyPasteMode}
-    <InfoAside className="add-new-instance-aside">
-      In basic login mode, click "log in" to open a new window. Then copy the code and paste it above.
-    </InfoAside>
   {/if}
 </SettingsLayout>
 <style>
@@ -105,20 +73,6 @@
     margin: 20px 5px;
   }
 
-  button.copy-paste-mode-button {
-    margin: 0;
-    padding: 0;
-    display: inline-block;
-    background: none;
-    border: none;
-    font-size: 1em;
-    color: var(--anchor-text);
-  }
-
-  button.copy-paste-mode-button:hover {
-    text-decoration: underline;
-  }
-
   @media (max-width: 767px) {
     input {
       min-width: 95%;
@@ -129,11 +83,9 @@
 <script>
   import SettingsLayout from '../../../_components/settings/SettingsLayout.html'
   import { store } from '../../../_store/store'
-  import { logInToInstance, handleOauthCode, handleCopyPasteOauthCode } from '../../../_actions/addInstance'
-  import ExternalLink from '../../../_components/ExternalLink.html'
+  import { logInToInstance, handleOauthCode } from '../../../_actions/addInstance'
   import { testHasIndexedDB, testHasLocalStorage } from '../../../_utils/testStorage'
   import Tooltip from '../../../_components/Tooltip.html'
-  import InfoAside from '../../../_components/InfoAside.html'
 
   export default {
     async oncreate () {
@@ -148,31 +100,21 @@
     },
     components: {
       SettingsLayout,
-      ExternalLink,
-      Tooltip,
-      InfoAside
+      Tooltip
     },
     store: () => store,
     data: () => ({
       hasIndexedDB: true,
-      hasLocalStorage: true,
-      oauthCode: ''
+      hasLocalStorage: true
     }),
+    computed: {
+      pageLabel: ({ $isUserLoggedIn }) => $isUserLoggedIn ? 'intl.addInstance' : 'intl.logIn'
+    },
     methods: {
       onSubmitInstance (event) {
         event.preventDefault()
         event.stopPropagation()
         logInToInstance()
-      },
-      onSubmitOauth (event) {
-        event.preventDefault()
-        event.stopPropagation()
-        handleCopyPasteOauthCode(this.get().oauthCode)
-      },
-      onCopyPasteModeButtonClick () {
-        const { copyPasteMode } = this.store.get()
-        console.log('copyPasteMode', copyPasteMode)
-        this.store.set({ copyPasteMode: !copyPasteMode })
       }
     }
   }

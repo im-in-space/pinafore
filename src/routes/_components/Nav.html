@@ -18,8 +18,9 @@
 {/if}
 
 <style>
-	:global(.main-nav ){
-		border-bottom: 1px solid var(--nav-border);
+	.main-nav {
+    box-sizing: border-box;
+		border-bottom: var(--nav-border-bottom) solid var(--nav-border);
 		background: var(--nav-bg);
 		position: fixed;
 		left: 0;
@@ -50,7 +51,7 @@
 </style>
 <script>
   import NavItem from './NavItem'
-  import { importNavShortcuts } from '../_utils/asyncModules'
+  import { importNavShortcuts } from '../_utils/asyncModules/importNavShortcuts.js'
   import { store } from '../_store/store'
 
   export default {

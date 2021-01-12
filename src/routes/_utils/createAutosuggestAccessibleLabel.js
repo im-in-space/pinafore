@@ -6,7 +6,9 @@ export function createAutosuggestAccessibleLabel (
   const selected = searchResults[selectedIndex]
   let label
   if (autosuggestType === 'emoji') {
-    label = `${selected.shortcode}`
+    label = selected.name || [selected.unicode].concat(selected.shortcodes).join(', ')
+  } else if (autosuggestType === 'hashtag') {
+    label = `#${selected.name}`
   } else { // account
     let displayName = selected.display_name || selected.username
     const emojis = selected.emojis || []
@@ -15,6 +17,5 @@ export function createAutosuggestAccessibleLabel (
       : displayName
     label = `${displayName} @${selected.acct}`
   }
-  return `${label} (${selectedIndex + 1} of ${searchResults.length}). ` +
-    'Press up and down arrows to review and enter to select.'
+  return label
 }

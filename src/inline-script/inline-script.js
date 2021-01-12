@@ -7,6 +7,8 @@ import { INLINE_THEME, DEFAULT_THEME, switchToTheme } from '../routes/_utils/the
 import { basename } from '../routes/_api/utils'
 import { onUserIsLoggedOut } from '../routes/_actions/onUserIsLoggedOut'
 import { storeLite } from '../routes/_store/storeLite'
+import { isIOSPre12Point2 } from '../routes/_utils/userAgent/isIOSPre12Point2'
+import { isMac } from '../routes/_utils/userAgent/isMac'
 
 window.__themeColors = process.env.THEME_COLORS
 
@@ -51,7 +53,7 @@ if (disableCustomScrollbars) {
 }
 
 // hack to make the scrollbars rounded only on macOS
-if (/mac/i.test(navigator.platform)) {
+if (isMac()) {
   document.documentElement.style.setProperty('--scrollbar-border-radius', '50px')
 }
 
@@ -59,9 +61,7 @@ if (/mac/i.test(navigator.platform)) {
 // for cross-origin authentication: https://github.com/nolanlawson/pinafore/issues/45
 // Here we sniff for iOS <12.2 by checking for the existence of a native IntersectionObserver
 // function, which was added in 12.2.
-if (/iP(?:hone|ad|od)/.test(navigator.userAgent) &&
-  !(typeof IntersectionObserver === 'function' &&
-    IntersectionObserver.toString().includes('[native code]'))) {
+if (isIOSPre12Point2()) {
   document.head.removeChild(document.getElementById('theManifest'))
 }
 

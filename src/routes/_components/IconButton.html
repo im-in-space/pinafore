@@ -1,9 +1,12 @@
-<button type="button"
-        title={label}
-        aria-label={label}
-        aria-pressed={pressable ? !!pressed : undefined}
-        aria-hidden={ariaHidden}
-        tabindex="{ariaHidden ? '-1' : '0'}"
+<!-- Normally "pressable" icons would be toggle buttons, but to avoid having the titles and labels mismatched
+     due to guidelines from http://w3c.github.io/aria-practices/#button , we just use normal buttons and change
+     the aria-label instead. See discussion in: https://github.com/nolanlawson/pinafore/issues/1633 -->
+<button id={elementId}
+        type="button"
+        title={ariaLabel}
+        aria-label={ariaLabel}
+        aria-hidden={ariaHidden ? 'true' : undefined}
+        tabindex={ariaHidden ? '-1' : '0'}
         class={computedClass}
         {disabled}
         ref:node
@@ -18,6 +21,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
   }
 
   :global(.icon-button-svg) {
@@ -94,13 +98,16 @@
 
   export default {
     oncreate () {
-      const { clickListener, elementId } = this.get()
+      const { clickListener } = this.get()
       if (clickListener) {
         this.onClick = this.onClick.bind(this)
         this.refs.node.addEventListener('click', this.onClick)
       }
-      if (elementId) {
-        this.refs.node.setAttribute('id', elementId)
+      if (process.env.NODE_ENV !== 'production') {
+        const { pressable, pressedLabel, label } = this.get()
+        if (pressable && ((!pressedLabel || !label) || pressedLabel === label)) {
+          throw new Error('pressable buttons should have a label and a pressedLabel different from each other')
+        }
       }
     },
     ondestroy () {
@@ -114,9 +121,10 @@
       muted: false,
       disabled: false,
       svgClassName: undefined,
-      elementId: undefined,
+      elementId: '',
       pressable: false,
       pressed: false,
+      pressedLabel: undefined,
       className: undefined,
       sameColorWhenPressed: false,
       ariaHidden: false,
@@ -124,17 +132,16 @@
     }),
     store: () => store,
     computed: {
-      computedClass: ({ pressable, pressed, big, muted, sameColorWhenPressed, className }) => {
-        return classname(
-          'icon-button',
-          !pressable && 'not-pressable',
-          pressed && 'pressed',
-          big && 'big-icon',
-          muted && 'muted-style',
-          sameColorWhenPressed ? 'same-pressed' : 'not-same-pressed',
-          className
-        )
-      }
+      computedClass: ({ pressable, pressed, big, muted, sameColorWhenPressed, className }) => (classname(
+        'icon-button',
+        !pressable && 'not-pressable',
+        pressed && 'pressed',
+        big && 'big-icon',
+        muted && 'muted-style',
+        sameColorWhenPressed ? 'same-pressed' : 'not-same-pressed',
+        className
+      )),
+      ariaLabel: ({ pressable, pressed, label, pressedLabel }) => ((pressable && pressed) ? pressedLabel : label)
     },
     methods: {
       animate (animation) {

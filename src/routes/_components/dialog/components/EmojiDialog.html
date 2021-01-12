@@ -4,87 +4,54 @@
   {title}
   shrinkWidthToFit={true}
   background="var(--main-bg)"
-  on:show="onShow()"
-  className="emoji-dialog"
 >
-  <div class="emoji-container" {style} ref:container >
-    {#if loaded}
-      <emoji-mart props-json={emojiMartPropsJson} ></emoji-mart>
-    {:elseif error}
-      <div>Failed to load emoji picker: {error}</div>
-    {:else}
-      <div class="emoji-container-loading" >
-        <LoadingSpinner />
-      </div>
-    {/if}
+  <div class="emoji-container">
+    <emoji-picker
+      ref:picker
+      locale={emojiPickerLocale}
+      data-source={emojiPickerDataSource}
+      class={darkMode ? 'dark' : 'light'}
+      on:emoji-click="onEmojiSelected(event)"
+      on:keydown="onPickerKeydown(event)"
+    ></emoji-picker>
   </div>
 </ModalDialog>
 <style>
-  .emoji-container {
-    max-width: calc(100vw - 20px);
-    position: relative;
-  }
-  .emoji-container-loading {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  :global(.emoji-mart-category .emoji-mart-emoji-custom span,
-    .emoji-mart-preview-emoji .emoji-mart-emoji-custom span) {
-    /* some custom emoji look repeated because they aren't tall enough */
-    background-repeat: no-repeat;
-    background-position: center center;
-  }
-  :global(.emoji-container .emoji-mart-category .emoji-mart-emoji span, .emoji-container .emoji-mart-anchor) {
-    cursor: pointer;
-  }
-  :global(.emoji-container .emoji-mart-search-icon) {
-    top: 6px; /* this looks a bit off-center with the native emoji */
+  :global(emoji-picker) {
+    --indicator-color: var(--main-theme-color);
+    --outline-color: var(--focus-outline);
   }
 
-  :global(.emoji-container .emoji-mart-skin) {
-    max-width: 24px;
-  }
+  @media (max-width: 479px) {
+    :global(emoji-picker) {
+      --emoji-padding: 0.25rem;
+      --input-padding: 0.125rem;
+    }
 
-  :global(.emoji-container .emoji-mart-skin-swatch.selected) {
-    width: 24px;
-  }
-
-  :global(.emoji-container .emoji-mart-skin-swatches.opened .emoji-mart-skin-swatch) {
-    width: 24px;
-  }
-
-  :global(.emoji-container button:hover) {
-    background: none;
+    .emoji-container, :global(emoji-picker) {
+      width: 100%;
+    }
   }
 
   @media (max-width: 320px) {
-    :global(.emoji-container .emoji-mart-preview) {
-      height: 60px;
+    :global(emoji-picker) {
+      --num-columns: 6;
     }
   }
 
   @media (max-width: 240px) {
-    :global(.modal-dialog .modal-dialog-contents.emoji-dialog) {
-      max-width: 100%;
-      max-height: 100%;
+    :global(emoji-picker) {
+      --num-columns: 6;
+      --emoji-size: 1.125rem;
+      --emoji-padding: 0.125rem;
+      height: 240px;
     }
-    .emoji-container {
-      max-width: 100vw;
-      width: 100%;
+  }
+
+  @media (max-height: 450px) {
+    :global(emoji-picker) {
+      height: calc(100vh - 75px); /* leave room for the dialog bar */
     }
-    :global(.emoji-container .emoji-mart) {
-      width: 100% !important;
-    }
-   :global(.emoji-container .emoji-mart-anchors img, .emoji-container .emoji-mart-anchors svg) {
-     width: 14px;
-     height: 14px;
-   }
   }
 </style>
 <script>
@@ -94,122 +61,75 @@
   import { show } from '../helpers/showDialog'
   import { close } from '../helpers/closeDialog'
   import { oncreate as onCreateDialog } from '../helpers/onCreateDialog'
-  import { define } from 'remount'
-  import LoadingSpinner from '../../../_components/LoadingSpinner.html'
-  import { on } from '../../../_utils/eventBus'
-  import { createEmojiMartPicker } from '../../../_react/createEmojiMartPicker'
-
-  // Consistency with Mastodon FE, taken from
-  // app/javascript/mastodon/features/compose/components/emoji_picker_dropdown.js
-  const categoriesSort = [
-    'recent',
-    'custom',
-    'people',
-    'nature',
-    'foods',
-    'activity',
-    'places',
-    'objects',
-    'symbols',
-    'flags'
-  ]
+  import { isDarkTheme } from '../../../_utils/isDarkTheme'
+  import 'emoji-picker-element/picker'
+  import { registerShadowRoot, unregisterShadowRoot } from '../../../_thirdparty/a11y-dialog/a11y-dialog'
+  import { doubleRAF } from '../../../_utils/doubleRAF'
+  import { convertCustomEmojiToEmojiPickerFormat } from '../../../_utils/convertCustomEmojiToEmojiPickerFormat'
+  import { supportsFocusVisible } from '../../../_utils/supportsFocusVisible'
+  import { importFocusVisible } from '../../../_utils/asyncPolyfills'
+  import { emojiPickerI18n, emojiPickerDataSource, emojiPickerLocale } from '../../../_static/emojiPickerIntl'
 
   export default {
     async oncreate () {
       onCreateDialog.call(this)
-      on('emoji-selected', this, emoji => this.onEmojiSelected(emoji))
-      try {
-        const Picker = await createEmojiMartPicker()
-        if (!customElements.get('emoji-mart')) {
-          define({ 'emoji-mart': Picker })
-        }
-        this.set({ loaded: true })
-      } catch (error) {
-        this.set({ error }) // should never happen, but you never know
+      const { customEmoji } = this.get()
+      const { enableGrayscale, isUserTouching } = this.store.get()
+      const { picker } = this.refs
+      picker.customEmoji = customEmoji
+      if (emojiPickerI18n) {
+        picker.i18n = emojiPickerI18n
+      }
+      // break into shadow DOM to fix grayscale in Wellness grayscale mode
+      if (enableGrayscale) {
+        const style = document.createElement('style')
+        style.textContent = '.emoji { filter: grayscale(100%); }'
+        picker.shadowRoot.appendChild(style)
+      }
+      registerShadowRoot(picker.shadowRoot)
+      this.on('destroy', () => unregisterShadowRoot(picker.shadowRoot))
+      if (!isUserTouching) { // auto focus the input on desktop
+        doubleRAF(() => { // triple rAF because a11y tries to focus as well
+          requestAnimationFrame(() => {
+            picker.shadowRoot.querySelector('input').focus()
+          })
+        })
+      }
+      if (!supportsFocusVisible()) {
+        await importFocusVisible()
+        /* global applyFocusVisiblePolyfill */
+        applyFocusVisiblePolyfill(picker.shadowRoot)
       }
     },
     components: {
-      ModalDialog,
-      LoadingSpinner
+      ModalDialog
     },
     store: () => store,
     data: () => ({
-      loading: true,
-      loaded: false,
-      error: undefined
+      emojiPickerLocale,
+      emojiPickerDataSource
     }),
     computed: {
-      // try to estimate size of emoji-mart based on mobile vs desktop
-      style: ({ $isVeryTinyMobileSize, $isSmallMobileSize }) => (`
-        min-width: ${$isVeryTinyMobileSize ? 200 : $isSmallMobileSize ? 250 : 300}px;
-        min-height: ${$isVeryTinyMobileSize ? 0 : $isSmallMobileSize ? 300 : 400}px;
-        ${$isVeryTinyMobileSize ? 'overflow-y: auto; overflow-x: hidden;' : ''}
-      `),
-      emojiMartPropsJson: ({ emojiMartProps }) => JSON.stringify(emojiMartProps),
-      emojiMartProps: ({ perLine, custom }) => ({
-        perLine,
-        custom,
-        color: 'var(--nav-bg)',
-        emoji: 'sailboat',
-        title: 'Emoji',
-        include: categoriesSort,
-        showPreview: true
-      }),
-      perLine: ({ $isSmallMobileSize, $isTinyMobileSize, $isMobileSize, $isVeryTinyMobileSize }) => (
-        $isVeryTinyMobileSize
-          ? 5
-          : $isTinyMobileSize
-            ? 7
-            : $isSmallMobileSize
-              ? 8
-              : $isMobileSize
-                ? 9
-                : 10
-      ),
-      custom: ({ $currentCustomEmoji, $autoplayGifs }) => {
-        if (!$currentCustomEmoji) {
-          return []
-        }
-        return $currentCustomEmoji.filter(emoji => emoji.visible_in_picker).map(emoji => ({
-          name: emoji.shortcode,
-          short_names: [emoji.shortcode],
-          text: `:${emoji.shortcode}:`,
-          emoticons: [],
-          keywords: [emoji.shortcode],
-          imageUrl: $autoplayGifs ? emoji.url : emoji.static_url
-        }))
-      },
-      // it's jarring on mobile if the emoji picker automatically pops open the keyboard
-      autoFocus: ({ $isUserTouching }) => !$isUserTouching
+      darkMode: ({ $currentTheme }) => isDarkTheme($currentTheme),
+      customEmoji: ({ $currentCustomEmoji, $autoplayGifs }) => (
+        convertCustomEmojiToEmojiPickerFormat($currentCustomEmoji, $autoplayGifs)
+      )
     },
     methods: {
       show,
       close,
-      onEmojiSelected (emoji) {
+      onEmojiSelected (event) {
         const { realm } = this.get()
-        insertEmoji(realm, emoji)
+        insertEmoji(realm, event.detail.emoji)
         this.close()
       },
-      onShow () {
-        this.focusIfNecessary()
-      },
-      focusIfNecessary () {
-        const { autoFocus } = this.get()
-        if (!autoFocus) {
-          return
+      onPickerKeydown (event) {
+        // workaround for shortcuts -- see acceptShortcutEvent() in shortcuts.js
+        if (event.key === 'Backspace' &&
+          event.target.shadowRoot.activeElement &&
+          event.target.shadowRoot.activeElement.tagName === 'INPUT') {
+          event.stopPropagation() // prevent our hotkeys from activating when pressing backspace in the input
         }
-        // The setTimeout is to work around timing issues where
-        // sometimes the search input isn't rendered yet.
-        setTimeout(() => requestAnimationFrame(() => {
-          const container = this.refs.container
-          if (container) {
-            const searchInput = container.querySelector('emoji-mart .emoji-mart-search input')
-            if (searchInput) {
-              // do this manually because emoji-mart's built in autofocus doesn't work consistently
-              searchInput.focus()
-            }
-          }
-        }), 50)
       }
     }
   }

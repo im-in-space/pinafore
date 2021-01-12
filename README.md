@@ -1,4 +1,4 @@
-# Pinafore [![Build Status](https://travis-ci.org/nolanlawson/pinafore.svg)](https://travis-ci.org/nolanlawson/pinafore) [![Greenkeeper badge](https://badges.greenkeeper.io/nolanlawson/pinafore.svg)](https://greenkeeper.io/)
+# Pinafore [![Build status](https://circleci.com/gh/nolanlawson/pinafore.svg?style=svg)](https://app.circleci.com/pipelines/gh/nolanlawson/pinafore)
 
 An alternative web client for [Mastodon](https://joinmastodon.org), focused on speed and simplicity.
 
@@ -31,12 +31,12 @@ Compatible versions of each (Opera, Brave, Samsung, etc.) should be fine.
 - Progressive Web App features
 - Multi-instance support
 - Support latest versions of Chrome, Edge, Firefox, and Safari
+- Support non-Mastodon instances (e.g. Pleroma) as well as possible
+- Internationalization
 
 ### Secondary / possible future goals
 
-- Support for Pleroma or other non-Mastodon backends
 - Serve as an alternative frontend tied to a particular instance
-- Support for non-English languages (i18n)
 - Offline search
 
 ### Non-goals
@@ -75,6 +75,14 @@ To build a Docker image for production:
 
 Now Pinafore is running at `localhost:4002`.
 
+### docker-compose
+
+Alternatively, use docker-compose to build and serve the image for production:
+
+    docker-compose up --build -d
+
+The image will build and start, then detach from the terminal running at `localhost:4002`.
+
 ### Updating
 
 To keep your version of Pinafore up to date, you can use `git` to check out the latest tag:
@@ -83,10 +91,10 @@ To keep your version of Pinafore up to date, you can use `git` to check out the 
 
 ### Exporting
 
-Pinafore is a static site. When you run `yarn build`, static files will be 
+Pinafore is a static site. When you run `yarn build`, static files will be
 written to `__sapper__/export`.
 
-In theory you could host these static files yourself (e.g. using nginx or Apache), but 
+In theory you could host these static files yourself (e.g. using nginx or Apache), but
 it's not recommended, because:
 
 - You'd have to set the [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) headers yourself,
@@ -95,7 +103,7 @@ which are an important security feature.
 
 ## Developing and testing
 
-See [CONTRIBUTING.md](https://github.com/nolanlawson/pinafore/blob/master/CONTRIBUTING.md) for 
+See [CONTRIBUTING.md](https://github.com/nolanlawson/pinafore/blob/master/CONTRIBUTING.md) for
 how to run Pinafore in dev mode and run tests.
 
 ## Changelog

@@ -1,5 +1,6 @@
 import { getAccountAccessibleName } from './getAccountAccessibleName'
 import { POST_PRIVACY_OPTIONS } from '../_static/statuses'
+import { formatIntl } from '../_utils/formatIntl'
 
 function getNotificationText (notification, omitEmojiInDisplayNames) {
   if (!notification) {
@@ -7,9 +8,9 @@ function getNotificationText (notification, omitEmojiInDisplayNames) {
   }
   const notificationAccountDisplayName = getAccountAccessibleName(notification.account, omitEmojiInDisplayNames)
   if (notification.type === 'reblog') {
-    return `${notificationAccountDisplayName} boosted your status`
+    return formatIntl('intl.accountRebloggedYou', { account: notificationAccountDisplayName })
   } else if (notification.type === 'favourite') {
-    return `${notificationAccountDisplayName} favorited your status`
+    return formatIntl('intl.accountFavoritedYou', { account: notificationAccountDisplayName })
   }
 }
 
@@ -26,7 +27,7 @@ function getReblogText (reblog, account, omitEmojiInDisplayNames) {
     return
   }
   const accountDisplayName = getAccountAccessibleName(account, omitEmojiInDisplayNames)
-  return `Boosted by ${accountDisplayName}`
+  return formatIntl('intl.rebloggedByAccount', { account: accountDisplayName })
 }
 
 function cleanupText (text) {
@@ -36,23 +37,27 @@ function cleanupText (text) {
 export function getAccessibleLabelForStatus (originalAccount, account, plainTextContent,
   timeagoFormattedDate, spoilerText, showContent,
   reblog, notification, visibility, omitEmojiInDisplayNames,
-  disableLongAriaLabels) {
+  disableLongAriaLabels, showMedia, showPoll) {
   const originalAccountDisplayName = getAccountAccessibleName(originalAccount, omitEmojiInDisplayNames)
   const contentTextToShow = (showContent || !spoilerText)
     ? cleanupText(plainTextContent)
-    : `Content warning: ${cleanupText(spoilerText)}`
+    : formatIntl('intl.contentWarningContent', { spoiler: cleanupText(spoilerText) })
+  const mediaTextToShow = showMedia && 'intl.hasMedia'
+  const pollTextToShow = showPoll && 'intl.hasPoll'
   const privacyText = getPrivacyText(visibility)
 
   if (disableLongAriaLabels) {
     // Long text can crash NVDA; allow users to shorten it like we had it before.
     // https://github.com/nolanlawson/pinafore/issues/694
-    return `${privacyText} status by ${originalAccountDisplayName}`
+    return formatIntl('intl.shortStatusLabel', { privacy: privacyText, account: originalAccountDisplayName })
   }
 
   const values = [
     getNotificationText(notification, omitEmojiInDisplayNames),
     originalAccountDisplayName,
     contentTextToShow,
+    mediaTextToShow,
+    pollTextToShow,
     timeagoFormattedDate,
     `@${originalAccount.acct}`,
     privacyText,

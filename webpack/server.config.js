@@ -1,3 +1,6 @@
+import { LOCALE } from '../src/routes/_static/intl'
+
+const path = require('path')
 const webpack = require('webpack')
 const config = require('sapper/config/webpack.js')
 const pkg = require('../package.json')
@@ -6,7 +9,6 @@ const { mode, dev, resolve, inlineSvgs, allSvgs } = require('./shared.config')
 // modules that the server should ignore, either because they cause errors or warnings
 // (because they're only used on the client side)
 const NOOP_MODULES = [
-  'page-lifecycle/dist/lifecycle.mjs',
   '../_workers/blurhash',
   'tesseract.js/dist/worker.min.js',
   'tesseract.js/dist/worker.min.js.map',
@@ -16,6 +18,7 @@ const NOOP_MODULES = [
 ]
 
 const serverResolve = JSON.parse(JSON.stringify(resolve))
+serverResolve.alias = serverResolve.alias || {}
 NOOP_MODULES.forEach(mod => {
   serverResolve.alias[mod] = 'lodash-es/noop'
 })
@@ -29,6 +32,13 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: path.join(__dirname, './svelte-intl-loader.js')
+        }
+      },
+      {
         test: /\.html$/,
         exclude: /node_modules/,
         use: {
@@ -40,6 +50,9 @@ module.exports = {
             dev
           }
         }
+      },
+      {
+        loader: path.join(__dirname, './svelte-intl-loader.js')
       }
     ]
   },
@@ -47,11 +60,14 @@ module.exports = {
   performance: {
     hints: false // it doesn't matter if server.js is large
   },
+  optimization: dev ? {} : {
+    minimize: false
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.INLINE_SVGS': JSON.stringify(inlineSvgs),
       'process.env.ALL_SVGS': JSON.stringify(allSvgs),
-      'process.env.LEGACY': !!process.env.LEGACY
+      'process.env.LOCALE': JSON.stringify(LOCALE)
     })
   ]
 }

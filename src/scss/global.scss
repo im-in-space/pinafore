@@ -20,12 +20,14 @@ body {
 
 .main-content {
   contain: content; // see https://www.w3.org/TR/2018/CR-css-contain-1-20181108/#valdef-contain-content
-  // these paddings should be kept in sync with getMainTopMargin.js
-  @supports (-webkit-overflow-scrolling: touch) {
-    // fixes iOS Safari horizontal scrolling (see https://github.com/nolanlawson/pinafore/issues/667)
-    overflow-x: hidden;
-  }
   padding-top: var(--main-content-pad-top);
+
+  @supports not (contain: content) {
+    // For browsers which don't support the "contain" CSS property,
+    // make a stacking context manually so that the z-index behavior
+    // is consistent. See: https://github.com/nolanlawson/pinafore/issues/1806
+    isolation: isolate;
+  }
 }
 
 main {
@@ -36,14 +38,11 @@ main {
   max-width: 100%;
   padding: 0;
   box-sizing: border-box;
-  margin: 30px auto 15px;
+  margin: 0 auto var(--main-margin-bottom);
   background: var(--main-bg);
-  border: 1px solid var(--main-border);
+  border: var(--main-border-size) solid var(--main-border);
   border-radius: 1px;
   min-height: 70vh;
-  @media (max-width: 767px) {
-    margin: 5px auto 15px;
-  }
 }
 
 footer {

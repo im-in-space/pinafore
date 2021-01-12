@@ -60,6 +60,14 @@ test('Shortcut s goes to the search page', async t => {
     .expect(getUrl()).contains('/search')
 })
 
+test('Shortcut / goes to the search page', async t => {
+  await loginAsFoobar(t)
+  await t
+    .expect(getUrl()).eql('http://localhost:4002/')
+    .pressKey('/')
+    .expect(getUrl()).contains('/search')
+})
+
 test('Shortcut backspace goes back from favorites', async t => {
   await loginAsFoobar(t)
   await t
@@ -187,4 +195,19 @@ test('Shortcuts can be disabled', async t => {
   await sleep(500)
   await t
     .expect(modalDialog.exists).false
+})
+
+test('Shortcut left/right works on settings page', async t => {
+  await loginAsFoobar(t)
+  await t
+    .click(settingsNavButton)
+    .click($('a[href="/settings/hotkeys"]'))
+    .expect(getUrl()).contains('/settings/hotkeys')
+    .expect(settingsNavButton.getAttribute('aria-current')).eql('true')
+    .pressKey('left')
+    .expect(settingsNavButton.getAttribute('aria-current')).notEql('true')
+    .expect(getUrl()).contains('/search')
+    .pressKey('right')
+    .expect(getUrl()).match(/\/settings$/)
+    .expect(settingsNavButton.getAttribute('aria-current')).eql('true')
 })

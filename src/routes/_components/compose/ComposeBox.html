@@ -1,5 +1,5 @@
 {#if realm === 'home'}
-  <h1 class="sr-only">Compose status</h1>
+  <h1 class="sr-only">{intl.composeStatus}</h1>
 {/if}
 <ComposeFileDrop {realm} >
   <div class="{computedClassName} {hideAndFadeIn}">
@@ -12,7 +12,7 @@
     {/if}
     <ComposeInput {realm} {text} {autoFocus} on:postAction="doPostStatus()" />
     <ComposeLengthGauge {length} {overLimit} />
-    <ComposeAutosuggest {realm} {text} />
+    <ComposeAutosuggest {realm} {text} {dialogId} />
     {#if poll && poll.options && poll.options.length}
       <div class="compose-poll-wrapper"
            transition:slide="{duration: 333}">
@@ -57,7 +57,7 @@
     background-color: var(--status-direct-background);
   }
 
-  .compose-box-fade-in {
+  :global(.compose-box-fade-in) {
     transition: opacity 0.2s linear; /* main page reveal */
   }
 

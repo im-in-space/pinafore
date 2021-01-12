@@ -10,6 +10,13 @@ import { getStatus, getStatusContext } from '../_api/statuses'
 import { emit } from '../_utils/eventBus'
 import { TIMELINE_BATCH_SIZE } from '../_static/timelines'
 import { timelineItemToSummary } from '../_utils/timelineItemToSummary'
+import uniqBy from 'lodash-es/uniqBy'
+import { addStatusesOrNotifications } from './addStatusOrNotification'
+import { scheduleIdleTask } from '../_utils/scheduleIdleTask'
+import { sortItemSummariesForThread } from '../_utils/sortItemSummariesForThread'
+import li from 'li'
+
+const byId = _ => _.id
 
 async function storeFreshTimelineItemsInDatabase (instanceName, timelineName, items) {
   await database.insertTimelineItems(instanceName, timelineName, items)
@@ -23,20 +30,106 @@ async function storeFreshTimelineItemsInDatabase (instanceName, timelineName, it
   }
 }
 
+async function updateStatus (instanceName, accessToken, statusId) {
+  const status = await getStatus(instanceName, accessToken, statusId)
+  await database.insertStatus(instanceName, status)
+  emit('statusUpdated', status)
+  return status
+}
+
+async function updateStatusAndThread (instanceName, accessToken, timelineName, statusId) {
+  const [status, context] = await Promise.all([
+    updateStatus(instanceName, accessToken, statusId),
+    getStatusContext(instanceName, accessToken, statusId)
+  ])
+  await database.insertTimelineItems(
+    instanceName,
+    timelineName,
+    concat(context.ancestors, status, context.descendants)
+  )
+  addStatusesOrNotifications(instanceName, timelineName, concat(context.ancestors, context.descendants))
+}
+
+async function fetchFreshThreadFromNetwork (instanceName, accessToken, statusId) {
+  const [status, context] = await Promise.all([
+    getStatus(instanceName, accessToken, statusId),
+    getStatusContext(instanceName, accessToken, statusId)
+  ])
+  return concat(context.ancestors, status, context.descendants)
+}
+
+async function fetchThreadFromNetwork (instanceName, accessToken, timelineName) {
+  const statusId = timelineName.split('/').slice(-1)[0]
+
+  // For threads, we do several optimizations to make it a bit faster to load.
+  // The vast majority of statuses have no replies and aren't in reply to anything,
+  // so we want that to be as fast as possible.
+  const status = await database.getStatus(instanceName, statusId)
+  if (!status) {
+    // If for whatever reason the status is not cached, fetch everything from the network
+    // and wait for the result. This happens in very unlikely cases (e.g. loading /statuses/<id>
+    // where <id> is not cached locally) but is worth covering.
+    return fetchFreshThreadFromNetwork(instanceName, accessToken, statusId)
+  }
+
+  if (!status.in_reply_to_id) {
+    // status is not a reply to another status (fast path)
+    // Update the status and thread asynchronously, but return just the status for now
+    // Any replies to the status will load asynchronously
+    /* no await */ updateStatusAndThread(instanceName, accessToken, timelineName, statusId)
+    return [status]
+  }
+  // status is a reply to some other status, meaning we don't want some
+  // jerky behavior where it suddenly scrolls into place. Update the status asynchronously
+  // but grab the thread now
+  scheduleIdleTask(() => updateStatus(instanceName, accessToken, statusId))
+  const context = await getStatusContext(instanceName, accessToken, statusId)
+  return concat(context.ancestors, status, context.descendants)
+}
+
 async function fetchTimelineItemsFromNetwork (instanceName, accessToken, timelineName, lastTimelineItemId) {
   if (timelineName.startsWith('status/')) { // special case - this is a list of descendents and ancestors
-    const statusId = timelineName.split('/').slice(-1)[0]
-    const statusRequest = getStatus(instanceName, accessToken, statusId)
-    const contextRequest = getStatusContext(instanceName, accessToken, statusId)
-    const [status, context] = await Promise.all([statusRequest, contextRequest])
-    return concat(context.ancestors, status, context.descendants)
+    return fetchThreadFromNetwork(instanceName, accessToken, timelineName)
   } else { // normal timeline
-    return getTimeline(instanceName, accessToken, timelineName, lastTimelineItemId, null, TIMELINE_BATCH_SIZE)
+    const { items } = await getTimeline(instanceName, accessToken, timelineName, lastTimelineItemId, null, TIMELINE_BATCH_SIZE)
+    return items
+  }
+}
+async function addPagedTimelineItems (instanceName, timelineName, items) {
+  console.log('addPagedTimelineItems, length:', items.length)
+  mark('addPagedTimelineItemSummaries')
+  const newSummaries = items.map(timelineItemToSummary)
+  await addPagedTimelineItemSummaries(instanceName, timelineName, newSummaries)
+  stop('addPagedTimelineItemSummaries')
+}
+
+export async function addPagedTimelineItemSummaries (instanceName, timelineName, newSummaries) {
+  const oldSummaries = store.getForTimeline(instanceName, timelineName, 'timelineItemSummaries')
+
+  const mergedSummaries = uniqBy(concat(oldSummaries || [], newSummaries), byId)
+
+  if (!isEqual(oldSummaries, mergedSummaries)) {
+    store.setForTimeline(instanceName, timelineName, { timelineItemSummaries: mergedSummaries })
   }
 }
 
-async function fetchTimelineItems (instanceName, accessToken, timelineName, lastTimelineItemId, online) {
+async function fetchPagedItems (instanceName, accessToken, timelineName) {
+  const { timelineNextPageId } = store.get()
+  console.log('saved timelineNextPageId', timelineNextPageId)
+  const { items, headers } = await getTimeline(instanceName, accessToken, timelineName, timelineNextPageId, null, TIMELINE_BATCH_SIZE)
+  const linkHeader = headers.get('Link')
+  const parsedLinkHeader = li.parse(linkHeader)
+  const nextUrl = parsedLinkHeader && parsedLinkHeader.next
+  const nextId = nextUrl && (new URL(nextUrl)).searchParams.get('max_id')
+  console.log('new timelineNextPageId', nextId)
+  store.setForTimeline(instanceName, timelineName, { timelineNextPageId: nextId })
+  await storeFreshTimelineItemsInDatabase(instanceName, timelineName, items)
+  await addPagedTimelineItems(instanceName, timelineName, items)
+}
+
+async function fetchTimelineItems (instanceName, accessToken, timelineName, online) {
   mark('fetchTimelineItems')
+  const { lastTimelineItemId } = store.get()
   let items
   let stale = false
   if (!online) {
@@ -46,10 +139,10 @@ async function fetchTimelineItems (instanceName, accessToken, timelineName, last
     try {
       console.log('fetchTimelineItemsFromNetwork')
       items = await fetchTimelineItemsFromNetwork(instanceName, accessToken, timelineName, lastTimelineItemId)
-      /* no await */ storeFreshTimelineItemsInDatabase(instanceName, timelineName, items)
+      await storeFreshTimelineItemsInDatabase(instanceName, timelineName, items)
     } catch (e) {
       console.error(e)
-      toast.say('Internet request failed. Showing offline content.')
+      /* no await */ toast.say('intl.showingOfflineContent')
       items = await database.getTimeline(instanceName, timelineName, lastTimelineItemId, TIMELINE_BATCH_SIZE)
       stale = true
     }
@@ -67,10 +160,10 @@ async function addTimelineItems (instanceName, timelineName, items, stale) {
 }
 
 export async function addTimelineItemSummaries (instanceName, timelineName, newSummaries, newStale) {
-  const oldSummaries = store.getForTimeline(instanceName, timelineName, 'timelineItemSummaries') || []
+  const oldSummaries = store.getForTimeline(instanceName, timelineName, 'timelineItemSummaries')
   const oldStale = store.getForTimeline(instanceName, timelineName, 'timelineItemSummariesAreStale')
 
-  const mergedSummaries = mergeArrays(oldSummaries, newSummaries, compareTimelineItemSummaries)
+  const mergedSummaries = uniqBy(mergeArrays(oldSummaries || [], newSummaries, compareTimelineItemSummaries), byId)
 
   if (!isEqual(oldSummaries, mergedSummaries)) {
     store.setForTimeline(instanceName, timelineName, { timelineItemSummaries: mergedSummaries })
@@ -87,12 +180,17 @@ async function fetchTimelineItemsAndPossiblyFallBack () {
     currentTimeline,
     currentInstance,
     accessToken,
-    lastTimelineItemId,
     online
   } = store.get()
 
-  const { items, stale } = await fetchTimelineItems(currentInstance, accessToken, currentTimeline, lastTimelineItemId, online)
-  addTimelineItems(currentInstance, currentTimeline, items, stale)
+  if (currentTimeline === 'favorites' || currentTimeline === 'bookmarks') {
+    // Always fetch favorites from the network, we currently don't have a good way of storing
+    // these in IndexedDB because of "internal ID" system Mastodon uses to paginate these
+    await fetchPagedItems(currentInstance, accessToken, currentTimeline)
+  } else {
+    const { items, stale } = await fetchTimelineItems(currentInstance, accessToken, currentTimeline, online)
+    await addTimelineItems(currentInstance, currentTimeline, items, stale)
+  }
   stop('fetchTimelineItemsAndPossiblyFallBack')
 }
 
@@ -157,9 +255,11 @@ export async function showMoreItemsForThread (instanceName, timelineName) {
       timelineItemSummaries.push(itemSummaryToAdd)
     }
   }
+  const statusId = timelineName.split('/').slice(-1)[0]
+  const sortedTimelineItemSummaries = await sortItemSummariesForThread(timelineItemSummaries, statusId)
   store.setForTimeline(instanceName, timelineName, {
     timelineItemSummariesToAdd: [],
-    timelineItemSummaries: timelineItemSummaries
+    timelineItemSummaries: sortedTimelineItemSummaries
   })
   stop('showMoreItemsForThread')
 }

@@ -19,22 +19,31 @@
   import ListLazyItem from './ListLazyItem.html'
   import { listStore } from './listStore'
   import { getScrollContainer } from '../../_utils/scrollContainer'
+  import { observe } from 'svelte-extras'
+  import { mark, stop } from '../../_utils/marks'
 
   function getScrollTopOffset () {
-    const style = getComputedStyle(document.documentElement)
-    return parseInt(style.getPropertyValue('--main-content-pad-top'), 10) +
-      parseInt(style.getPropertyValue('--status-pad-v'), 10)
+    return document.getElementById('main-nav').getBoundingClientRect().height
   }
 
   export default {
     oncreate () {
       const { realm } = this.get()
       this.store.setCurrentRealm(realm)
+
+      if (process.env.NODE_ENV !== 'production') {
+        this.observe('safeItems', safeItems => {
+          if (new Set(safeItems).size !== safeItems.length) {
+            console.error('list of items is not unique:', safeItems)
+          }
+        })
+      }
     },
     ondestroy () {
       this.store.setCurrentRealm(null)
     },
     methods: {
+      observe,
       itemInitialized () {
         let { initializedCount, length } = this.get()
         initializedCount++
@@ -49,9 +58,12 @@
           const element = document.getElementById(`list-item-${scrollToItem}`)
           requestAnimationFrame(() => {
             console.log('scrolling element into view')
-            element.scrollIntoView(true)
+            mark('scrollToElement')
             const scrollTopOffset = getScrollTopOffset()
+            element.scrollIntoView(true)
+            console.log('scrollTopOffset', scrollTopOffset)
             getScrollContainer().scrollTop -= scrollTopOffset
+            stop('scrollToElement')
             this.fire('initialized')
           })
         } else {

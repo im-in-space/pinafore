@@ -1,96 +1,92 @@
 {#if $isUserLoggedIn}
 <div class="community-page">
 
-  <h2 class="community-header">
-    Timelines
-  </h2>
+  <FocusRestoration realm="community">
+    <RadioGroup
+      id="pinnables"
+      length={numPinnable}
+      label="{intl.pinnableTimelines}">
 
-  <PageList label="Timelines">
-    <PageListItem href="/local"
-                  label="Local Timeline"
-                  icon="#fa-users"
-                  pinnable="true"
-    />
-    <PageListItem href="/federated"
-                  label="Federated Timeline"
-                  icon="#fa-globe"
-                  pinnable="true"
-    />
-    <PageListItem href="/favorites"
-                  label="Favorites"
-                  icon="#fa-star"
-                  pinnable="true"
-    />
-    <PageListItem href="/direct"
-                  label="Direct messages"
-                  icon="#fa-envelope"
-                  pinnable="true"
-    />
-  </PageList>
+      <h2 class="community-header">
+        {intl.timelines}
+      </h2>
 
-  {#if $lists.length}
+      <PageList label="{intl.timelines}">
+        {#each staticPinnables as staticPinnable, i}
+          <PageListItem href={staticPinnable.href}
+                        label={staticPinnable.label}
+                        icon={staticPinnable.icon}
+                        pinnable="true"
+                        pinIndex={i}
+          />
+        {/each}
+      </PageList>
+
+      {#if listsLength}
+
+        <h2 class="community-header">
+          {intl.lists}
+        </h2>
+
+        <PageList label="{intl.lists}">
+          {#each $lists as list, i}
+            <PageListItem href="/lists/{list.id}"
+                          label={list.title}
+                          icon="#fa-bars"
+                          pinnable="true"
+                          pinIndex={staticPinnablesLength + i}
+            />
+          {/each}
+        </PageList>
+
+      {/if}
+
+    </RadioGroup>
 
     <h2 class="community-header">
-      Lists
+      Instance settings
     </h2>
 
-    <PageList label="Lists">
-      {#each $lists as list}
-      <PageListItem href="/lists/{list.id}"
-                    label={list.title}
-                    icon="#fa-bars"
-                    pinnable="true"
+    <PageList label="{intl.instanceSettings}">
+      {#if isLockedAccount}
+      <PageListItem href="/requests"
+                    label={followRequestsLabel}
+                    icon="#fa-user-plus"
+       />
+      {/if}
+      <PageListItem href="/muted"
+                    label="{intl.mutedUsers}"
+                    icon="#fa-volume-off"
       />
-      {/each}
+      <PageListItem href="/blocked"
+                    label="{intl.blockedUsers}"
+                    icon="#fa-ban"
+      />
+      <PageListItem href="/pinned"
+                    label="{intl.pinnedStatuses}"
+                    icon="#fa-thumb-tack"
+      />
     </PageList>
 
-  {/if}
-
-  <h2 class="community-header">
-    Instance settings
-  </h2>
-
-  <PageList label="Instance settings">
-    {#if isLockedAccount}
-    <PageListItem href="/requests"
-                  label={followRequestsLabel}
-                  icon="#fa-user-plus"
-     />
-    {/if}
-    <PageListItem href="/muted"
-                  label="Muted users"
-                  icon="#fa-volume-off"
-    />
-    <PageListItem href="/blocked"
-                  label="Blocked users"
-                  icon="#fa-ban"
-    />
-    <PageListItem href="/pinned"
-                  label="Pinned toots"
-                  icon="#fa-thumb-tack"
-    />
-  </PageList>
-
+  </FocusRestoration>
 </div>
 {:else}
 <HiddenFromSSR>
   <FreeTextLayout>
-    <h1>Community</h1>
+    <h1>{intl.community}</h1>
 
-    <p>Community options appear here when logged in.</p>
+    <p>{intl.communityNotLoggedIn}</p>
   </FreeTextLayout>
 </HiddenFromSSR>
-  <div style="display: none">
-    <!-- TODO: this is just a hack so that `sapper export` knows to crawl these files -->
-    <a href="/muted">Muted</a>
-    <a href="/blocked">Blocked</a>
-    <a href="/pinned">Pinned</a>
-    <a href="/requests">Requests</a>
-    <a href="/share">Share</a>
-    <a href="/federated">Federated</a>
-    <a href="/favorites">Favorites</a>
-    <a href="/direct">Conversations</a>
-  </div>
+<div style="display: none">
+  <!-- TODO: this is just a hack so that `sapper export` knows to crawl these files -->
+  <!-- Note that these links have to be spread out or else they result in ECONNRESET errors during crawling -->
+  <!-- See also search.html -->
+  <a href="/requests">{intl.followRequests}</a>
+  <a href="/muted">{intl.mutedUsers}</a>
+  <a href="/blocked">{intl.blockedUsers}</a>
+  <a href="/pinned">{intl.pinnedStatuses}</a>
+</div>
 {/if}
 <style>
   :global(.community-page ){
@@ -108,8 +104,11 @@
   import HiddenFromSSR from '../../_components/HiddenFromSSR'
   import PageList from '../../_components/community/PageList.html'
   import PageListItem from '../../_components/community/PageListItem.html'
+  import RadioGroup from '../../_components/radio/RadioGroup.html'
   import { updateListsForInstance } from '../../_actions/lists'
   import { updateFollowRequestCountIfLockedAccount } from '../../_actions/followRequests'
+  import FocusRestoration from '../../_components/FocusRestoration.html'
+  import { formatIntl } from '../../_utils/formatIntl'
 
   export default {
     async oncreate () {
@@ -126,13 +125,50 @@
       FreeTextLayout,
       HiddenFromSSR,
       PageList,
-      PageListItem
+      PageListItem,
+      RadioGroup,
+      FocusRestoration
     },
+    data: () => ({
+      staticPinnables: [
+        {
+          href: '/local',
+          label: 'intl.localTimeline',
+          icon: '#fa-users'
+        },
+        {
+          href: '/federated',
+          label: 'intl.federatedTimeline',
+          icon: '#fa-globe'
+        },
+        {
+          href: '/favorites',
+          label: 'intl.favorites',
+          icon: '#fa-star'
+        },
+        {
+          href: '/direct',
+          label: 'intl.directMessages',
+          icon: '#fa-envelope'
+        },
+        {
+          href: '/bookmarks',
+          label: 'intl.bookmarks',
+          icon: '#fa-bookmark'
+        }
+      ]
+    }),
     computed: {
       isLockedAccount: ({ $currentVerifyCredentials }) => $currentVerifyCredentials && $currentVerifyCredentials.locked,
       followRequestsLabel: ({ $hasFollowRequests, $numberOfFollowRequests }) => (
-        `Follow requests${$hasFollowRequests ? ` (${$numberOfFollowRequests})` : ''}`
-      )
+        formatIntl('intl.followRequestsLabel', {
+          hasFollowRequests: $hasFollowRequests,
+          count: $numberOfFollowRequests
+        })
+      ),
+      listsLength: ({ $lists }) => $lists ? $lists.length : 0,
+      staticPinnablesLength: ({ staticPinnables }) => staticPinnables.length,
+      numPinnable: ({ listsLength, staticPinnablesLength }) => listsLength + staticPinnablesLength
     }
   }
 </script>

@@ -1,24 +1,24 @@
 <textarea
   id="the-compose-box-input-{realm}"
   class="compose-box-input compose-box-input-realm-{realm}"
-  placeholder="What's on your mind?"
+  placeholder="{intl.composeLabel}"
   aria-describedby="compose-box-input-description-{realm}"
-  aria-owns="{autosuggestShownForThisInput ? `compose-autosuggest-list-${realm}` : undefined}"
+  aria-owns="compose-autosuggest-list-{realm}"
   aria-expanded={autosuggestShownForThisInput}
   aria-autocomplete="both"
-  aria-activedescendant="{autosuggestShownForThisInput ? `compose-autosuggest-active-item-${realm}` : undefined}"
+  aria-activedescendant={activeDescendant}
   ref:textarea
   bind:value=rawText
-  on:blur="onBlur()"
   on:focus="onFocus()"
+  on:blur="onBlur()"
   on:selectionChange="onSelectionChange(event)"
   on:keydown="onKeydown(event)"
 ></textarea>
 <label for="the-compose-box-input-{realm}" class="sr-only">
-  What's on your mind?
+  {intl.composeLabel}
 </label>
 <span id="compose-box-input-description-{realm}" class="sr-only">
-  When autocomplete results are available, press up or down arrows and enter to select.
+  {intl.autocompleteDescription}
 </span>
 <style>
   :global(.compose-box-input ){
@@ -63,7 +63,7 @@
   import { selectionChange } from '../../_utils/events'
   import {
     clickSelectedAutosuggestionUsername,
-    clickSelectedAutosuggestionEmoji
+    clickSelectedAutosuggestionEmoji, clickSelectedAutosuggestionHashtag
   } from '../../_actions/autosuggest'
   import { observe } from 'svelte-extras'
   import { get } from '../../_utils/lodash-lite'
@@ -209,6 +209,8 @@
           this.store.setForCurrentAutosuggest({ autosuggestSelecting: true })
           if (autosuggestType === 'account') {
             await clickSelectedAutosuggestionUsername(realm)
+          } else if (autosuggestType === 'hashtag') {
+            await clickSelectedAutosuggestionHashtag(realm)
           } else { // emoji
             await clickSelectedAutosuggestionEmoji(realm)
           }
@@ -266,10 +268,17 @@
       composeFocused: ({ $autosuggestData_composeFocused, $currentInstance, realm }) => (
         get($autosuggestData_composeFocused, [$currentInstance, realm], false)
       ),
-      /* eslint-enable camelcase */
-      autosuggestShownForThisInput: ({ realm, $autosuggestShown, composeFocused }) => (
+
+      autosuggestShownForThisInput: ({ $autosuggestShown, composeFocused }) => (
         !!($autosuggestShown && composeFocused)
+      ),
+      autosuggestSelected: ({ $autosuggestData_autosuggestSelected, $currentInstance, realm }) => (
+        get($autosuggestData_autosuggestSelected, [$currentInstance, realm], 0)
+      ),
+      activeDescendant: ({ autosuggestSelected, autosuggestShownForThisInput, realm }) => (
+        autosuggestShownForThisInput ? `compose-autosuggest-active-item-${realm}-${autosuggestSelected}` : undefined
       )
+      /* eslint-enable camelcase */
     },
     events: {
       selectionChange

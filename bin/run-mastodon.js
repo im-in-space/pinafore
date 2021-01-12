@@ -4,51 +4,18 @@ import childProcessPromise from 'child-process-promise'
 import path from 'path'
 import fs from 'fs'
 import { waitForMastodonUiToStart, waitForMastodonApiToStart } from './wait-for-mastodon-to-start'
-import mkdirpCB from 'mkdirp'
+import mkdirp from 'mkdirp'
+import cloneMastodon from './clone-mastodon'
+import { DB_USER, DB_PASS, DB_NAME, DB_HOST, DB_PORT } from './mastodon-config'
 
 const exec = childProcessPromise.exec
 const spawn = childProcessPromise.spawn
-const mkdirp = promisify(mkdirpCB)
 const stat = promisify(fs.stat)
 const writeFile = promisify(fs.writeFile)
 const dir = __dirname
-
-const GIT_URL = 'https://github.com/nolanlawson/mastodon.git'
-const GIT_TAG_OR_COMMIT = '824ddcdbe'
-const GIT_BRANCH = 'v2.9.2-with-fuubar-fix'
-
-const DB_NAME = 'pinafore_development'
-const DB_USER = 'pinafore'
-const DB_PASS = 'pinafore'
-const DB_PORT = process.env.PGPORT || 5432
-const DB_HOST = '127.0.0.1'
-
-const envFile = `
-PAPERCLIP_SECRET=foo
-SECRET_KEY_BASE=bar
-OTP_SECRET=foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_USER=${DB_USER}
-DB_NAME=${DB_NAME}
-DB_PASS=${DB_PASS}
-`
-
 const mastodonDir = path.join(dir, '../mastodon')
 
 let childProc
-
-async function cloneMastodon () {
-  try {
-    await stat(mastodonDir)
-  } catch (e) {
-    console.log('Cloning mastodon...')
-    await exec(`git clone --single-branch --branch ${GIT_BRANCH} ${GIT_URL} "${mastodonDir}"`)
-    await exec('git fetch origin --tags', { cwd: mastodonDir }) // may already be cloned, e.g. in CI
-    await exec(`git checkout ${GIT_TAG_OR_COMMIT}`, { cwd: mastodonDir })
-    await writeFile(path.join(dir, '../mastodon/.env'), envFile, 'utf8')
-  }
-}
 
 async function setupMastodonDatabase () {
   console.log('Setting up mastodon database...')
@@ -92,7 +59,7 @@ async function runMastodon () {
   const cwd = mastodonDir
   const cmds = [
     'gem install bundler foreman',
-    'bundle install',
+    'bundle install --frozen --path vendor/bundle',
     'bundle exec rails db:migrate',
     'yarn --pure-lockfile'
   ]
@@ -110,7 +77,9 @@ async function runMastodon () {
     await writeFile(installedFile, '', 'utf8')
   }
   const promise = spawn('foreman', ['start'], { cwd, env })
-  const log = fs.createWriteStream('mastodon.log', { flags: 'a' })
+  // don't bother writing to mastodon.log in CI; we can't read the file anyway
+  const logFile = process.env.CIRCLECI ? '/dev/null' : 'mastodon.log'
+  const log = fs.createWriteStream(logFile, { flags: 'a' })
   childProc = promise.childProcess
   childProc.stdout.pipe(log)
   childProc.stderr.pipe(log)

@@ -30,7 +30,7 @@ async function throwErrorIfInvalidResponse (response) {
   }
   const json = await response.json()
   if (response.status >= 200 && response.status < 300) {
-    return json
+    return { json, headers: response.headers }
   }
   if (json && json.error) {
     throw new Error(response.status + ': ' + json.error)
@@ -62,23 +62,28 @@ async function _putOrPostOrPatch (method, url, body, headers, options) {
 }
 
 export async function put (url, body, headers, options) {
-  return _putOrPostOrPatch('PUT', url, body, headers, options)
+  return (await _putOrPostOrPatch('PUT', url, body, headers, options)).json
 }
 
 export async function post (url, body, headers, options) {
-  return _putOrPostOrPatch('POST', url, body, headers, options)
+  return (await _putOrPostOrPatch('POST', url, body, headers, options)).json
 }
 
 export async function patch (url, body, headers, options) {
-  return _putOrPostOrPatch('PATCH', url, body, headers, options)
+  return (await _putOrPostOrPatch('PATCH', url, body, headers, options)).json
 }
 
 export async function get (url, headers, options) {
+  return (await _fetch(url, makeFetchOptions('GET', headers, options), options)).json
+}
+
+/** @returns {json, headers} */
+export async function getWithHeaders (url, headers, options) {
   return _fetch(url, makeFetchOptions('GET', headers, options), options)
 }
 
 export async function del (url, headers, options) {
-  return _fetch(url, makeFetchOptions('DELETE', headers, options), options)
+  return (await _fetch(url, makeFetchOptions('DELETE', headers, options), options)).json
 }
 
 export function paramsString (paramsObject) {

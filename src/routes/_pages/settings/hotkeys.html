@@ -1,15 +1,15 @@
-<SettingsLayout page='settings/hotkeys' label="Hotkeys">
-  <h1>Hotkeys</h1>
+<SettingsLayout page='settings/hotkeys' label="{intl.hotkeys}">
+  <h1>{intl.hotkeys}</h1>
 
-  <h2 class="sr-only">Preferences</h2>
-  <form class="ui-settings" aria-label="Hotkey settings">
+  <h2 class="sr-only">{intl.preferences}</h2>
+  <form class="ui-settings" aria-label="{intl.hotkeySettings}">
     <label class="setting-group {allowChangeHotkeySetting ? '' : 'disabled-style'}">
       <input type="checkbox" id="choice-disable-hotkeys"
              bind:checked="$disableHotkeys"
              on:change="onChange()"
              disabled={!allowChangeHotkeySetting}
       >
-      Disable all hotkeys
+      {intl.disableHotkeys}
     </label>
     <label class="setting-group  {allowChangeLeftRightSetting ? '' : 'disabled-style'}">
       <input type="checkbox" id="choice-left-right-focus"
@@ -17,43 +17,30 @@
              on:change="onChange()"
              disabled={!allowChangeLeftRightSetting}
       >
-      Left/right arrow keys change focus rather than columns/media
+      {intl.leftRightArrows}
     </label>
   </form>
 
-  <h2 class="sr-only">Guide</h2>
+  <h2 class="sr-only">{intl.guide}</h2>
 
   <ShortcutHelpInfo />
 </SettingsLayout>
+<UISettingsStyles />
 <style>
   .ui-settings {
-    background: var(--form-bg);
-    border: 1px solid var(--main-border);
-    border-radius: 4px;
-    padding: 20px;
-    line-height: 2em;
     margin-bottom: 20px;
-  }
-  .setting-group {
-    display: block;
-    padding: 5px 0;
   }
 
   label.disabled-style {
     color: var(--deemphasized-text-color);
-  }
-
-  @media (max-width: 240px) {
-    .ui-settings {
-      padding: 20px 10px;
-    }
   }
 </style>
 <script>
   import SettingsLayout from '../../_components/settings/SettingsLayout.html'
   import ShortcutHelpInfo from '../../_components/ShortcutHelpInfo.html'
   import { store } from '../../_store/store'
-  import { isKaiOS } from '../../_utils/userAgent'
+  import { isKaiOS } from '../../_utils/userAgent/isKaiOS'
+  import UISettingsStyles from '../../_components/settings/UISettingsStyles.html'
 
   export default {
     store: () => store,
@@ -72,7 +59,8 @@
     },
     components: {
       SettingsLayout,
-      ShortcutHelpInfo
+      ShortcutHelpInfo,
+      UISettingsStyles
     }
   }
 </script>

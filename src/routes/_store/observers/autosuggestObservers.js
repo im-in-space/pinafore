@@ -1,6 +1,14 @@
 import { store } from '../store'
 import { doEmojiSearch } from '../../_actions/autosuggestEmojiSearch'
 import { doAccountSearch } from '../../_actions/autosuggestAccountSearch'
+import { doHashtagSearch } from '../../_actions/autosuggestHashtagSearch'
+
+function resetAutosuggest () {
+  store.setForCurrentAutosuggest({
+    autosuggestSelected: 0,
+    autosuggestSearchResults: []
+  })
+}
 
 export function autosuggestObservers () {
   let lastSearch
@@ -16,14 +24,15 @@ export function autosuggestObservers () {
     const { composeFocused } = store.get()
     const autosuggestSelecting = store.getForCurrentAutosuggest('autosuggestSelecting')
     if (!composeFocused || !autosuggestSearchText || autosuggestSelecting) {
+      resetAutosuggest()
       return
     }
 
-    const autosuggestType = autosuggestSearchText.startsWith('@') ? 'account' : 'emoji'
-
-    if (autosuggestType === 'emoji') {
+    if (autosuggestSearchText.startsWith(':')) { // emoji
       lastSearch = doEmojiSearch(autosuggestSearchText)
-    } else {
+    } else if (autosuggestSearchText.startsWith('#')) { // hashtag
+      lastSearch = doHashtagSearch(autosuggestSearchText)
+    } else { // account
       lastSearch = doAccountSearch(autosuggestSearchText)
     }
   })

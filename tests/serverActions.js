@@ -11,6 +11,7 @@ import { reblogStatus } from '../src/routes/_api/reblog'
 import { submitMedia } from './submitMedia'
 import { voteOnPoll } from '../src/routes/_api/polls'
 import { POLL_EXPIRY_DEFAULT } from '../src/routes/_static/polls'
+import { createList, getLists } from '../src/routes/_api/lists'
 
 global.fetch = fetch
 global.File = FileApi.File
@@ -34,6 +35,12 @@ export async function postAs (username, text) {
 export async function postWithSpoilerAndPrivacyAs (username, text, spoiler, privacy) {
   return postStatus(instanceName, users[username].accessToken, text,
     null, null, true, spoiler, privacy)
+}
+
+export async function postStatusWithMediaAs (username, status, filename, alt, sensitive) {
+  const mediaResponse = await submitMedia(users[username].accessToken, filename, alt)
+  return postStatus(instanceName, users[username].accessToken, status,
+    null, [mediaResponse.id], !!sensitive, null, 'public')
 }
 
 export async function postEmptyStatusWithMediaAs (username, filename, alt, sensitive) {
@@ -71,8 +78,8 @@ export async function updateUserDisplayNameAs (username, displayName) {
   return updateCredentials(instanceName, users[username].accessToken, { display_name: displayName })
 }
 
-export async function createPollAs (username, content, options, multiple) {
-  return postStatus(instanceName, users[username].accessToken, content, null, null, false, null, 'public', {
+export async function createPollAs (username, content, options, multiple, spoilerText) {
+  return postStatus(instanceName, users[username].accessToken, content, null, null, false, spoilerText, 'public', {
     options,
     multiple,
     expires_in: POLL_EXPIRY_DEFAULT
@@ -81,4 +88,12 @@ export async function createPollAs (username, content, options, multiple) {
 
 export async function voteOnPollAs (username, pollId, choices) {
   return voteOnPoll(instanceName, users[username].accessToken, pollId, choices.map(_ => _.toString()))
+}
+
+export async function createListAs (username, title) {
+  return createList(instanceName, users[username].accessToken, title)
+}
+
+export async function getListsAs (username) {
+  return getLists(instanceName, users[username].accessToken)
 }

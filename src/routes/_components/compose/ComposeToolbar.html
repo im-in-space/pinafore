@@ -2,38 +2,40 @@
   <div class="compose-box-toolbar-items">
     <IconButton
       className="compose-toolbar-button"
-      label="Insert emoji"
+      label="{intl.addEmoji}"
       href="#fa-smile"
       on:click="onEmojiClick()"
     />
     <IconButton
       className="compose-toolbar-button"
       svgClassName={$uploadingMedia ? 'spin' : ''}
-      label="Add media (images, video, audio)"
+      label="{intl.addMedia}"
       href={$uploadingMedia ? '#fa-spinner' : '#fa-camera'}
       on:click="onMediaClick()"
       disabled={$uploadingMedia || (media.length === 4)}
     />
     <IconButton
       className="compose-toolbar-button"
-      label="{poll && poll.options && poll.options.length ? 'Remove poll' : 'Add poll'}"
+      label="{intl.addPoll}"
+      pressedLabel="{intl.removePoll}"
       href="#fa-bar-chart"
       on:click="onPollClick()"
-      pressable="true"
+      pressable={true}
       pressed={poll && poll.options && poll.options.length}
     />
     <IconButton
       className="compose-toolbar-button"
-      label="Adjust privacy (currently {postPrivacy.label})"
+      label={postPrivacyLabel}
       href={postPrivacy.icon}
       on:click="onPostPrivacyClick()"
     />
     <IconButton
       className="compose-toolbar-button"
-      label={contentWarningShown ? 'Remove content warning' : 'Add content warning'}
+      label="{intl.addContentWarning}"
+      pressedLabel="{intl.removeContentWarning}"
       href="#fa-exclamation-triangle"
       on:click="onContentWarningClick()"
-      pressable="true"
+      pressable={true}
       pressed={contentWarningShown}
     />
   </div>
@@ -70,12 +72,14 @@
 <script>
   import IconButton from '../IconButton.html'
   import { store } from '../../_store/store'
-  import { importShowEmojiDialog, importShowPostPrivacyDialog } from '../dialog/asyncDialogs'
+  import { importShowEmojiDialog } from '../dialog/asyncDialogs/importShowEmojiDialog'
+  import { importShowPostPrivacyDialog } from '../dialog/asyncDialogs/importShowPostPrivacyDialog'
   import { doMediaUpload } from '../../_actions/media'
   import { toggleContentWarningShown } from '../../_actions/contentWarnings'
   import { mediaAccept } from '../../_static/media'
   import { enablePoll, disablePoll } from '../../_actions/composePoll'
   import { updateCustomEmojiForInstance } from '../../_actions/emoji'
+  import { formatIntl } from '../../_utils/formatIntl'
 
   export default {
     components: {
@@ -84,6 +88,11 @@
     data: () => ({
       mediaAccept
     }),
+    computed: {
+      postPrivacyLabel: ({ postPrivacy }) => (
+        formatIntl('intl.postPrivacyLabel', { label: postPrivacy.label })
+      )
+    },
     store: () => store,
     methods: {
       async onEmojiClick () {

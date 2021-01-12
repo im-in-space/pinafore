@@ -1,4 +1,4 @@
-import { get, paramsString, DEFAULT_TIMEOUT } from '../_utils/ajax'
+import { getWithHeaders, paramsString, DEFAULT_TIMEOUT } from '../_utils/ajax'
 import { auth, basename } from './utils'
 
 function getTimelineUrlPath (timeline) {
@@ -15,6 +15,8 @@ function getTimelineUrlPath (timeline) {
       return 'favourites'
     case 'direct':
       return 'conversations'
+    case 'bookmarks':
+      return 'bookmarks'
   }
   if (timeline.startsWith('tag/')) {
     return 'timelines/tag'
@@ -23,6 +25,7 @@ function getTimelineUrlPath (timeline) {
   } else if (timeline.startsWith('list/')) {
     return 'timelines/list'
   }
+  throw new Error(`Invalid timeline type: ${timeline}`)
 }
 
 export async function getTimeline (instanceName, accessToken, timeline, maxId, since, limit) {
@@ -69,10 +72,10 @@ export async function getTimeline (instanceName, accessToken, timeline, maxId, s
   url += '?' + paramsString(params)
 
   console.log('fetching url', url)
-  const items = await get(url, auth(accessToken), { timeout: DEFAULT_TIMEOUT })
+  let { json: items, headers } = await getWithHeaders(url, auth(accessToken), { timeout: DEFAULT_TIMEOUT })
 
   if (timeline === 'direct') {
-    return items.map(item => item.last_status)
+    items = items.map(item => item.last_status)
   }
-  return items
+  return { items, headers }
 }

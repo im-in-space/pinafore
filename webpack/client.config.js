@@ -1,10 +1,12 @@
+import { DEFAULT_LOCALE, LOCALE } from '../src/routes/_static/intl'
+
+const path = require('path')
 const webpack = require('webpack')
 const config = require('sapper/config/webpack.js')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 const terser = require('./terser.config')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
-const legacyBabel = require('./legacyBabel.config')
 const { mode, dev, resolve, inlineSvgs, allSvgs } = require('./shared.config')
 
 const urlRegex = require('../src/routes/_utils/urlRegexSource.js')()
@@ -13,9 +15,12 @@ const output = Object.assign(config.client.output(), {
   // enables HMR in workers
   globalObject: 'this',
   // Zeit does not like filenames with "$" in them, so just keep things simple
-  filename: '[hash]/[id].js',
-  chunkFilename: '[hash]/[id].js'
+  filename: dev ? '[hash]/[id].js' : '[id].[contenthash].js',
+  chunkFilename: dev ? '[hash]/[id].js' : '[id].[contenthash].js'
 })
+
+const emojiPickerI18n = LOCALE !== DEFAULT_LOCALE &&
+  require(path.join(__dirname, '../src/intl/emoji-picker/', `${LOCALE}.js`)).default
 
 module.exports = {
   entry: config.client.entry(),
@@ -29,7 +34,7 @@ module.exports = {
         use: {
           loader: 'worker-loader',
           options: {
-            name: 'blurhash.[hash].[name].[ext]'
+            filename: dev ? '[hash]/blurhash.[name].js' : 'blurhash.[contenthash].[name].js'
           }
         }
       },
@@ -43,42 +48,33 @@ module.exports = {
         use: {
           loader: 'file-loader',
           options: {
-            name: 'tesseract-asset.[hash].[name].[ext]'
+            name: dev ? '[hash]/tesseract-asset.[name].[ext]' : 'tesseract-asset.[contenthash].[name].[ext]'
           }
         }
       },
       {
-        test: /\.m?js$/,
-        include: /node_modules\/emoji-mart/,
+        test: /\.js$/,
+        exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            plugins: [
-              [
-                'transform-react-remove-prop-types',
-                {
-                  removeImport: true,
-                  additionalLibraries: [
-                    '../../utils/shared-props'
-                  ]
-                }
-              ]
-            ]
-          }
+          loader: path.join(__dirname, './svelte-intl-loader.js')
         }
       },
-      process.env.LEGACY && legacyBabel(),
       {
         test: /\.html$/,
-        use: {
-          loader: 'svelte-loader',
-          options: {
-            dev,
-            hydratable: true,
-            store: true,
-            hotReload: dev
+        use: [
+          {
+            loader: 'svelte-loader',
+            options: {
+              dev,
+              hydratable: true,
+              store: true,
+              hotReload: dev
+            }
+          },
+          {
+            loader: path.join(__dirname, './svelte-intl-loader.js')
           }
-        }
+        ]
       }
     ].filter(Boolean)
   },
@@ -86,9 +82,13 @@ module.exports = {
     setImmediate: false
   },
   optimization: dev ? {} : {
+    minimize: !process.env.DEBUG,
     minimizer: [
       terser()
-    ].filter(Boolean),
+    ],
+    // TODO: we should be able to enable this, but Sapper breaks if we do so
+    // // isolate runtime chunk to avoid excessive cache invalidations https://webpack.js.org/guides/caching/
+    // runtimeChunk: 'single',
     splitChunks: {
       chunks: 'async',
       minSize: 5000,
@@ -104,7 +104,8 @@ module.exports = {
       'process.env.INLINE_SVGS': JSON.stringify(inlineSvgs),
       'process.env.ALL_SVGS': JSON.stringify(allSvgs),
       'process.env.URL_REGEX': urlRegex.toString(),
-      'process.env.LEGACY': !!process.env.LEGACY
+      'process.env.LOCALE': JSON.stringify(LOCALE),
+      'process.env.EMOJI_PICKER_I18N': emojiPickerI18n ? JSON.stringify(emojiPickerI18n) : 'undefined'
     }),
     new webpack.NormalModuleReplacementPlugin(
       /\/_database\/database\.js$/, // this version plays nicer with IDEs

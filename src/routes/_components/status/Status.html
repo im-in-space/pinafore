@@ -5,6 +5,7 @@
          aria-setsize={length}
          aria-label={ariaLabel}
          on:recalculateHeight
+         ref:article
 >
   {#if showHeader}
     <StatusHeader {...params} />
@@ -21,7 +22,7 @@
   {#if !showContent}
     <StatusMentions {...params} />
   {/if}
-  {#if content && (showContent || contentPreloaded)}
+  {#if content && (showContent || preloadHiddenContent)}
     <StatusContent {...params} shown={showContent}/>
   {/if}
   {#if showCard }
@@ -30,8 +31,8 @@
   {#if showMedia }
     <StatusMediaAttachments {...params} on:recalculateHeight />
   {/if}
-  {#if showPoll}
-    <StatusPoll {...params} />
+  {#if showPoll && (showContent || preloadHiddenContent)}
+    <StatusPoll {...params} shown={showContent} />
   {/if}
   {#if isStatusInOwnThread}
     <StatusDetails {...params} {...timestampParams} />
@@ -129,7 +130,7 @@
   import { absoluteDateFormatter } from '../../_utils/formatters'
   import { composeNewStatusMentioning } from '../../_actions/mention'
   import { createStatusOrNotificationUuid } from '../../_utils/createStatusOrNotificationUuid'
-  import { statusHtmlToPlainText } from '../../_utils/statusHtmlToPlainText'
+  import { addEmojiTooltips } from '../../_utils/addEmojiTooltips'
 
   const INPUT_TAGS = new Set(['a', 'button', 'input', 'textarea', 'label'])
   const isUserInputElement = node => INPUT_TAGS.has(node.localName)
@@ -148,9 +149,10 @@
         scheduleIdleTask(() => {
           // Perf optimization: lazily load the StatusContent when the user is idle so that
           // it's fast when they click the "show more" button
-          this.set({ contentPreloaded: true })
+          this.set({ preloadHiddenContent: true })
         })
       }
+      scheduleIdleTask(() => addEmojiTooltips(this.refs.article))
     },
     components: {
       StatusSidebar,
@@ -172,7 +174,7 @@
     data: () => ({
       notification: undefined,
       replyVisibility: undefined,
-      contentPreloaded: false,
+      preloadHiddenContent: false,
       enableShortcuts: null
     }),
     store: () => store,
@@ -224,8 +226,7 @@
       originalAccountId: ({ originalAccount }) => originalAccount.id,
       accountForShortcut: ({ originalAccount, notification }) => notification ? notification.account : originalAccount,
       visibility: ({ originalStatus }) => originalStatus.visibility,
-      mentions: ({ originalStatus }) => originalStatus.mentions || [],
-      plainTextContent: ({ content, mentions }) => statusHtmlToPlainText(content, mentions),
+      plainTextContent: ({ originalStatus }) => originalStatus.plainTextContent || '',
       plainTextContentOverLength: ({ plainTextContent }) => (
         // measureText() is expensive, so avoid doing it when possible.
         // Also measureText() typically only makes text shorter, not longer, so we can measure the raw length
@@ -280,11 +281,14 @@
       reblog: ({ status }) => status.reblog,
       ariaLabel: ({
         originalAccount, account, plainTextContent, timeagoFormattedDate, spoilerText,
-        showContent, reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels
+        showContent, reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels,
+        showMedia, showPoll
       }) => (
         getAccessibleLabelForStatus(originalAccount, account, plainTextContent,
           timeagoFormattedDate, spoilerText, showContent,
-          reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels)
+          reblog, notification, visibility, $omitEmojiInDisplayNames, $disableLongAriaLabels,
+          showMedia, showPoll
+        )
       ),
       showHeader: ({ notification, status, timelineType }) => (
         (notification && ['reblog', 'favourite', 'poll'].includes(notification.type)) ||

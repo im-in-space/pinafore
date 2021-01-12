@@ -8,6 +8,13 @@ import { updateCustomEmojiForInstance } from './emoji'
 import { database } from '../_database/database'
 import { DOMAIN_BLOCKS } from '../_static/blocks'
 
+const GENERIC_ERROR = `
+  Is this a valid Mastodon instance? Is a browser extension
+  blocking the request? Are you in private browsing mode?
+  If you believe this is a problem with your instance, please send
+  <a href="https://github.com/nolanlawson/pinafore/blob/master/docs/Admin-Guide.md"
+    target="_blank" rel="noopener">this link</a> to the administrator of your instance.`
+
 function createKnownError (message) {
   const err = new Error(message)
   err.knownError = true
@@ -15,8 +22,7 @@ function createKnownError (message) {
 }
 
 function getRedirectUri () {
-  const { copyPasteMode } = store.get()
-  return copyPasteMode ? 'urn:ietf:wg:oauth:2.0:oob' : `${location.origin}/settings/instances/add`
+  return `${location.origin}/settings/instances/add`
 }
 
 async function redirectToOauth () {
@@ -45,13 +51,8 @@ async function redirectToOauth () {
     redirectUri
   )
   // setTimeout to allow the browser to *actually* save the localStorage data (fixes Safari bug apparently)
-  const { copyPasteMode } = store.get()
   setTimeout(() => {
-    if (copyPasteMode) {
-      window.open(oauthUrl, '_blank', 'noopener')
-    } else {
-      document.location.href = oauthUrl
-    }
+    document.location.href = oauthUrl
   }, 200)
 }
 
@@ -65,10 +66,7 @@ export async function logInToInstance () {
   } catch (err) {
     console.error(err)
     const error = `${err.message || err.name}. ` +
-      (err.knownError ? '' : (navigator.onLine
-        ? `Is this a valid Mastodon instance? Is a browser extension
-           blocking the request? Are you in private browsing mode?`
-        : 'Are you offline?'))
+      (err.knownError ? '' : (navigator.onLine ? GENERIC_ERROR : 'Are you offline?'))
     const { instanceNameInSearch } = store.get()
     store.set({
       logInToInstanceError: error,
@@ -102,8 +100,7 @@ async function registerNewInstance (code) {
     loggedInInstances: loggedInInstances,
     currentInstance: currentRegisteredInstanceName,
     loggedInInstancesInOrder: loggedInInstancesInOrder,
-    instanceThemes: instanceThemes,
-    copyPasteMode: false
+    instanceThemes: instanceThemes
   })
   store.save()
   const { enableGrayscale } = store.get()
@@ -122,18 +119,5 @@ export async function handleOauthCode (code) {
     store.set({ logInToInstanceError: `${err.message || err.name}. Failed to connect to instance.` })
   } finally {
     store.set({ logInToInstanceLoading: false })
-  }
-}
-
-export async function handleCopyPasteOauthCode (code) {
-  const { currentRegisteredInstanceName, currentRegisteredInstance } = store.get()
-  if (!currentRegisteredInstanceName || !currentRegisteredInstance) {
-    store.set({
-      logInToInstanceError: 'You must log in to an instance first.',
-      logInToInstanceErrorForText: '',
-      instanceNameInSearch: ''
-    })
-  } else {
-    await handleOauthCode(code)
   }
 }

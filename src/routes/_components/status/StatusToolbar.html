@@ -2,7 +2,8 @@
   <IconButton
     className="status-toolbar-reply-button"
     label={replyLabel}
-    pressable="true"
+    pressedLabel="{intl.closeReply}"
+    pressable={true}
     pressed={replyShown}
     href={replyIcon}
     clickListener={false}
@@ -10,6 +11,7 @@
     />
   <IconButton
     label={reblogLabel}
+    pressedLabel="Unboost"
     pressable={!reblogDisabled}
     pressed={reblogged}
     disabled={reblogDisabled}
@@ -19,8 +21,9 @@
     ref:reblogIcon
   />
   <IconButton
-    label={favoriteLabel}
-    pressable="true"
+    label="{intl.favorite}"
+    pressedLabel="{intl.unfavorite}"
+    pressable={true}
     pressed={favorited}
     href="#fa-star"
     clickListener={false}
@@ -28,7 +31,7 @@
     ref:favoriteIcon
     />
   <IconButton
-    label="Show more options"
+    label="{intl.moreOptions}"
     href="#fa-ellipsis-h"
     clickListener={false}
     elementId={optionsKey}
@@ -44,6 +47,7 @@
     grid-area: toolbar;
     display: flex;
     justify-content: space-between;
+    pointer-events: none;
   }
   :global(.status-toolbar.status-in-own-thread ){
     margin-left: 63px; /* offset to align all toolbar items: 48px avatar + 15px margin-right */
@@ -69,7 +73,7 @@
   import { registerClickDelegates } from '../../_utils/delegate'
   import { setFavorited } from '../../_actions/favorite'
   import { setReblogged } from '../../_actions/reblog'
-  import { importShowStatusOptionsDialog } from '../dialog/asyncDialogs'
+  import { importShowStatusOptionsDialog } from '../dialog/asyncDialogs/importShowStatusOptionsDialog.js'
   import { updateProfileAndRelationship } from '../../_actions/accounts'
   import { FAVORITE_ANIMATION, REBLOG_ANIMATION } from '../../_static/animations'
   import { on } from '../../_utils/eventBus'
@@ -160,18 +164,18 @@
       reblogAnimation: REBLOG_ANIMATION
     }),
     computed: {
-      replyLabel: ({ replyShown, inReplyToId }) => (
-        replyShown ? 'Close reply' : inReplyToId ? 'Reply to thread' : 'Reply'
+      replyLabel: ({ inReplyToId }) => (
+        inReplyToId ? 'intl.replyToThread' : 'intl.reply'
       ),
       replyIcon: ({ inReplyToId }) => inReplyToId ? '#fa-reply-all' : '#fa-reply',
-      reblogLabel: ({ visibility, reblogged }) => {
+      reblogLabel: ({ visibility }) => {
         switch (visibility) {
           case 'private':
-            return 'Cannot be boosted because this is followers-only'
+            return 'intl.cannotReblogFollowersOnly'
           case 'direct':
-            return 'Cannot be boosted because this is a direct message'
+            return 'intl.cannotReblogDirectMessage'
           default:
-            return reblogged ? 'Unboost' : 'Boost'
+            return 'intl.reblog'
         }
       },
       reblogIcon: ({ visibility }) => {
@@ -193,9 +197,6 @@
         }
         return originalStatus.reblogged
       },
-      favoriteLabel: ({ favorited }) => (
-        favorited ? 'Unfavorite' : 'Favorite'
-      ),
       favorited: ({ originalStatusId, $currentStatusModifications, originalStatus }) => {
         if ($currentStatusModifications && originalStatusId in $currentStatusModifications.favorites) {
           return $currentStatusModifications.favorites[originalStatusId]

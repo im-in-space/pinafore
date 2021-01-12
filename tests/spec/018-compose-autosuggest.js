@@ -1,5 +1,11 @@
 import {
-  composeInput, getNthAutosuggestionResult, getNthComposeReplyInput, getNthReplyButton, getNthStatus, sleep
+  composeInput,
+  composeLengthIndicator,
+  getNthAutosuggestionResult,
+  getNthComposeReplyInput,
+  getNthReplyButton,
+  getNthStatus,
+  sleep
 } from '../utils'
 import { Selector as $ } from 'testcafe'
 import { loginAsFoobar } from '../roles'
@@ -16,6 +22,7 @@ test('autosuggests user handles', async t => {
   await sleep(1000)
   await t
     .typeText(composeInput, 'hey @qu')
+    .expect(getNthAutosuggestionResult(1).find('.sr-only').innerText).contains('@quux')
     .click(getNthAutosuggestionResult(1), { timeout })
     .expect(composeInput.value).eql('hey @quux ')
     .typeText(composeInput, 'and also @adm')
@@ -39,6 +46,7 @@ test('autosuggests custom emoji', async t => {
     .click(getNthAutosuggestionResult(1))
     .expect(composeInput.value).eql(':blobnom: ')
     .typeText(composeInput, 'and :blob')
+    .expect(getNthAutosuggestionResult(1).find('.sr-only').innerText).contains('blobnom')
     .expect(getNthAutosuggestionResult(1).innerText).contains(':blobnom:', { timeout })
     .expect(getNthAutosuggestionResult(2).innerText).contains(':blobpats:')
     .expect(getNthAutosuggestionResult(3).innerText).contains(':blobpeek:')
@@ -92,6 +100,16 @@ test('autosuggest handles works with regular emoji - clicking', async t => {
     .expect(composeInput.value).eql('\ud83c\udf4d @quux ')
 })
 
+test('autosuggest can suggest native emoji', async t => {
+  await loginAsFoobar(t)
+  await t
+    .hover(composeInput)
+    .typeText(composeInput, ':slight')
+    .expect(getNthAutosuggestionResult(1).innerText).contains(':slightly_smiling_face:', { timeout })
+    .click(getNthAutosuggestionResult(1))
+    .expect(composeInput.value).eql('\ud83d\ude42 ')
+})
+
 test('autosuggest only shows for one input', async t => {
   await loginAsFoobar(t)
   await t
@@ -102,7 +120,7 @@ test('autosuggest only shows for one input', async t => {
     .selectText(getNthComposeReplyInput(1))
     .pressKey('delete')
     .typeText(getNthComposeReplyInput(1), 'uu')
-    .expect($('.compose-autosuggest.shown').exists).notOk()
+    .expect($('.compose-autosuggest').visible).notOk()
 })
 
 test('autosuggest only shows for one input part 2', async t => {
@@ -110,7 +128,7 @@ test('autosuggest only shows for one input part 2', async t => {
   await t
     .hover(composeInput)
     .typeText(composeInput, '@adm')
-    .expect($('.compose-autosuggest.shown').exists).ok({ timeout })
+    .expect($('.compose-autosuggest').visible).ok({ timeout })
     .expect(getNthAutosuggestionResult(1).innerText).contains('@admin')
     .hover(getNthStatus(1))
     .click(getNthReplyButton(1))
@@ -119,5 +137,15 @@ test('autosuggest only shows for one input part 2', async t => {
     .typeText(getNthComposeReplyInput(1), '@dd')
   await sleep(1000)
   await t.pressKey('backspace')
-    .expect($('.compose-autosuggest.shown').exists).notOk()
+    .expect($('.compose-autosuggest').visible).notOk()
+})
+
+test('autocomplete disappears on blur', async t => {
+  await loginAsFoobar(t)
+  await t
+    .hover(composeInput)
+    .typeText(composeInput, '@adm')
+    .expect($('.compose-autosuggest').visible).ok({ timeout })
+    .click(composeLengthIndicator)
+    .expect($('.compose-autosuggest').visible).notOk()
 })

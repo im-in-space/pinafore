@@ -5,14 +5,20 @@ import { addStatusOrNotification } from './addStatusOrNotification'
 import { database } from '../_database/database'
 import { emit } from '../_utils/eventBus'
 import { putMediaMetadata } from '../_api/media'
+import uniqBy from 'lodash-es/uniqBy'
+import { deleteCachedMediaFile } from '../_utils/mediaUploadFileCache'
+import { scheduleIdleTask } from '../_utils/scheduleIdleTask'
+import { formatIntl } from '../_utils/formatIntl'
 
 export async function insertHandleForReply (statusId) {
   const { currentInstance } = store.get()
   const status = await database.getStatus(currentInstance, statusId)
   const { currentVerifyCredentials } = store.get()
   const originalStatus = status.reblog || status
-  const accounts = [originalStatus.account].concat(originalStatus.mentions || [])
+  let accounts = [originalStatus.account].concat(originalStatus.mentions || [])
     .filter(account => account.id !== currentVerifyCredentials.id)
+  // Pleroma includes account in mentions as well, so make uniq https://github.com/nolanlawson/pinafore/issues/1591
+  accounts = uniqBy(accounts, _ => _.id)
   if (!store.getComposeData(statusId, 'text') && accounts.length) {
     store.setComposeData(statusId, {
       text: accounts.map(account => `@${account.acct} `).join('')
@@ -26,7 +32,7 @@ export async function postStatus (realm, text, inReplyToId, mediaIds,
   const { currentInstance, accessToken, online } = store.get()
 
   if (!online) {
-    toast.say('You cannot post while offline')
+    /* no await */ toast.say('intl.cannotPostOffline')
     return
   }
 
@@ -55,9 +61,10 @@ export async function postStatus (realm, text, inReplyToId, mediaIds,
     addStatusOrNotification(currentInstance, 'home', status)
     store.clearComposeData(realm)
     emit('postedStatus', realm, inReplyToUuid)
+    scheduleIdleTask(() => (mediaIds || []).forEach(mediaId => deleteCachedMediaFile(mediaId))) // clean up media cache
   } catch (e) {
     console.error(e)
-    toast.say('Unable to post status: ' + (e.message || ''))
+    /* no await */ toast.say(formatIntl('intl.unableToPost', { error: (e.message || '') }))
   } finally {
     store.set({ postingStatus: false })
   }

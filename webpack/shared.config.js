@@ -23,21 +23,10 @@ const resolve = {
   extensions: ['.js', '.json', '.html'],
   mainFields: ['svelte', 'module', 'browser', 'main'],
   alias: {
-    react: 'preact/compat/dist/compat.module.js',
-    'react-dom': 'preact/compat/dist/compat.module.js',
-    ...(process.env.LEGACY ? {
-      '../_utils/tesseractWorker.js': 'lodash/noop',
-      'emoji-mart/dist-modern/components/picker/nimble-picker': 'emoji-mart/dist-es/components/picker/nimble-picker',
-      'emoji-regex/es2015/text': 'emoji-regex/text',
-      'page-lifecycle/dist/lifecycle.mjs': 'page-lifecycle/dist/lifecycle.es5.js',
-      './SvgIcon.html': './SvgIconLegacy.html',
-      '../SvgIcon.html': '../SvgIconLegacy.html',
-      '../../SvgIcon.html': '../../SvgIconLegacy.html',
-      '../../_components/SvgIcon.html': '../../_components/SvgIconLegacy.html',
-      '../../../_components/SvgIcon.html': '../../../_components/SvgIconLegacy.html'
-    } : {
-      intl: 'lodash/noop'
-    })
+    // All browsers we target support Intl.PluralRules, so format-message-interpret can fall back to that. This file is
+    // pretty big (9.83kB) and it's not needed.
+    './plurals': 'lodash-es/noop',
+    'lookup-closest-locale': 'lodash-es/noop' // small, but also not needed
   }
 }
 

@@ -28,3 +28,19 @@ export function padStart (string, length, chars) {
   }
   return string
 }
+
+export function sum (list) {
+  let total = 0
+  for (const item of list) {
+    total += item
+  }
+  return total
+}
+
+export function times (n, func) {
+  const res = []
+  for (let i = 0; i < n; i++) {
+    res.push(func(i))
+  }
+  return res
+}

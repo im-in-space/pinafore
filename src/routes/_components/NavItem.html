@@ -12,7 +12,9 @@
     />
     <span class="nav-link-label">{label}</span>
   </div>
-  <div class="nav-indicator" ref:indicator></div>
+  <div class="nav-indicator-wrapper">
+    <div class="nav-indicator" ref:indicator></div>
+  </div>
 </a>
 <style>
   :global(.main-nav-link ){
@@ -40,9 +42,15 @@
     background: var(--nav-a-selected-bg-hover);
   }
 
-  :global(.nav-indicator ){
+  .nav-indicator-wrapper {
     width: 100%;
-    height: 1px;
+    height: var(--nav-indicator-height);
+    background: var(--nav-a-border);
+    display: flex;
+  }
+
+  .nav-indicator {
+    flex: 1;
     background: var(--nav-a-border);
     transform-origin: left;
   }
@@ -56,12 +64,16 @@
     background: var(--nav-a-border-hover);
   }
 
-  :global(.main-nav-link.selected .nav-indicator ){
-    background: var(--nav-a-selected-border);
+  .main-nav-link.selected .nav-indicator-wrapper {
+    background: var(--nav-a-border-hover);
   }
 
-  :global(.main-nav-link.selected:hover .nav-indicator ){
-    background: var(--nav-a-selected-border-hover);
+  .main-nav-link.selected .nav-indicator {
+    background: var(--nav-indicator-bg);
+  }
+
+  .main-nav-link.selected:hover .nav-indicator {
+    background: var(--nav-indicator-bg-hover);
   }
 
   :global(.main-nav-link:hover ){
@@ -81,18 +93,30 @@
     background-color: var(--nav-a-selected-active-bg);
   }
 
-  :global(.nav-link-label ){
-    font-size: 16px;
+  .nav-link-label {
+    font-size: var(--nav-font-size);
+    line-height: var(--nav-icon-size);
     color: var(--nav-text-color);
     padding-left: 10px;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
     text-overflow: ellipsis;
   }
 
   @media (max-width: 991px) {
-    :global(.main-nav-link .nav-link-label ){
-      display: none;
+    .main-nav-link .nav-link-label {
+      /* Copied from the sr-only styles in global.scss
+       * the reason we explicitly leave this <span> in is because Voice Control on iOS does not
+       * understand aria-labels very well, but it understands hidden text just fine
+       */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
     }
   }
 </style>
@@ -103,6 +127,8 @@
   import { mark, stop } from '../_utils/marks'
   import { doubleRAF } from '../_utils/doubleRAF'
   import { scrollToTop } from '../_utils/scrollToTop'
+  import { normalizePageName } from '../_utils/normalizePageName'
+  import { formatIntl } from '../_utils/formatIntl'
 
   export default {
     oncreate () {
@@ -123,22 +149,17 @@
     },
     store: () => store,
     computed: {
-      selected: ({ page, name }) => {
-        return page === name ||
-          // special case – these should both highlight the notifications tab icon
-          (name === 'notifications' && page === 'notifications/mentions')
-      },
+      selected: ({ page, name }) => name === normalizePageName(page),
       ariaLabel: ({ selected, name, label, $numberOfNotifications, $numberOfFollowRequests }) => {
-        let res = label
-        if (selected) {
-          res += ' (current page)'
-        }
-        if (name === 'notifications' && $numberOfNotifications) {
-          res += ` (${$numberOfNotifications} notification${$numberOfNotifications === 1 ? '' : 's'})`
-        } else if (name === 'community' && $numberOfFollowRequests) {
-          res += ` (${$numberOfFollowRequests} follow request${$numberOfFollowRequests === 1 ? '' : 's'})`
-        }
-        return res
+        const count = name === 'notifications'
+          ? $numberOfNotifications
+          : (name === 'community' ? $numberOfFollowRequests : 0)
+        return formatIntl('intl.navItemLabel', {
+          label,
+          selected,
+          name,
+          count
+        })
       },
       showBadge: ({ name, $hasNotifications, $hasFollowRequests }) => (
         (name === 'notifications' && $hasNotifications) || (name === 'community' && $hasFollowRequests)

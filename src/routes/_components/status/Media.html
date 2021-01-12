@@ -2,7 +2,7 @@
     <button id={elementId}
             type="button"
             class="inline-media play-video-button focus-after {$largeInlineMedia ? '' : 'fixed-size'} {type === 'audio' ? 'play-audio-button' : ''}"
-            aria-label="Play {type === 'video' ? 'video' : 'audio'}: {description}"
+            aria-label={videoOrAudioButtonLabel}
             {tabindex}
             aria-hidden={ariaHidden}
             style={inlineMediaStyle}>
@@ -25,7 +25,7 @@
   <button id={elementId}
           type="button"
           class="inline-media show-image-button focus-after {$largeInlineMedia ? '' : 'fixed-size'}"
-          aria-label="Show image: {description}"
+          aria-label={imageButtonAriaLabel}
           title={description}
           on:mouseover="set({mouseover: event})"
           style={inlineMediaStyle}
@@ -34,7 +34,7 @@
   >
   {#if type === 'gifv' && $autoplayGifs && !blurhash}
     <AutoplayVideo
-      ariaLabel="Animated GIF: {description}"
+      ariaLabel={animatedLabel}
       poster={previewUrl}
       src={url}
       width={inlineWidth}
@@ -44,7 +44,7 @@
   {:elseif type === 'gifv'}
     <NonAutoplayGifv
       class={noNativeWidthHeight ? 'no-native-width-height' : ''}
-      label="Animated GIF: {description}"
+      label={animatedLabel}
       poster={previewUrl}
       {blurhash}
       src={url}
@@ -102,7 +102,7 @@
 </style>
 <script>
   import { DEFAULT_MEDIA_WIDTH, DEFAULT_MEDIA_HEIGHT, ONE_TRANSPARENT_PIXEL } from '../../_static/media'
-  import { importShowMediaDialog } from '../dialog/asyncDialogs'
+  import { importShowMediaDialog } from '../dialog/asyncDialogs/importShowMediaDialog.js'
   import { mouseover } from '../../_utils/events'
   import NonAutoplayGifv from '../NonAutoplayGifv.html'
   import PlayVideoIcon from '../PlayVideoIcon.html'
@@ -111,6 +111,7 @@
   import AutoplayVideo from '../AutoplayVideo.html'
   import { registerClickDelegate } from '../../_utils/delegate'
   import { convertCssPropertyToDataUrl } from '../../_utils/convertCssPropertyToDataUrl'
+  import { formatIntl } from '../../_utils/formatIntl'
 
 export default {
     async oncreate () {
@@ -166,7 +167,16 @@ export default {
         }
       },
       tabindex: ({ showAsSensitive }) => showAsSensitive ? '-1' : '0',
-      ariaHidden: ({ showAsSensitive }) => showAsSensitive
+      ariaHidden: ({ showAsSensitive }) => showAsSensitive,
+      imageButtonAriaLabel: ({ type, description }) => (
+        formatIntl('intl.showImage', { animated: type === 'gifv', description })
+      ),
+      videoOrAudioButtonLabel: ({ type, description }) => (
+        formatIntl('intl.playVideoOrAudio', { audio: type === 'audio', description })
+      ),
+      animatedLabel: ({ description }) => (
+        formatIntl('intl.animatedImage', { description })
+      )
     },
     methods: {
       onClick () {

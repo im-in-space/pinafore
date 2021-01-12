@@ -3,9 +3,10 @@ import { computations } from './computations/computations'
 import { mixins } from './mixins/mixins'
 import { LocalStorageStore } from './LocalStorageStore'
 import { observe } from 'svelte-extras'
-import { isKaiOS } from '../_utils/userAgent'
+import { isKaiOS } from '../_utils/userAgent/isKaiOS'
 
 const persistedState = {
+  alwaysShowFocusRing: false,
   autoplayGifs: false,
   composeData: {},
   currentInstance: null,
@@ -16,7 +17,7 @@ const persistedState = {
   disableFavCounts: false,
   disableFollowerCounts: false,
   disableHotkeys: false,
-  disableInfiniteScroll: isKaiOS(),
+  disableInfiniteScroll: false,
   disableLongAriaLabels: false,
   disableNotificationBadge: false,
   disableReblogCounts: false,

@@ -61,4 +61,5 @@ test('Can mute and unmute an account', async t => {
   await t
     .click(closeDialogButton)
     .expect(accountProfileFollowButton.getAttribute('aria-label')).eql('Unfollow')
+    .expect(accountProfileFollowButton.getAttribute('title')).eql('Unfollow')
 })

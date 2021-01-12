@@ -36,36 +36,46 @@
         />
       {/if}
       {#if dots.length > 1}
-        <div class="media-controls">
-            <IconButton
-              className="media-control-button"
-              svgClassName="media-control-button-svg"
-              disabled={scrolledItem === 0}
-              label="Show previous media"
-              href="#fa-angle-left"
-              on:click="prev()"
-            />
-            {#each dots as dot, i (dot.i)}
+        <!-- Roughly based on https://www.w3.org/WAI/tutorials/carousels/functionality/
+             Since this toolbar contains a mix of left/right/first/second/third/fourth buttons,
+             just list them and explicitly label the current one as "current." -->
+        <ul class="media-controls" aria-label="{intl.navigateMedia}">
+            <li class="media-control">
               <IconButton
                 className="media-control-button"
                 svgClassName="media-control-button-svg"
-                pressable={true}
-                label="Show {nth(i)} media"
-                pressed={i === scrolledItem}
-                href={i === scrolledItem ? '#fa-circle' : '#fa-circle-o'}
-                sameColorWhenPressed={true}
-                on:click="onButtonClick(i)"
+                disabled={scrolledItem === 0}
+                label="{intl.showPreviousMedia}"
+                href="#fa-angle-left"
+                on:click="prev()"
               />
+            </li>
+            {#each dots as dot, i (dot.i)}
+              <li class="media-control">
+                <IconButton
+                  className="media-control-button"
+                  svgClassName="media-control-button-svg"
+                  pressable={true}
+                  label="{createLabel(i, false)}"
+                  pressedLabel="{createLabel(i, true)}"
+                  pressed={i === scrolledItem}
+                  href={i === scrolledItem ? '#fa-circle' : '#fa-circle-o'}
+                  sameColorWhenPressed={true}
+                  on:click="onButtonClick(i)"
+                />
+              </li>
             {/each}
-            <IconButton
-              className="media-control-button"
-              svgClassName="media-control-button-svg"
-              disabled={scrolledItem === length - 1}
-              label="Show next media"
-              href="#fa-angle-right"
-              on:click="next()"
-            />
-        </div>
+            <li class="media-control">
+              <IconButton
+                className="media-control-button"
+                svgClassName="media-control-button-svg"
+                disabled={scrolledItem === length - 1}
+                label="{intl.showNextMedia}"
+                href="#fa-angle-right"
+                on:click="next()"
+              />
+            </li>
+        </ul>
       {/if}
       {#if canPinchZoom}
         <IconButton
@@ -73,7 +83,8 @@
           svgClassName="media-control-button-svg"
           pressable={true}
           pressed={pinchZoomMode}
-          label={pinchZoomMode ? 'Disable pinch-zoom mode' : 'Enable pinch-zoom mode'}
+          label="{intl.enterPinchZoom}"
+          pressedLabel="{intl.exitPinchZoom}"
           href="#fa-search"
           on:click="togglePinchZoomMode()"
         />
@@ -140,6 +151,16 @@
   .media-controls {
     display: flex;
     justify-content: space-between;
+  }
+  ul.media-controls {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li.media-control {
+    margin: 0;
+    padding: 0;
+    display: flex;
   }
 
   :global(.media-pinch-zoom) {
@@ -223,6 +244,7 @@
   import { store } from '../../../_store/store'
   import { intrinsicScale } from '../../../_thirdparty/intrinsic-scale/intrinsicScale'
   import { get } from '../../../_utils/lodash-lite'
+  import { formatIntl } from '../../../_utils/formatIntl'
 
   // padding for .media-scroll-item-image-area
   const IMAGE_AREA_PADDING = {
@@ -260,17 +282,8 @@
       PinchZoomable
     },
     helpers: {
-      nth (i) {
-        switch (i) {
-          case 0:
-            return 'first'
-          case 1:
-            return 'second'
-          case 2:
-            return 'third'
-          case 3:
-            return 'fourth'
-        }
+      createLabel (i, current) {
+        return formatIntl('intl.showMedia', { index: i + 1, current })
       }
     },
     methods: {
@@ -333,7 +346,7 @@
             // smooth scroll, so disable smooth scrolling
             scroller.scrollLeft = scrollLeft
           } else {
-            smoothScroll(scroller, scrollLeft, true)
+            smoothScroll(scroller, scrollLeft, /* horizontal */ true, /* preferFast */ false)
           }
         } else {
           console.log('setting scrollLeft', scrollLeft)

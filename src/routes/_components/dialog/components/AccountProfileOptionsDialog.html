@@ -22,6 +22,7 @@ import { copyText } from '../../../_actions/copyText'
 import { composeNewStatusMentioning } from '../../../_actions/mention'
 import { toggleMute } from '../../../_actions/toggleMute'
 import { reportStatusOrAccount } from '../../../_actions/report'
+import { formatIntl } from '../../../_utils/formatIntl'
 
 export default {
   oncreate,
@@ -35,25 +36,30 @@ export default {
     followRequested: ({ relationship }) => relationship && relationship.requested,
     accountId: ({ account }) => account && account.id,
     acct: ({ account }) => account.acct,
+    username: ({ account }) => account.username,
     muting: ({ relationship }) => relationship && relationship.muting,
     blocking: ({ relationship }) => relationship && relationship.blocking,
-    followLabel: ({ following, followRequested, account, acct }) => {
+    followLabel: ({ following, followRequested, account, username }) => {
       if (typeof following === 'undefined' || !account) {
         return ''
       }
       return (following || followRequested)
-        ? `Unfollow @${acct}`
-        : `Follow @${acct}`
+        ? formatIntl('intl.unfollowAccount', { account: `@${username}` })
+        : formatIntl('intl.followAccount', { account: `@${username}` })
     },
     followIcon: ({ following, followRequested }) => (
       following ? '#fa-user-times' : followRequested ? '#fa-hourglass' : '#fa-user-plus'
     ),
-    blockLabel: ({ blocking, acct }) => (
-      blocking ? `Unblock @${acct}` : `Block @${acct}`
+    blockLabel: ({ blocking, username }) => (
+      blocking
+        ? formatIntl('intl.unblockAccount', { account: `@${username}` })
+        : formatIntl('intl.blockAccount', { account: `@${username}` })
     ),
     blockIcon: ({ blocking }) => blocking ? '#fa-unlock' : '#fa-ban',
-    muteLabel: ({ muting, acct }) => (
-      muting ? `Unmute @${acct}` : `Mute @${acct}`
+    muteLabel: ({ muting, username }) => (
+      muting
+        ? formatIntl('intl.unmuteAccount', { account: `@${username}` })
+        : formatIntl('intl.muteAccount', { account: `@${username}` })
     ),
     muteIcon: ({ muting }) => muting ? '#fa-volume-up' : '#fa-volume-off',
     isUser: ({ accountId, verifyCredentialsId }) => accountId === verifyCredentialsId,
@@ -61,28 +67,30 @@ export default {
     // end copypasta (StatusOptionsDialog.html / AccountProfileOptionsDialog.html)
     //
     showingReblogs: ({ relationship }) => relationship ? relationship.showing_reblogs : true,
-    showReblogsLabel: ({ showingReblogs, acct }) => (
+    showReblogsLabel: ({ showingReblogs, username }) => (
       showingReblogs
-        ? `Hide boosts from @${acct}`
-        : `Show boosts from @${acct}`
+        ? formatIntl('intl.hideReblogsFromAccount', { account: `@${username}` })
+        : formatIntl('intl.showReblogsFromAccount', { account: `@${username}` })
     ),
     domain: ({ acct }) => acct.split('@')[1],
     blockingDomain: ({ relationship }) => relationship && relationship.domain_blocking,
     blockDomainLabel: ({ blockingDomain, domain }) => (
       blockingDomain
-        ? `Unhide ${domain}`
-        : `Hide ${domain}`
+        ? formatIntl('intl.showDomain', { domain })
+        : formatIntl('intl.hideDomain', { domain })
     ),
-    reportLabel: ({ acct }) => `Report @${acct}`,
+    reportLabel: ({ username }) => (
+      formatIntl('intl.reportAccount', { account: `@${username}` })
+    ),
     items: ({
       blockLabel, blocking, blockIcon, muteLabel, muteIcon,
       followLabel, followIcon, following, followRequested,
-      accountId, verifyCredentialsId, acct, isUser, showReblogsLabel,
+      accountId, verifyCredentialsId, username, isUser, showReblogsLabel,
       domain, blockDomainLabel, reportLabel
     }) => ([
       !isUser && {
         key: 'mention',
-        label: `Mention @${acct}`,
+        label: formatIntl('intl.mentionAccount', { account: `@${username}` }),
         icon: '#fa-comments'
       },
       !isUser && !blocking && {
@@ -117,7 +125,7 @@ export default {
       },
       {
         key: 'copy',
-        label: 'Copy link to account',
+        label: 'intl.copyLinkToAccount',
         icon: '#fa-link'
       }
     ].filter(Boolean))
