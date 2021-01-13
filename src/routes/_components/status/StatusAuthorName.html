@@ -7,7 +7,7 @@
   <AccountDisplayName account={originalAccount} />
 </a>
 <style>
-  :global(.status-author-name ){
+  .status-author-name {
     grid-area: author-name;
     align-self: center;
     margin-left: 5px;
@@ -19,17 +19,17 @@
     text-overflow: ellipsis;
   }
 
-  :global(.status-author-name.status-in-own-thread ){
+  .status-author-name.status-in-own-thread {
     font-size: 1.3em;
   }
 
-  :global(.status-author-name, .status-author-name:hover, .status-author-name:visited ){
+  .status-author-name, .status-author-name:hover, .status-author-name:visited {
     color: var(--body-text-color);
   }
 
-  :global(.status-author-name.status-in-notification,
+  .status-author-name.status-in-notification,
   .status-author-name.status-in-notification:hover,
-  .status-author-name.status-in-notification:visited ){
+  .status-author-name.status-in-notification:visited {
     color: var(--very-deemphasized-text-color);
   }
 

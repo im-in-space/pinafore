@@ -45,7 +45,7 @@
   {/if}
 </div>
 <style>
-  :global(.account-profile-details ){
+  .account-profile-details {
     grid-area: details;
     display: grid;
     margin: 0 5px;
@@ -61,48 +61,48 @@
     font-size: 1.1em;
   }
 
-  :global(.account-profile-details-item:hover ){
+  .account-profile-details-item:hover {
     text-decoration: none;
     background: var(--button-bg-hover);
     cursor: pointer;
   }
 
-  :global(.account-profile-details-item:active ){
+  .account-profile-details-item:active {
     background: var(--button-bg-active);
   }
 
-  :global(.account-profile-details-item-title ){
+  .account-profile-details-item-title {
     text-transform: uppercase;
     color: var(--deemphasized-text-color);
     margin-right: 5px;
   }
 
-  :global(.account-profile-details-item-datum ){
+  .account-profile-details-item-datum {
     color: var(--body-text-color);
     margin-left: 5px;
     font-weight: 600;
   }
 
   @media (max-width: 767px) {
-    :global(.account-profile-details-item ){
+    .account-profile-details-item {
       flex-direction: column;
       margin-left: 5px;
       margin-right: 5px;
     }
 
-    :global(.account-profile-details-item:last-child ){
+    .account-profile-details-item:last-child {
       margin-right: 0;
     }
 
-    :global(.account-profile-details-item:first-child ){
+    .account-profile-details-item:first-child {
       margin-left: 0;
     }
 
-    :global(.account-profile-details-item-title ){
+    .account-profile-details-item-title {
       margin-right: 0;
       text-align: center;
     }
-    :global(.account-profile-details-item-datum ){
+    .account-profile-details-item-datum {
       margin-left: 0;
       text-align: center;
     }

@@ -12,14 +12,14 @@
 </div>
 <Shortcut key="Backspace" on:pressed="onGoBack()"/>
 <style>
-  :global(.dynamic-page-banner ){
+  .dynamic-page-banner {
     display: grid;
     align-items: center;
     margin: 20px 20px 20px;
     grid-template-columns: 1fr min-content;
     grid-column-gap: 10px;
   }
-  :global(.dynamic-page-banner.dynamic-page-with-icon ){
+  .dynamic-page-banner.dynamic-page-with-icon {
     grid-template-columns: min-content 1fr min-content;
   }
   :global(.dynamic-page-banner-svg) {
@@ -27,13 +27,13 @@
     height: 24px;
     fill: var(--body-text-color);
   }
-  :global(.dynamic-page-title ){
+  .dynamic-page-title {
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  :global(.dynamic-page-go-back ){
+  .dynamic-page-go-back {
     font-size: 1.3em;
     color: var(--anchor-text);
     border: 0;
@@ -41,21 +41,21 @@
     background: none;
     justify-self: flex-end;
   }
-  :global(.dynamic-page-go-back:hover ){
+  .dynamic-page-go-back:hover {
     text-decoration: underline;
   }
-  :global(.dynamic-page-go-back::before ){
+  .dynamic-page-go-back::before {
     content: '←';
     margin-right: 5px;
   }
   @media (max-width: 767px) {
-    :global(.dynamic-page-banner ){
+    .dynamic-page-banner {
       margin: 20px 10px 20px;
     }
-    :global(.dynamic-page-title ){
+    .dynamic-page-title {
       font-size: 1.3em;
     }
-    :global(.dynamic-page-go-back ){
+    .dynamic-page-go-back {
       font-size: 1.3em;
     }
   }

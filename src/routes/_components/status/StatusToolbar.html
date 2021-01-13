@@ -43,18 +43,18 @@
   <Shortcut scope={shortcutScope} key="b" on:pressed="reblog()"/>
 {/if}
 <style>
-  :global(.status-toolbar ){
+  .status-toolbar {
     grid-area: toolbar;
     display: flex;
     justify-content: space-between;
     pointer-events: none;
   }
-  :global(.status-toolbar.status-in-own-thread ){
+  .status-toolbar.status-in-own-thread {
     margin-left: 63px; /* offset to align all toolbar items: 48px avatar + 15px margin-right */
   }
 
   @media (max-width: 767px) {
-    :global(.status-toolbar.status-in-own-thread ){
+    .status-toolbar.status-in-own-thread {
       margin-left: 53px; /* offset to align all toolbar items: 48px avatar + 5px margin-right */
     }
   }

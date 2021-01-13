@@ -4,32 +4,32 @@
   </a>
 </li>
 <style>
-  :global(.search-result ){
+  .search-result {
     box-sizing: border-box;
     border-bottom: 1px solid var(--main-border);
     display: flex;
   }
-  :global(.search-result:last-child ){
+  .search-result:last-child {
     border-bottom: none;
   }
-  :global(.search-result-anchor ){
+  .search-result-anchor {
     padding: 20px;
     flex: 1;
     background: var(--settings-list-item-bg);
   }
-  :global(.search-result-anchor, .search-result-anchor:visited ){
+  .search-result-anchor, .search-result-anchor:visited {
     color: var(--body-text-color);
   }
-  :global(.search-result-anchor:hover ){
+  .search-result-anchor:hover {
     background: var(--settings-list-item-bg-hover);
     text-decoration: none;
   }
-  :global(.search-result-anchor:active ){
+  .search-result-anchor:active {
     background: var(--settings-list-item-bg-active);
   }
 
   @media (max-width: 767px) {
-    :global(.search-result-anchor ){
+    .search-result-anchor {
       padding: 15px 10px;
     }
   }

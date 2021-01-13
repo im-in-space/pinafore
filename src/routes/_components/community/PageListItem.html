@@ -19,28 +19,28 @@
   </a>
 </li>
 <style>
-  :global(.page-list-item ){
+  .page-list-item {
     border: 1px solid var(--settings-list-item-border);
     font-size: 1.3em;
     display: flex;
     flex-direction: column;
   }
-  :global(.page-list-item a ){
+  .page-list-item a {
     padding: 20px 40px;
     background: var(--settings-list-item-bg);
     display: grid;
     grid-template-columns: min-content 1fr min-content;
     align-items: center;
   }
-  :global(.page-list-item a, .page-list-item a:visited ){
+  .page-list-item a, .page-list-item a:visited {
     color: var(--body-text-color);
   }
-  :global(.page-list-item a:hover ){
+  .page-list-item a:hover {
     text-decoration: none;
     background: var(--settings-list-item-bg-hover);
     color: var(--body-text-color);
   }
-  :global(.page-list-item a:active ){
+  .page-list-item a:active {
     background: var(--settings-list-item-bg-active);
   }
   :global(.page-list-item-svg) {
@@ -50,7 +50,7 @@
     margin-right: 20px;
     fill: var(--body-text-color);
   }
-  :global(.page-list-item span ){
+  .page-list-item span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -93,7 +93,7 @@
   /* TODO: end copypasta */
 
   @media (max-width: 767px) {
-    :global(.page-list-item a ){
+    .page-list-item a {
       padding: 20px 10px;
     }
     :global(.page-list-item-svg) {

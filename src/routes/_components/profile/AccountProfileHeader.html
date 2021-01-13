@@ -37,7 +37,7 @@
   {/if}
 </div>
 <style>
-  :global(.account-profile-followed-by ){
+  .account-profile-followed-by {
     grid-area: followed-by;
     align-self: center;
     text-transform: uppercase;
@@ -45,17 +45,17 @@
     font-size: 0.8em;
     white-space: nowrap;
   }
-  :global(.account-profile-followed-by-span ){
+  .account-profile-followed-by-span {
     background: rgba(30, 30, 30, 0.2);
     border-radius: 4px;
     padding: 3px 5px;
     white-space: nowrap;
   }
-  :global(.account-profile-avatar ){
+  .account-profile-avatar {
     grid-area: avatar;
   }
 
-  :global(.account-profile-username ){
+  .account-profile-username {
     grid-area: username;
     color: var(--deemphasized-text-color);
     white-space: nowrap;
@@ -64,7 +64,7 @@
     align-self: center;
   }
 
-  :global(.account-profile-name ){
+  .account-profile-name {
     grid-area: name;
     font-size: 1.5em;
     align-self: center;
@@ -106,13 +106,13 @@
   }
 
   @media (max-width: 767px) {
-    :global(.account-profile-name ){
+    .account-profile-name {
       font-size: 1.3em;
     }
-    :global(.account-profile-username ){
+    .account-profile-username {
       font-size: 1.1em;
     }
-    :global(.account-profile-name, .account-profile-username ){
+    .account-profile-name, .account-profile-username {
       align-self: flex-start;
     }
   }

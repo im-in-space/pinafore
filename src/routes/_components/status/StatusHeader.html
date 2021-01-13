@@ -24,17 +24,17 @@
   </div>
 </div>
 <style>
-  :global(.status-header ){
+  .status-header {
     grid-area: header;
     margin: 0 10px 5px 5px;
     display: flex;
     align-items: center;
   }
-  :global(.status-header.header-is-follow ){
+  .status-header.header-is-follow {
     margin-bottom: 0; /* standalone, so doesn't need a bottom margin */
   }
 
-  :global(.status-header-avatar ){
+  .status-header-avatar {
     margin-left: 19px; /* offset for avatar, 48px - 24px - 5px */
   }
 
@@ -50,14 +50,14 @@
     fill: var(--body-text-color);
   }
 
-  :global(.status-header-content ){
+  .status-header-content {
     display: flex;
     flex: 1;
     min-width: 0;
     width: 0;
   }
 
-  :global(.status-header-author ){
+  .status-header-author {
     margin-left: 5px;
     white-space: nowrap;
     overflow: hidden;
@@ -65,23 +65,23 @@
     min-width: 0;
   }
 
-  :global(.status-header-action ){
+  .status-header-action {
     margin-left: 0.5ch;
     white-space: nowrap;
     flex: 1;
   }
 
-  :global(.status-header-action,
+  .status-header-action,
   .status-header-author,
   .status-header-author:visited,
-  .status-header-author:hover ){
+  .status-header-author:hover {
     color: var(--deemphasized-text-color);
   }
 
-  :global(.status-in-notification .status-header-action,
+  .status-in-notification .status-header-action,
   .status-in-notification .status-header-author,
   .status-in-notification .status-header-author:visited,
-  .status-in-notification .status-header-author:hover ){
+  .status-in-notification .status-header-author:hover {
     color: var(--body-text-color);
   }
 

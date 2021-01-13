@@ -10,7 +10,7 @@
 <Shortcut scope={shortcutScope} key="x" on:pressed="toggleSpoilers()"/>
 {/if}
 <style>
-  :global(.status-spoiler ){
+  .status-spoiler {
     grid-area: spoiler;
     word-wrap: break-word;
     overflow: hidden;
@@ -19,24 +19,24 @@
     margin: 10px 5px;
   }
 
-  :global(.status-spoiler.status-in-own-thread ){
+  .status-spoiler.status-in-own-thread {
     font-size: 1.3em;
     margin: 20px 5px 10px;
   }
 
-  :global(.status-spoiler.status-in-notification ){
+  .status-spoiler.status-in-notification {
     color: var(--very-deemphasized-text-color);
   }
 
-  :global(.status-spoiler-button ){
+  .status-spoiler-button {
     grid-area: spoiler-btn;
     margin: 10px 5px;
   }
 
-  :global(.status-spoiler-button.status-in-own-thread ){
+  .status-spoiler-button.status-in-own-thread {
   }
 
-  :global(.status-spoiler-button button ){
+  .status-spoiler-button button {
     padding: 5px 10px;
     font-size: 1.1em;
   }

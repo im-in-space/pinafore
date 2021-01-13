@@ -27,7 +27,7 @@
   </div>
 {/if}
 <style>
-  :global(.account-profile-meta ){
+  .account-profile-meta {
     grid-area: meta;
     display: grid;
     grid-template-columns: auto 1fr max-content;
@@ -36,7 +36,7 @@
     padding: 10px 0;
   }
 
-  :global(.account-profile-meta-border ){
+  .account-profile-meta-border {
     height: 1px;
     width: 100%;
     grid-column: 1 / 4;
@@ -44,7 +44,7 @@
     justify-self: center;
   }
 
-  :global(.account-profile-meta-cell ){
+  .account-profile-meta-cell {
     word-wrap: break-word;
     overflow: hidden;
     white-space: pre-wrap;
@@ -58,7 +58,7 @@
     fill: var(--svg-fill);
   }
 
-  :global(.account-profile-meta-name ){
+  .account-profile-meta-name {
     padding: 10px 20px 10px 0;
     text-transform: uppercase;
     color: var(--deemphasized-text-color);
@@ -66,7 +66,7 @@
     max-width: 300px;
   }
 
-  :global(.account-profile-meta-name:after ){
+  .account-profile-meta-name:after {
     content: '';
     position: absolute;
     right: 0;
@@ -75,7 +75,7 @@
     border-right: 1px solid var(--main-border);
   }
 
-  :global(.account-profile-meta-value ){
+  .account-profile-meta-value {
     padding: 10px 10px 10px 20px;
   }
 
@@ -84,17 +84,17 @@
   }
 
   @media (max-width: 767px) {
-    :global(.account-profile-meta ){
+    .account-profile-meta {
       padding: 5px 0;
     }
-    :global(.account-profile-meta-cell ){
+    .account-profile-meta-cell {
       font-size: 1em;
     }
-    :global(.account-profile-meta-name ){
+    .account-profile-meta-name {
       padding: 5px 10px 5px 0;
       max-width: 40vw;
     }
-    :global(.account-profile-meta-value ){
+    .account-profile-meta-value {
       padding: 5px 10px 5px 10px;
     }
   }

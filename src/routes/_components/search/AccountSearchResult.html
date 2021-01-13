@@ -24,7 +24,7 @@
   </div>
 </SearchResult>
 <style>
-  :global(.search-result-account ){
+  .search-result-account {
     display: grid;
     grid-template-areas:
       "avatar    name     buttons"
@@ -36,21 +36,21 @@
   :global(.search-result-account-avatar) {
     grid-area: avatar;
   }
-  :global(.search-result-account-name ){
+  .search-result-account-name {
     grid-area: name;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 1.2em;
   }
-  :global(.search-result-account-username ){
+  .search-result-account-username {
     grid-area: username;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--deemphasized-text-color);
   }
-  :global(.search-result-account-buttons ){
+  .search-result-account-buttons {
     grid-area: buttons;
     display: flex;
   }
@@ -61,7 +61,7 @@
     margin-right: 0;
   }
   @media (max-width: 767px) {
-    :global(.search-result-account ){
+    .search-result-account {
       grid-column-gap: 10px;
     }
     :global(.search-result-account-buttons .icon-button) {

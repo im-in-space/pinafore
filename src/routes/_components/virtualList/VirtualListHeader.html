@@ -3,7 +3,7 @@
   <svelte:component this={component} {virtualProps} />
 </div>
 <style>
-  :global(.virtual-list-header ){
+  .virtual-list-header {
     position: absolute;
     top: 0;
     width: 100%;
@@ -12,11 +12,11 @@
     transition: none;
     display: none;
   }
-  :global(.virtual-list-header.shown ){
+  .virtual-list-header.shown {
     display: block;
     transition: opacity 0.2s linear;
   }
-  :global(.virtual-list-header.faded-in ){
+  .virtual-list-header.faded-in {
     opacity: 1;
   }
 </style>

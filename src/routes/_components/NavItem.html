@@ -17,7 +17,7 @@
   </div>
 </a>
 <style>
-  :global(.main-nav-link ){
+  .main-nav-link {
     text-decoration: none;
     display: flex;
     justify-content: center;
@@ -38,7 +38,7 @@
     background: var(--nav-a-selected-bg);
   }
 
-  :global(.main-nav-link.selected:hover ){
+  .main-nav-link.selected:hover {
     background: var(--nav-a-selected-bg-hover);
   }
 
@@ -55,12 +55,12 @@
     transform-origin: left;
   }
 
-  :global(.nav-indicator.animate ){
+  .nav-indicator.animate {
     transition: transform 333ms ease-in-out;
     will-change: transform;
   }
 
-  :global(.main-nav-link:hover .nav-indicator ){
+  .main-nav-link:hover .nav-indicator {
     background: var(--nav-a-border-hover);
   }
 
@@ -76,12 +76,12 @@
     background: var(--nav-indicator-bg-hover);
   }
 
-  :global(.main-nav-link:hover ){
+  .main-nav-link:hover {
     background-color: var(--nav-a-bg-hover);
     text-decoration: none;
   }
 
-  :global(.main-nav-link:hover .nav-link-label ){
+  .main-nav-link:hover .nav-link-label {
     color: var(--nav-text-color-hover);
   }
 
