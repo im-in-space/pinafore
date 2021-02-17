@@ -50,6 +50,7 @@ async function runMastodon () {
   const env = Object.assign({}, process.env, {
     RAILS_ENV: 'development',
     NODE_ENV: 'development',
+    BUNDLE_PATH: path.join(mastodonDir, 'vendor/bundle'),
     DB_NAME,
     DB_USER,
     DB_PASS,
@@ -57,10 +58,11 @@ async function runMastodon () {
     DB_PORT
   })
   const cwd = mastodonDir
-  const cmds = [
+  const installCommands = [
+    'gem update --system',
     'gem install bundler foreman',
-    'bundle install --frozen --path vendor/bundle',
-    'bundle exec rails db:migrate',
+    'bundle config set --local frozen \'true\'',
+    'bundle install',
     'yarn --pure-lockfile'
   ]
 
@@ -70,12 +72,13 @@ async function runMastodon () {
     console.log('Already installed Mastodon')
   } catch (e) {
     console.log('Installing Mastodon...')
-    for (const cmd of cmds) {
+    for (const cmd of installCommands) {
       console.log(cmd)
       await exec(cmd, { cwd, env })
     }
     await writeFile(installedFile, '', 'utf8')
   }
+  await exec('bundle exec rails db:migrate', { cwd, env })
   const promise = spawn('foreman', ['start'], { cwd, env })
   // don't bother writing to mastodon.log in CI; we can't read the file anyway
   const logFile = process.env.CIRCLECI ? '/dev/null' : 'mastodon.log'
