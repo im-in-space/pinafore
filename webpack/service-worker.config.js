@@ -12,12 +12,14 @@ module.exports = {
   resolve,
   mode,
   devtool: dev ? 'inline-source-map' : 'source-map',
-  optimization: dev ? {} : {
-    minimize: !process.env.DEBUG,
-    minimizer: [
-      terser()
-    ]
-  },
+  optimization: dev
+    ? {}
+    : {
+        minimize: !process.env.DEBUG,
+        minimizer: [
+          terser()
+        ]
+      },
   module: {
     rules: [
       {
@@ -34,7 +36,8 @@ module.exports = {
       'process.browser': true,
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.SAPPER_TIMESTAMP': process.env.SAPPER_TIMESTAMP || Date.now(),
-      'process.env.LOCALE': JSON.stringify(LOCALE)
+      'process.env.LOCALE': JSON.stringify(LOCALE),
+      'process.env.IS_SERVICE_WORKER': 'true'
     })
   ].filter(Boolean)
 }

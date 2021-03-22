@@ -5,6 +5,7 @@ const webpack = require('webpack')
 const config = require('sapper/config/webpack.js')
 const pkg = require('../package.json')
 const { mode, dev, resolve, inlineSvgs, allSvgs } = require('./shared.config')
+const { version } = require('../package.json')
 
 // modules that the server should ignore, either because they cause errors or warnings
 // (because they're only used on the client side)
@@ -14,7 +15,8 @@ const NOOP_MODULES = [
   'tesseract.js/dist/worker.min.js.map',
   'tesseract.js-core/tesseract-core.wasm',
   'tesseract.js-core/tesseract-core.wasm.js',
-  'tesseract.js'
+  'tesseract.js/src/createWorker.js',
+  'tesseract.js/src/createWorker.js.map'
 ]
 
 const serverResolve = JSON.parse(JSON.stringify(resolve))
@@ -60,14 +62,14 @@ module.exports = {
   performance: {
     hints: false // it doesn't matter if server.js is large
   },
-  optimization: dev ? {} : {
-    minimize: false
-  },
+  optimization: dev ? {} : { minimize: false },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.INLINE_SVGS': JSON.stringify(inlineSvgs),
       'process.env.ALL_SVGS': JSON.stringify(allSvgs),
-      'process.env.LOCALE': JSON.stringify(LOCALE)
+      'process.env.LOCALE': JSON.stringify(LOCALE),
+      'process.env.PINAFORE_VERSION': JSON.stringify(version),
+      'process.env.IS_SERVICE_WORKER': 'false'
     })
   ]
 }

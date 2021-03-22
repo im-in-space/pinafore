@@ -8,18 +8,26 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 const terser = require('./terser.config')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 const { mode, dev, resolve, inlineSvgs, allSvgs } = require('./shared.config')
+const { version } = require('../package.json')
 
 const urlRegex = require('../src/routes/_utils/urlRegexSource.js')()
 
 const output = Object.assign(config.client.output(), {
   // enables HMR in workers
   globalObject: 'this',
-  filename: dev ? '[hash]/[id].js' : '[id].[contenthash].[name].js',
-  chunkFilename: dev ? '[hash]/[id].js' : '[id].[contenthash].[name].js'
+  filename: dev ? '[fullhash]/[id].js' : '[id].[contenthash].[name].js',
+  chunkFilename: dev ? '[fullhash]/[id].js' : '[id].[contenthash].[name].js'
 })
 
 const emojiPickerI18n = LOCALE !== DEFAULT_LOCALE &&
   require(path.join(__dirname, '../src/intl/emoji-picker/', `${LOCALE}.js`)).default
+
+process.on('unhandledRejection', err => {
+  // TODO: seems to be a Webpack Bundle Analyzer error we can safely ignore
+  if (!err.message.includes('Error: No such label \'done hook\' for WebpackLogger.timeEnd()')) {
+    console.error(err)
+  }
+})
 
 module.exports = {
   entry: config.client.entry(),
@@ -33,7 +41,7 @@ module.exports = {
         use: {
           loader: 'worker-loader',
           options: {
-            filename: dev ? '[hash]/blurhash.[name].js' : 'blurhash.[contenthash].[name].js'
+            filename: dev ? '[fullhash]/blurhash.[name].js' : 'blurhash.[contenthash].[name].js'
           }
         }
       },
@@ -47,7 +55,7 @@ module.exports = {
         use: {
           loader: 'file-loader',
           options: {
-            name: dev ? '[hash]/tesseract-asset.[name].[ext]' : 'tesseract-asset.[contenthash].[name].[ext]'
+            name: dev ? 'tesseract-asset.[name].[ext]' : 'tesseract-asset.[contenthash].[name].[ext]'
           }
         }
       },
@@ -77,24 +85,23 @@ module.exports = {
       }
     ].filter(Boolean)
   },
-  node: {
-    setImmediate: false
-  },
-  optimization: dev ? {} : {
-    minimize: !process.env.DEBUG,
-    minimizer: [
-      terser()
-    ],
-    // TODO: we should be able to enable this, but Sapper breaks if we do so
-    // // isolate runtime chunk to avoid excessive cache invalidations https://webpack.js.org/guides/caching/
-    // runtimeChunk: 'single',
-    splitChunks: {
-      chunks: 'async',
-      minSize: 5000,
-      maxAsyncRequests: Infinity,
-      maxInitialRequests: Infinity
-    }
-  },
+  optimization: dev
+    ? {}
+    : {
+        minimize: !process.env.DEBUG,
+        minimizer: [
+          terser()
+        ],
+        // TODO: we should be able to enable this, but Sapper breaks if we do so
+        // // isolate runtime chunk to avoid excessive cache invalidations https://webpack.js.org/guides/caching/
+        // runtimeChunk: 'single',
+        splitChunks: {
+          chunks: 'async',
+          minSize: 5000,
+          maxAsyncRequests: Infinity,
+          maxInitialRequests: Infinity
+        }
+      },
   plugins: [
     new webpack.DefinePlugin({
       'process.browser': true,
@@ -103,7 +110,9 @@ module.exports = {
       'process.env.ALL_SVGS': JSON.stringify(allSvgs),
       'process.env.URL_REGEX': urlRegex.toString(),
       'process.env.LOCALE': JSON.stringify(LOCALE),
-      'process.env.EMOJI_PICKER_I18N': emojiPickerI18n ? JSON.stringify(emojiPickerI18n) : 'undefined'
+      'process.env.EMOJI_PICKER_I18N': emojiPickerI18n ? JSON.stringify(emojiPickerI18n) : 'undefined',
+      'process.env.PINAFORE_VERSION': JSON.stringify(version),
+      'process.env.IS_SERVICE_WORKER': 'false'
     }),
     new webpack.NormalModuleReplacementPlugin(
       /\/_database\/database\.js$/, // this version plays nicer with IDEs
@@ -115,18 +124,20 @@ module.exports = {
       failOnError: true,
       cwd: process.cwd()
     })
-  ].concat(dev ? [
-    new webpack.HotModuleReplacementPlugin({
-      requestTimeout: 120000
-    })
-  ] : [
+  ].concat(dev
+    ? [
+        new webpack.HotModuleReplacementPlugin({
+          requestTimeout: 120000
+        })
+      ]
+    : [
 
-    new BundleAnalyzerPlugin({ // generates report.html
-      analyzerMode: 'static',
-      openAnalyzer: false,
-      logLevel: 'silent'
-    })
-  ]),
+        new BundleAnalyzerPlugin({ // generates report.html
+          analyzerMode: 'static',
+          openAnalyzer: false,
+          logLevel: 'silent'
+        })
+      ]),
   devtool: dev ? 'inline-source-map' : 'source-map',
   performance: {
     hints: dev ? false : (process.env.DEBUG ? 'warning' : 'error'),

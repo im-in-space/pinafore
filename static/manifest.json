@@ -4,17 +4,29 @@
   "name": "Pinafore for Mastodon",
   "short_name": "Pinafore",
   "description": "Alternative web client for Mastodon, focused on speed and simplicity.",
+  "categories": [
+    "social"
+  ],
   "display": "standalone",
   "start_url": "/?pwa=true",
   "share_target": {
     "action": "/share",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
-    "url_template": "/share?title={title}&text={text}&url={url}",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": [
+            "audio/*",
+            "image/*",
+            "video/*"
+          ]
+        }
+      ]
     }
   },
   "icons": [
@@ -98,6 +110,49 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Write a toot",
+      "short_name": "New toot",
+      "description": "Start composing a new toot",
+      "url": "/?pwa=true&compose=true",
+      "icons": [
+        {
+          "src": "/icon-shortcut-fa-pencil.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "View notifications",
+      "short_name": "Notifications",
+      "description": "View your new notifications",
+      "url": "/notifications?pwa=true",
+      "icons": [
+        {
+          "src": "/icon-shortcut-fa-bell.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-540-720-1.png",
+      "type": "image/png",
+      "sizes": "540x720"
+    },
+    {
+      "src": "screenshot-540-720-2.png",
+      "type": "image/jpeg",
+      "sizes": "540x720"
+    },
+    {
+      "src": "screenshot-540-720-3.png",
+      "type": "image/jpeg",
+      "sizes": "540x720"
     }
   ]
 }

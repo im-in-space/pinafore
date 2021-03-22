@@ -48,6 +48,9 @@ jobs:
           name: Unit tests
           command: yarn test-unit
       - run:
+          name: Install mastodon
+          command: yarn install-mastodon
+      - run:
           name: Wait for postgres to be ready
           command: |
             for i in `seq 1 10`;
@@ -68,10 +71,22 @@ jobs:
             done
             echo Failed waiting for redis && exit 1
       - run:
-          name: Integration tests
+          name: Copy vercel.json
+          command: cp vercel.json vercel-old.json
+      - run:
+          name: Build
+          command: yarn build
+      - run:
+          name: Check vercel.json unchanged
           command: |
-            node -v
-            yarn test
+            if ! diff -q vercel-old.json vercel.json &>/dev/null; then
+              diff vercel-old.json vercel.json
+              echo "vercel.json changed, run yarn build and make sure everything looks okay"
+              exit 1
+            fi
+      - run:
+          name: Integration tests
+          command: yarn test-in-ci
       - save_cache:
           name: Save yarn cache
           key: yarn-v1-{{ checksum "yarn.lock" }}

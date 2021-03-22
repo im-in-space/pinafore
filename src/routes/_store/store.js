@@ -21,6 +21,7 @@ const persistedState = {
   disableLongAriaLabels: false,
   disableNotificationBadge: false,
   disableReblogCounts: false,
+  disableRelativeTimestamps: false,
   disableTapOnStatus: false,
   enableGrayscale: false,
   hideCards: false,
@@ -45,9 +46,11 @@ const persistedState = {
 
 const nonPersistedState = {
   customEmoji: {},
+  unexpiredInstanceFilters: {},
   followRequestCounts: {},
   instanceInfos: {},
   instanceLists: {},
+  instanceFilters: {},
   online: !process.browser || navigator.onLine,
   pinnedStatuses: {},
   polls: {},
@@ -61,8 +64,7 @@ const nonPersistedState = {
   sensitivesShown: {},
   spoilersShown: {},
   statusModifications: {},
-  verifyCredentials: {},
-  openShareDialog: false
+  verifyCredentials: {}
 }
 
 const state = Object.assign({}, persistedState, nonPersistedState)

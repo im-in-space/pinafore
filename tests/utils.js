@@ -55,6 +55,7 @@ export const neverMarkMediaSensitiveInput = $('#choice-never-mark-media-sensitiv
 export const removeEmojiFromDisplayNamesInput = $('#choice-omit-emoji-in-display-names')
 export const disableInfiniteScroll = $('#choice-disable-infinite-scroll')
 export const disableUnreadNotifications = $('#choice-disable-unread-notification-counts')
+export const disableRelativeTimestamps = $('#choice-disable-relative-timestamps')
 export const leftRightChangesFocus = $('#choice-left-right-focus')
 export const disableHotkeys = $('#choice-disable-hotkeys')
 export const dialogOptionsOption = $('.modal-dialog button')
@@ -262,6 +263,50 @@ export const uploadKittenImage = i => (exec(() => {
     images,
     blobUtils,
     i
+  }
+}))
+
+export const simulateWebShare = ({ title, text, url, file }) => (exec(() => {
+  let blob
+  return Promise.resolve().then(() => {
+    if (file) {
+      return fetch(file).then(resp => resp.blob()).then(theBlob => {
+        blob = theBlob
+      })
+    }
+  }).then(() => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('keyval-store')
+      request.onerror = (event) => {
+        console.error(event)
+        reject(new Error('idb error'))
+      }
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore('keyval')
+      }
+      request.onsuccess = (event) => {
+        const db = event.target.result
+        const txn = db.transaction('keyval', 'readwrite')
+        txn.onerror = () => reject(new Error('idb error'))
+        txn.oncomplete = () => {
+          db.close()
+          resolve()
+        }
+        txn.objectStore('keyval').put({
+          title,
+          text,
+          url,
+          file: blob
+        }, 'web-share-data')
+      }
+    })
+  })
+}, {
+  dependencies: {
+    title,
+    text,
+    url,
+    file
   }
 }))
 

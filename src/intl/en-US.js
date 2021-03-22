@@ -156,6 +156,7 @@ export default {
     <li><kbd>p</kbd> to open the author's profile</li>
     <li><kbd>l</kbd> to open the card's link in a new tab</li>
     <li><kbd>x</kbd> to show or hide text behind content warning</li>
+    <li><kbd>z</kbd> to show or hide all content warnings in a thread</li>
   `,
   mediaHotkeys: `
     <li><kbd>←</kbd> / <kbd>→</kbd> to go to next or previous</li>
@@ -213,9 +214,11 @@ export default {
   thirtyMinutes: '30 minutes',
   oneHour: '1 hour',
   sixHours: '6 hours',
+  twelveHours: '12 hours',
   oneDay: '1 day',
   threeDays: '3 days',
   sevenDays: '7 days',
+  never: 'Never',
   addEmoji: 'Insert emoji',
   addMedia: 'Add media (images, video, audio)',
   addPoll: 'Add poll',
@@ -389,6 +392,9 @@ export default {
   hideReblogCount: 'Hide boost counts',
   hideFavoriteCount: 'Hide favorite counts',
   hideUnread: 'Hide unread notifications count (i.e. the red dot)',
+  // The quality that makes something seem important or interesting because it seems to be happening now
+  immediacy: 'Immediacy',
+  showAbsoluteTimestamps: 'Show absolute timestamps (e.g. "March 3rd") instead of relative timestamps (e.g. "5 minutes ago")',
   ui: 'UI',
   grayscaleMode: 'Grayscale mode',
   wellnessFooter: `These settings are partly based on guidelines from the
@@ -624,5 +630,28 @@ export default {
   showingOfflineContent: 'Internet request failed. Showing offline content.',
   youAreOffline: 'You seem to be offline. You can still read toots while offline.',
   // Snackbar UI
-  updateAvailable: 'App update available.'
+  updateAvailable: 'App update available.',
+  // Word/phrase filters
+  wordFilters: 'Word filters',
+  noFilters: 'You don\'t have any word filters.',
+  wordOrPhrase: 'Word or phrase',
+  contexts: 'Contexts',
+  addFilter: 'Add filter',
+  editFilter: 'Edit filter',
+  filterHome: 'Home and lists',
+  filterNotifications: 'Notifications',
+  filterPublic: 'Public timelines',
+  filterThread: 'Conversations',
+  filterAccount: 'Profiles',
+  filterUnknown: 'Unknown',
+  expireAfter: 'Expire after',
+  whereToFilter: 'Where to filter',
+  irreversible: 'Irreversible',
+  wholeWord: 'Whole word',
+  save: 'Save',
+  updatedFilter: 'Updated filter',
+  createdFilter: 'Created filter',
+  failedToModifyFilter: 'Failed to modify filter: {error}',
+  deletedFilter: 'Deleted filter',
+  required: 'Required'
 }

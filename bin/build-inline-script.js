@@ -23,7 +23,9 @@ export async function buildInlineScript () {
         'process.browser': true,
         'process.env.THEME_COLORS': JSON.stringify(themeColors)
       }),
-      !process.env.DEBUG && terser(terserOptions)
+      // TODO: can't disable terser at all, it causes the CSP checksum to stop working
+      // because the HTML gets minified as some point so the checksums don't match.
+      terser({ ...terserOptions, mangle: !process.env.DEBUG })
     ]
   })
   const { output } = await bundle.generate({
@@ -34,7 +36,7 @@ export async function buildInlineScript () {
   const { code, map } = output[0]
 
   const fullCode = `${code}//# sourceMappingURL=/inline-script.js.map`
-  const checksum = crypto.createHash('sha256').update(fullCode).digest('base64')
+  const checksum = crypto.createHash('sha256').update(fullCode, 'utf8').digest('base64')
 
   await writeFile(path.resolve(__dirname, '../src/inline-script/checksum.js'),
     `module.exports = ${JSON.stringify(checksum)}`, 'utf8')

@@ -63,6 +63,8 @@ const SCRIPT_CHECKSUMS = [inlineScriptChecksum]
   .map(_ => `'sha256-${_}'`)
   .join(' ')
 
+const PERMISSIONS_POLICY = 'sync-xhr=(),document-domain=()'
+
 const HTML_HEADERS = {
   'cache-control': 'public,max-age=3600',
   'content-security-policy': [
@@ -77,15 +79,17 @@ const HTML_HEADERS = {
     "frame-ancestors 'none'",
     "object-src 'none'",
     "manifest-src 'self'",
-    "form-action 'none'",
+    "form-action 'self'", // we need form-action for the Web Share Target API
     "base-uri 'self'"
   ].join(';'),
   'referrer-policy': 'no-referrer',
   'strict-transport-security': 'max-age=15552000; includeSubDomains',
+  'permissions-policy': PERMISSIONS_POLICY,
   'x-content-type-options': 'nosniff',
   'x-download-options': 'noopen',
   'x-frame-options': 'DENY',
-  'x-xss-protection': '1; mode=block'
+  'x-xss-protection': '1; mode=block',
+  'cross-origin-opener-policy': 'same-origin'
 }
 
 async function main () {

@@ -6,7 +6,7 @@
 >
   <time datetime={createdAtDate} title={absoluteFormattedDate}
         aria-label={createdAtLabel}>
-    {timeagoFormattedDate}
+    {shortInlineFormattedDate}
   </time>
 </a>
 <style>
@@ -41,8 +41,8 @@
         // just a duplicate link in the focus order.
         $disableTapOnStatus ? '0' : '-1'
       ),
-      createdAtLabel: ({ timeagoFormattedDate }) => (
-        formatIntl('intl.clickToShowThread', { time: timeagoFormattedDate })
+      createdAtLabel: ({ formattedDate }) => (
+        formatIntl('intl.clickToShowThread', { time: formattedDate })
       )
     }
   }
